@@ -780,48 +780,41 @@ function AssetCard({
 }) {
   const [localHovered, setLocalHovered] = useState(false);
 
-  // Map the effect's name dynamically to apply real-time filters and transforms to the looping video
+  // Map the effect's name to real-time grades/transforms applied to the looping video.
+  // Deliberately hue-rotation-free: rotations were what pushed warm footage blue.
   const cardStyles = useMemo(() => {
     const lower = item.name.toLowerCase();
     const result = { filter: "", transform: "", animateClass: "" };
 
-    // Shakes & Zooms
+    // Motion character
     if (lower.includes("shake") || lower.includes("jitter") || lower.includes("jolt")) {
-      result.animateClass = "animate-[nova-shake_0.22s_ease-in-out_infinite]";
+      result.animateClass = "animate-[nova-shake_0.24s_ease-in-out_infinite]";
     } else if (lower.includes("zoom") || lower.includes("ramp") || lower.includes("curve")) {
-      result.animateClass = "animate-[nova-zoom_1.4s_ease-in-out_infinite_alternate]";
+      result.animateClass = "animate-[nova-zoom_2.4s_cubic-bezier(0.45,0,0.55,1)_infinite_alternate]";
     } else if (lower.includes("whip") || lower.includes("pan") || lower.includes("transition")) {
-      result.animateClass = "animate-[nova-pan_1.5s_ease-in-out_infinite_alternate]";
+      result.animateClass = "animate-[nova-pan_2.6s_cubic-bezier(0.45,0,0.55,1)_infinite_alternate]";
     } else if (lower.includes("spin") || lower.includes("drift") || lower.includes("orbit")) {
-      result.animateClass = "animate-[nova-orbit_1.8s_ease-in-out_infinite_alternate]";
+      result.animateClass = "animate-[nova-orbit_3s_cubic-bezier(0.45,0,0.55,1)_infinite_alternate]";
     } else if (lower.includes("flicker") || lower.includes("leak") || lower.includes("flash")) {
-      result.animateClass = "animate-[nova-flicker_1s_ease-in-out_infinite]";
+      result.animateClass = "animate-[nova-flicker_1.6s_ease-in-out_infinite]";
     }
 
-    // Color LUTs & Aberrations
+    // Colour grades — contrast/saturation only, so hues stay true
     if (item.tag === "LUT") {
       if (lower.includes("moody") || lower.includes("contrast")) {
-        result.filter = "contrast(1.35) saturate(1.4) brightness(0.85) hue-rotate(-12deg)";
+        result.filter = "contrast(1.22) saturate(1.18) brightness(0.94)";
       } else if (lower.includes("amber") || lower.includes("neon")) {
-        result.filter = "contrast(1.25) saturate(1.55) sepia(0.15) hue-rotate(8deg)";
+        result.filter = "contrast(1.14) saturate(1.3) sepia(0.12)";
       }
     } else if (lower.includes("chromatic") || lower.includes("aberration")) {
-      result.filter = "contrast(1.2) hue-rotate(15deg) blur(0.3px)";
+      result.filter = "contrast(1.12) saturate(1.15)";
     }
 
     return result;
   }, [item.name, item.tag]);
 
   const preview = previewStyleFor(item.glyph);
-  // Faster timings on hover for that "coming to life" feel — slower baseline in the ThumbArt idle state
-  const animName =
-    preview.animate === "shake"   ? "nova-shake 0.28s ease-in-out infinite"
-    : preview.animate === "pan"     ? "nova-pan 1.6s ease-in-out infinite alternate"
-    : preview.animate === "zoom"    ? "nova-zoom 1.5s ease-in-out infinite alternate"
-    : preview.animate === "orbit"   ? "nova-orbit 1.8s ease-in-out infinite alternate"
-    : preview.animate === "flicker" ? "nova-flicker 1s ease-in-out infinite"
-    : preview.animate === "pulse"   ? "nova-pulse 1.2s ease-in-out infinite"
-    : undefined;
+
 
   return (
     <div

@@ -846,11 +846,14 @@ function AssetCard({
         setLocalHovered(false);
       }}
       className={cn(
-        // Immersive hover: lift + tilt + scale + coloured glow
+        // Premium hover: subtle lift + scale + violet glow, GPU-composited to stay artefact-free
         "group relative flex cursor-grab flex-col overflow-hidden rounded-xl border border-white/[0.06] bg-[#14151d] text-left text-zinc-200",
-        "transition-[transform,box-shadow,border-color] duration-200 ease-out will-change-transform",
-        "hover:-translate-y-1 hover:scale-[1.035] hover:border-violet-400/60 hover:shadow-[0_18px_40px_-12px_rgba(139,92,246,0.55),0_0_0_1px_rgba(217,70,239,0.35)_inset]",
+        "transform-gpu [backface-visibility:hidden] will-change-transform",
+        "transition-[transform,box-shadow,border-color] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:-translate-y-[3px] hover:scale-[1.025] hover:border-violet-400/50 hover:shadow-[0_20px_44px_-16px_rgba(139,92,246,0.55)]",
+        "active:scale-[0.995] active:duration-100",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60",
+
         "active:cursor-grabbing",
         size === "s" && "text-[10px]",
         size === "l" && "text-[11px]"

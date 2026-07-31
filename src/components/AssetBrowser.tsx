@@ -56,8 +56,9 @@ export default function AssetBrowser({
   const [tab, setTab] = useState<AssetTab>(initialTab);
   const [query, setQuery] = useState("");
   const [globalQuery, setGlobalQuery] = useState("");
-  const [activeCat, setActiveCat] = useState<string>("pro-studio-suite");
+  const [activeCat, setActiveCat] = useState<string>("advanced-fx-lab");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
+    "advanced-fx-lab": true,
     "pro-studio-suite": true,
     "trending-social-suite": true,
   });

@@ -56,9 +56,10 @@ export default function AssetBrowser({
   const [tab, setTab] = useState<AssetTab>(initialTab);
   const [query, setQuery] = useState("");
   const [globalQuery, setGlobalQuery] = useState("");
-  const [activeCat, setActiveCat] = useState<string>("video-creator-motion-fx");
+  const [activeCat, setActiveCat] = useState<string>("pro-studio-suite");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    "video-creator-motion-fx": true,
+    "pro-studio-suite": true,
+    "trending-social-suite": true,
   });
   const [hovered, setHovered] = useState<string | null>(null);
 

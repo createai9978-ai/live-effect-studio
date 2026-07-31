@@ -24,6 +24,9 @@ import {
   saveFavorites,
 } from "../editor/assetLibrary";
 import AiToolPopup from "./AiToolPopup";
+import LivePreviewVideo from "./LivePreviewVideo";
+import { previewClipFor } from "../editor/previewVideos";
+
 
 type Props = {
   open: boolean;

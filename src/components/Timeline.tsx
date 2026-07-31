@@ -1,0 +1,1044 @@
+import { Fragment, useRef, useState } from "react";
+import {
+  Asset,
+  Clip,
+  AppliedEffect,
+  Tool,
+  TrackId,
+  TrackState,
+  fmtDuration,
+  niceStep,
+  toTimecode,
+  waveformBars,
+} from "../editor/types";
+import { EFFECT_DRAG_MIME } from "../editor/assetLibrary";
+import { cn } from "../utils/cn";
+
+const HEAD_W = 148;
+
+type Props = {
+  assets: Asset[];
+  clips: Clip[];
+  videoTracks: TrackId[];
+  audioTracks: TrackId[];
+  time: number;
+  seqDur: number;
+  contentEnd: number;
+  tool: Tool;
+  zoom: number;
+  trackStates: Record<TrackId, TrackState>;
+  onUpdateTrackState: (track: TrackId, patch: Partial<TrackState>) => void;
+  onSetZoom: (fn: (z: number) => number) => void;
+  onSetTool: (t: Tool) => void;
+  selected: string[];
+  onSelectClip: (id: string | null, forward?: boolean) => void;
+  onSeek: (t: number) => void;
+  onDropAsset: (assetId: string, track: TrackId, t: number, offset?: number, duration?: number) => void;
+  onMoveClips: (ids: string[], anchorId: string, newAnchorStart: number, newAnchorTrack?: TrackId) => void;
+  onRippleTrim: (clipId: string, newDuration: number) => void;
+  onSlipClip: (clipId: string, newOffset: number) => void;
+  onSlideClip: (clipId: string, deltaSec: number) => void;
+  onSplitClip: (clipId: string, t: number) => void;
+  onAddKeyframe: (clipId: string, rel: number) => void;
+  onDeleteSelected: () => void;
+  onApplyEffectPreset: (effectId: string, targetClipId: string) => void;
+  onUpdateAppliedEffect?: (clipId: string, effectId: string, patch: Partial<AppliedEffect>) => void;
+};
+
+/* ---------------- tool definitions ---------------- */
+const TOOLS: { id: Tool; key: string; label: string; icon: string }[] = [
+  { id: "select", key: "V", label: "Selection", icon: "M3 3l7 18 2.5-7.5L20 11 3 3z" },
+  { id: "trackfwd", key: "A", label: "Track Select Forward", icon: "M3 5l8 7-8 7V5zM13 5l8 7-8 7V5z" },
+  { id: "ripple", key: "B", label: "Ripple Edit — drag clip edge; downstream clips shift", icon: "M4 4v16M9 4v16M9 12h11M16 8l4 4-4 4" },
+  { id: "razor", key: "C", label: "Razor / Blade — click to cut", icon: "M20 4L9 15M9 15a3 3 0 11-4 4 3 3 0 014-4zM15 15l5 5" },
+  { id: "slip", key: "Y", label: "Slip — shift source in/out inside clip", icon: "M8 7l-5 5 5 5M16 7l5 5-5 5M12 4v16" },
+  { id: "slide", key: "U", label: "Slide — move clip; neighbours absorb the delta", icon: "M4 12h16M8 7l-5 5 5 5M16 17l5-5-5-5" },
+  { id: "pen", key: "P", label: "Pen — add keyframes", icon: "M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" },
+  { id: "hand", key: "H", label: "Hand — pan timeline", icon: "M18 11V6a2 2 0 00-4 0v5M14 10V4a2 2 0 00-4 0v6M10 10.5V6a2 2 0 00-4 0v8M18 8a2 2 0 014 0v6a8 8 0 01-8 8h-2c-2.8 0-4.5-.86-5.99-2.34L3.4 16.8c-.8-1.1-.6-2.6.5-3.4 1-.7 2.4-.5 3.1.5L8 15" },
+  { id: "zoom", key: "Z", label: "Zoom — click in, Alt-click out", icon: "M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.35-4.35M11 8v6M8 11h6" },
+];
+
+const CURSOR: Record<Tool, string> = {
+  select: "cursor-default",
+  trackfwd: "cursor-e-resize",
+  ripple: "cursor-col-resize",
+  razor: "cursor-crosshair",
+  slip: "cursor-ew-resize",
+  slide: "cursor-ew-resize",
+  pen: "cursor-copy",
+  hand: "cursor-grab",
+  zoom: "cursor-zoom-in",
+};
+
+export default function Timeline(props: Props) {
+  const {
+    clips, videoTracks, audioTracks, time, seqDur, contentEnd, tool, zoom,
+    onSetZoom, onSetTool, selected, onSeek, onDeleteSelected, onSelectClip, onUpdateAppliedEffect,
+  } = props;
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [razorHoverX, setRazorHoverX] = useState<number | null>(null);
+
+  const step = niceStep(seqDur / zoom);
+  const tickCount = Math.floor(seqDur / step) + 1;
+
+  /**
+   * IMPORTANT: measure client → time relative to the LANE area only.
+   * The scrollable inner container starts with a HEAD_W-wide track-head spacer,
+   * so we must subtract HEAD_W from both offset and width. Without this, every
+   * timeFromClientX call was shifted right by ~148px, causing the razor to
+   * silently reject cuts (rel > duration - 0.1) and drops to land off-target.
+   */
+  const laneMetrics = () => {
+    const el = scrollRef.current;
+    if (!el) return { left: 0, width: 1 };
+    const inner = el.firstElementChild as HTMLElement;
+    const r = inner.getBoundingClientRect();
+    return { left: r.left + HEAD_W, width: Math.max(1, r.width - HEAD_W) };
+  };
+
+  const timeFromClientX = (clientX: number) => {
+    const { left, width } = laneMetrics();
+    return Math.min(seqDur, Math.max(0, ((clientX - left) / width) * seqDur));
+  };
+
+  const pxPerSec = () => {
+    const { width } = laneMetrics();
+    return width / seqDur;
+  };
+
+  const scrub = (e: React.MouseEvent) => {
+    onSeek(timeFromClientX(e.clientX));
+    const move = (ev: MouseEvent) => onSeek(timeFromClientX(ev.clientX));
+    const up = () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  };
+
+  return (
+    <div className="flex min-w-0 flex-1">
+      {/* ============ TOOL RAIL ============ */}
+      <div className="flex w-11 shrink-0 flex-col items-center gap-1 border-r border-white/[0.06] bg-[#14151d] py-2">
+        {TOOLS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            title={`${t.label} (${t.key})`}
+            aria-label={t.label}
+            aria-pressed={tool === t.id}
+            onMouseDown={(e) => e.preventDefault() /* keep focus out of way */}
+            onClick={() => onSetTool(t.id)}
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-lg transition-all active:scale-95",
+              tool === t.id
+                ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-600/40 ring-1 ring-white/20"
+                : "text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-100"
+            )}
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+              <path d={t.icon} />
+            </svg>
+          </button>
+        ))}
+        <div className="mt-auto flex flex-col items-center gap-0.5 pt-2">
+          <button
+            type="button"
+            title="Zoom in (+)"
+            onClick={() => onSetZoom((z) => Math.min(12, z * 1.4))}
+            className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-500 transition hover:bg-white/[0.07] hover:text-zinc-200 active:scale-95"
+          >
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+          </button>
+          <button
+            type="button"
+            title="Zoom out (-)"
+            onClick={() => onSetZoom((z) => Math.max(1, z / 1.4))}
+            className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-500 transition hover:bg-white/[0.07] hover:text-zinc-200 active:scale-95"
+          >
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round"><path d="M5 12h14" /></svg>
+          </button>
+        </div>
+      </div>
+
+      {/* ============ TIMELINE ============ */}
+      <div className="flex min-w-0 flex-1 flex-col bg-[#111218]">
+        {/* Header bar */}
+        <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] px-3 py-1">
+          <span className="font-mono text-[10px] text-cyan-300">{toTimecode(time)}</span>
+          <span className="text-[10px] text-zinc-500">Main_Sequence</span>
+          <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[8.5px] text-zinc-500">
+            {clips.length} clip{clips.length === 1 ? "" : "s"}
+          </span>
+          <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[8.5px] text-zinc-500">
+            {zoom.toFixed(1)}×
+          </span>
+          <span
+            className="flex items-center gap-1 rounded bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 px-2 py-0.5 text-[9px] font-medium text-violet-200 ring-1 ring-violet-400/30"
+            title={TOOLS.find((t) => t.id === tool)?.label ?? tool}
+          >
+            <span className="h-1 w-1 rounded-full bg-violet-400 shadow-[0_0_4px] shadow-violet-400" />
+            {TOOLS.find((t) => t.id === tool)?.label ?? tool}
+            <span className="rounded bg-black/40 px-1 font-mono text-[8px] text-zinc-400">
+              {TOOLS.find((t) => t.id === tool)?.key}
+            </span>
+          </span>
+          <div className="ml-auto flex items-center gap-2">
+            {selected.length > 0 && (
+              <button
+                onClick={onDeleteSelected}
+                className="flex items-center gap-1 rounded-md border border-fuchsia-500/40 px-1.5 py-0.5 text-[9px] text-fuchsia-300 transition hover:bg-fuchsia-500/10"
+              >
+                Delete {selected.length > 1 ? `${selected.length} clips` : "clip"} (Del)
+              </button>
+            )}
+            <span className="font-mono text-[9px] text-zinc-500">
+              Out <span className="text-zinc-300">{contentEnd > 0 ? toTimecode(contentEnd) : "--:--:--:--"}</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Scrollable ruler + lanes */}
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
+          <div className="flex h-full flex-col" style={{ width: `${zoom * 100}%`, minWidth: "100%" }}>
+            {/* Ruler */}
+            <div className="flex h-5 shrink-0">
+              <div className="shrink-0 border-b border-r border-white/[0.05] bg-[#14151d]" style={{ width: HEAD_W }} />
+              <div
+                className="relative flex-1 cursor-col-resize border-b border-white/[0.05] bg-[#0e0f15]"
+                onMouseDown={scrub}
+              >
+                {Array.from({ length: tickCount }).map((_, i) => {
+                  const sec = i * step;
+                  const left = ((sec / seqDur) * 100 * seqDur) / seqDur; // simple
+                  const leftPct = ((sec / seqDur) * 100);
+                  return (
+                    <div key={i} className="absolute top-0 h-full" style={{ left: `${leftPct}%` }}>
+                      <div className="h-full w-px bg-white/[0.1]" />
+                      <span className="absolute left-1 top-0.5 font-mono text-[8px] text-zinc-500">
+                        {String(Math.floor(sec / 60)).padStart(2, "0")}:{String(Math.floor(sec % 60)).padStart(2, "0")}
+                      </span>
+                      <span className="hidden">{left}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Lanes */}
+            <div
+              className="relative flex min-h-0 flex-1 flex-col"
+              onMouseMove={(e) => {
+                if (tool === "razor") setRazorHoverX(e.clientX);
+              }}
+              onMouseLeave={() => setRazorHoverX(null)}
+            >
+              {videoTracks.map((t) => (
+                <Fragment key={t}>
+                  <TrackLane
+                    track={t}
+                    kind="video"
+                    {...props}
+                    timeFromClientX={timeFromClientX}
+                    pxPerSec={pxPerSec}
+                    scrollRef={scrollRef}
+                  />
+                  {t === "V1" && (
+                    <EffectsSubTrack
+                      clips={clips}
+                      seqDur={seqDur}
+                      onSelectClip={onSelectClip}
+                      selected={selected}
+                      onUpdateAppliedEffect={onUpdateAppliedEffect}
+                    />
+                  )}
+                </Fragment>
+              ))}
+              <div className="flex h-1 shrink-0">
+                <div className="shrink-0 bg-[#14151d]" style={{ width: HEAD_W }} />
+                <div className="flex-1 bg-black/40" />
+              </div>
+              {audioTracks.map((t) => (
+                <TrackLane
+                  key={t}
+                  track={t}
+                  kind="audio"
+                  {...props}
+                  timeFromClientX={timeFromClientX}
+                  pxPerSec={pxPerSec}
+                  scrollRef={scrollRef}
+                />
+              ))}
+
+              {/* Playhead — offset by HEAD_W */}
+              <div
+                className="pointer-events-none absolute top-0 bottom-0 z-20"
+                style={{ left: `calc(${HEAD_W}px + (100% - ${HEAD_W}px) * ${Math.min(100, (time / seqDur) * 100) / 100})` }}
+              >
+                <div className="h-full w-px bg-cyan-400 shadow-[0_0_8px] shadow-cyan-400/70" />
+                <div className="absolute top-0 left-1/2 h-2 w-3 -translate-x-1/2 rounded-b-sm bg-cyan-400" />
+              </div>
+
+              {/* Razor blade indicator — follows the mouse while razor tool is active */}
+              {tool === "razor" && razorHoverX !== null && (() => {
+                const { left, width } = laneMetrics();
+                const t = Math.min(seqDur, Math.max(0, ((razorHoverX - left) / width) * seqDur));
+                return (
+                  <div
+                    className="pointer-events-none absolute top-0 bottom-0 z-30"
+                    style={{ left: `calc(${HEAD_W}px + (100% - ${HEAD_W}px) * ${(t / seqDur)})` }}
+                  >
+                    <div className="h-full w-px border-l border-dashed border-fuchsia-400" />
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 rounded-b-md bg-fuchsia-500 px-1 py-px font-mono text-[8px] text-white shadow-lg shadow-fuchsia-500/40">
+                      ✂ cut
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- track head with M/S/Lock/Target ---------------- */
+function TrackHead({
+  track,
+  kind,
+  state,
+  onUpdate,
+  clipCount,
+}: {
+  track: TrackId;
+  kind: "video" | "audio";
+  state: TrackState;
+  onUpdate: (patch: Partial<TrackState>) => void;
+  clipCount: number;
+}) {
+  const anySolo = state.solo;
+  return (
+    <div
+      className="sticky left-0 z-10 flex shrink-0 items-center gap-1 border-b border-r border-white/[0.05] bg-[#14151d] px-1.5"
+      style={{ width: HEAD_W }}
+    >
+      {/* Track Targeting box (source-patching) */}
+      <button
+        onClick={() => onUpdate({ targeted: !state.targeted })}
+        title={`Track targeting — ${state.targeted ? "ON" : "OFF"} (routes source patches here)`}
+        className={cn(
+          "flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[8.5px] font-bold transition",
+          state.targeted
+            ? kind === "video"
+              ? "border-violet-400/60 bg-violet-500/25 text-violet-200"
+              : "border-emerald-400/60 bg-emerald-500/25 text-emerald-200"
+            : "border-white/10 bg-black/30 text-zinc-600 hover:text-zinc-300"
+        )}
+      >
+        {kind === "video" ? "V" : "A"}
+      </button>
+
+      {/* Track label */}
+      <span
+        className={cn(
+          "w-6 shrink-0 text-[10px] font-bold",
+          kind === "video" ? "text-violet-300" : "text-emerald-300"
+        )}
+      >
+        {track}
+      </span>
+
+      <div className="ml-auto flex shrink-0 items-center gap-0.5">
+        {/* Toggle Track Output (video) / Mute (audio) */}
+        <button
+          onClick={() => onUpdate({ muted: !state.muted })}
+          title={kind === "video" ? "Toggle Track Output" : "Mute (M)"}
+          className={cn(
+            "flex h-4 w-4 items-center justify-center rounded text-[7.5px] font-bold transition",
+            state.muted
+              ? "bg-fuchsia-500/80 text-white"
+              : "bg-white/[0.07] text-zinc-500 hover:text-zinc-100"
+          )}
+        >
+          M
+        </button>
+        {/* Solo */}
+        <button
+          onClick={() => onUpdate({ solo: !state.solo })}
+          title="Solo (S)"
+          className={cn(
+            "flex h-4 w-4 items-center justify-center rounded text-[7.5px] font-bold transition",
+            anySolo
+              ? "bg-amber-400/90 text-black"
+              : "bg-white/[0.07] text-zinc-500 hover:text-zinc-100"
+          )}
+        >
+          S
+        </button>
+        {/* Lock */}
+        <button
+          onClick={() => onUpdate({ locked: !state.locked })}
+          title={`${state.locked ? "Unlock" : "Lock"} track`}
+          className={cn(
+            "flex h-4 w-4 items-center justify-center rounded transition",
+            state.locked
+              ? "bg-cyan-400/25 text-cyan-200"
+              : "bg-white/[0.07] text-zinc-500 hover:text-zinc-100"
+          )}
+        >
+          <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            {state.locked ? (
+              <>
+                <rect x="4" y="11" width="16" height="9" rx="1.5" />
+                <path d="M8 11V7a4 4 0 018 0v4" />
+              </>
+            ) : (
+              <>
+                <rect x="4" y="11" width="16" height="9" rx="1.5" />
+                <path d="M8 11V7a4 4 0 017-2.6" />
+              </>
+            )}
+          </svg>
+        </button>
+      </div>
+
+      <span className="ml-1 shrink-0 font-mono text-[8px] text-zinc-700">{clipCount || ""}</span>
+    </div>
+  );
+}
+
+/* ---------------- track lane ---------------- */
+function TrackLane(
+  props: Props & {
+    track: TrackId;
+    kind: "video" | "audio";
+    timeFromClientX: (x: number) => number;
+    pxPerSec: () => number;
+    scrollRef: React.RefObject<HTMLDivElement | null>;
+  }
+) {
+  const {
+    track, kind, assets, clips, tool, selected, onSelectClip,
+    onDropAsset, onSplitClip, timeFromClientX, scrollRef, onSetZoom,
+    trackStates, onUpdateTrackState,
+  } = props;
+  const [dragOver, setDragOver] = useState(false);
+  const trackClips = clips.filter((c) => c.track === track);
+  const state = trackStates[track];
+
+  const handleLaneMouseDown = (e: React.MouseEvent) => {
+    if (state.locked) return;
+
+    // Hand tool → click-drag to pan the horizontal scroll
+    if (tool === "hand") {
+      const el = scrollRef.current;
+      if (!el) return;
+      const startX = e.clientX;
+      const startScroll = el.scrollLeft;
+      const move = (ev: MouseEvent) => (el.scrollLeft = startScroll - (ev.clientX - startX));
+      const up = () => {
+        window.removeEventListener("mousemove", move);
+        window.removeEventListener("mouseup", up);
+      };
+      window.addEventListener("mousemove", move);
+      window.addEventListener("mouseup", up);
+      return;
+    }
+
+    // Zoom tool → click zooms in, Alt-click zooms out
+    if (tool === "zoom") {
+      onSetZoom((z) => (e.altKey ? Math.max(1, z / 1.5) : Math.min(12, z * 1.5)));
+      return;
+    }
+
+    // Razor on the lane → cut ANY clip on this track sitting under the click column
+    if (tool === "razor") {
+      const t = timeFromClientX(e.clientX);
+      const hit = trackClips.find((c) => t > c.start + 0.05 && t < c.start + c.duration - 0.05);
+      if (hit) onSplitClip(hit.id, t);
+      return;
+    }
+
+    // Any other tool: click on empty lane clears selection
+    onSelectClip(null);
+  };
+
+  return (
+    <div className="flex min-h-0 flex-1">
+      <TrackHead
+        track={track}
+        kind={kind}
+        state={state}
+        onUpdate={(patch) => onUpdateTrackState(track, patch)}
+        clipCount={trackClips.length}
+      />
+
+      {/* lane */}
+      <div
+        data-track={track}
+        className={cn(
+          "relative min-w-0 flex-1 border-b border-white/[0.04] transition-colors",
+          kind === "video" ? "bg-[#0e0f15]" : "bg-[#0d1210]",
+          state.locked && "opacity-60",
+          state.muted && "opacity-70",
+          CURSOR[tool],
+          dragOver && "bg-violet-500/[0.08] ring-1 ring-inset ring-violet-500/40",
+          state.locked && dragOver && "!bg-fuchsia-500/[0.08] !ring-fuchsia-500/40"
+        )}
+        onDragOver={(e) => {
+          if (e.dataTransfer.types.includes("application/x-nova-asset")) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = state.locked ? "none" : "copy";
+            setDragOver(true);
+          }
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          setDragOver(false);
+          if (state.locked) return;
+          const raw =
+            e.dataTransfer.getData("application/x-nova-asset") || e.dataTransfer.getData("text/plain");
+          if (!raw) return;
+          e.preventDefault();
+          let id = raw;
+          let offset: number | undefined;
+          let duration: number | undefined;
+          try {
+            const p = JSON.parse(raw);
+            if (p && typeof p === "object" && p.assetId) {
+              id = p.assetId;
+              offset = p.offset;
+              duration = p.duration;
+            }
+          } catch {
+            /* plain asset id */
+          }
+          onDropAsset(id, track, timeFromClientX(e.clientX), offset, duration);
+        }}
+        onMouseDown={handleLaneMouseDown}
+      >
+        {/* locked overlay pattern */}
+        {state.locked && (
+          <div
+            className="pointer-events-none absolute inset-0 opacity-30"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(45deg, transparent 0 6px, rgba(255,255,255,0.05) 6px 12px)",
+            }}
+          />
+        )}
+
+        {trackClips.length === 0 && (
+          <div className="pointer-events-none absolute inset-0 flex items-center px-3">
+            <span className={cn("text-[8.5px]", dragOver ? "text-violet-300" : "text-zinc-800")}>
+              {state.locked ? "Locked" : dragOver ? "Release to add clip" : "Drop media here"}
+            </span>
+          </div>
+        )}
+
+        {trackClips.map((clip) => {
+          const asset = assets.find((a) => a.id === clip.assetId);
+          if (!asset) return null;
+          return (
+            <ClipBlock
+              key={clip.id}
+              {...props}
+              clip={clip}
+              asset={asset}
+              kind={kind}
+              trackLocked={state.locked}
+              isSelected={selected.includes(clip.id)}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- clip block ---------------- */
+function ClipBlock(
+  props: Props & {
+    clip: Clip;
+    asset: Asset;
+    kind: "video" | "audio";
+    trackLocked: boolean;
+    isSelected: boolean;
+    timeFromClientX: (x: number) => number;
+    pxPerSec: () => number;
+  }
+) {
+  const {
+    clip, asset, kind, isSelected, seqDur, tool, trackLocked,
+    onSelectClip, onMoveClips, onRippleTrim, onSlipClip, onSlideClip, onSplitClip,
+    onAddKeyframe, onApplyEffectPreset, timeFromClientX, pxPerSec,
+  } = props;
+  const bars = waveformBars(clip.id, Math.max(16, Math.round(clip.duration * 2)));
+  const [slipping, setSlipping] = useState(false);
+  const [sliding, setSliding] = useState(false);
+  const [fxHover, setFxHover] = useState(false);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (trackLocked) return;
+
+    if (tool === "razor") {
+      onSplitClip(clip.id, timeFromClientX(e.clientX));
+      return;
+    }
+    if (tool === "pen") {
+      const rel = timeFromClientX(e.clientX) - clip.start;
+      onAddKeyframe(clip.id, Math.max(0, Math.min(clip.duration, rel)));
+      onSelectClip(clip.id);
+      return;
+    }
+    if (tool === "trackfwd") {
+      onSelectClip(clip.id, true);
+      const ids = props.clips
+        .filter((c) => c.track === clip.track && c.start >= clip.start - 0.001)
+        .map((c) => c.id);
+      startDragMove(e, ids);
+      return;
+    }
+    if (tool === "slip") {
+      onSelectClip(clip.id);
+      setSlipping(true);
+      const startX = e.clientX;
+      const origOffset = clip.offset;
+      const pps = pxPerSec();
+      const move = (ev: MouseEvent) => onSlipClip(clip.id, origOffset - (ev.clientX - startX) / pps);
+      const up = () => {
+        setSlipping(false);
+        window.removeEventListener("mousemove", move);
+        window.removeEventListener("mouseup", up);
+      };
+      window.addEventListener("mousemove", move);
+      window.addEventListener("mouseup", up);
+      return;
+    }
+    if (tool === "slide") {
+      onSelectClip(clip.id);
+      setSliding(true);
+      const startX = e.clientX;
+      const pps = pxPerSec();
+      let lastDelta = 0;
+      const move = (ev: MouseEvent) => {
+        const total = (ev.clientX - startX) / pps;
+        const step = total - lastDelta;
+        if (Math.abs(step) > 0.001) {
+          onSlideClip(clip.id, step);
+          lastDelta = total;
+        }
+      };
+      const up = () => {
+        setSliding(false);
+        window.removeEventListener("mousemove", move);
+        window.removeEventListener("mouseup", up);
+      };
+      window.addEventListener("mousemove", move);
+      window.addEventListener("mouseup", up);
+      return;
+    }
+    if (tool === "select") {
+      onSelectClip(clip.id);
+      startDragMove(e, [clip.id]);
+    }
+  };
+
+  const startDragMove = (e: React.MouseEvent, ids: string[]) => {
+    const startX = e.clientX;
+    const origStart = clip.start;
+    const pps = pxPerSec();
+
+    // Discover the target track by hit-testing the element under the pointer for a
+    // data-track attribute (set on every TrackLane below).
+    const trackAtPoint = (clientX: number, clientY: number): TrackId | undefined => {
+      // Temporarily hide the dragged block so elementFromPoint returns the lane behind it.
+      const els = document.elementsFromPoint(clientX, clientY);
+      for (const el of els) {
+        const t = (el as HTMLElement).dataset?.track as TrackId | undefined;
+        if (t) return t;
+      }
+      return undefined;
+    };
+
+    const move = (ev: MouseEvent) => {
+      const newStart = origStart + (ev.clientX - startX) / pps;
+      const target = trackAtPoint(ev.clientX, ev.clientY);
+      onMoveClips(ids, clip.id, newStart, target);
+    };
+    const up = () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  };
+
+  const handleRippleEdge = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (trackLocked) return;
+    onSelectClip(clip.id);
+    const startX = e.clientX;
+    const origDur = clip.duration;
+    const pps = pxPerSec();
+    const move = (ev: MouseEvent) => onRippleTrim(clip.id, origDur + (ev.clientX - startX) / pps);
+    const up = () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  };
+
+  const fx = clip.effects;
+  const hasFx =
+    fx.posX !== 0 ||
+    fx.posY !== 0 ||
+    Math.abs(fx.scale - 100) > 0.1 ||
+    fx.rotation !== 0 ||
+    Math.abs(fx.opacity - 100) > 0.1 ||
+    Math.abs(fx.speed - 100) > 0.1;
+
+  // Chips that summarize which parameters differ from default
+  const chips: { key: string; label: string }[] = [];
+  if (Math.abs(fx.scale - 100) > 0.1) chips.push({ key: "s", label: `${Math.round(fx.scale)}%` });
+  if (fx.rotation !== 0) chips.push({ key: "r", label: `${Math.round(fx.rotation)}°` });
+  if (fx.posX !== 0 || fx.posY !== 0)
+    chips.push({ key: "p", label: `${Math.round(fx.posX)},${Math.round(fx.posY)}` });
+  if (Math.abs(fx.speed - 100) > 0.1)
+    chips.push({ key: "v", label: `${(fx.speed / 100).toFixed(2)}×` });
+
+  return (
+    <div
+      onMouseDown={handleMouseDown}
+      onDragOver={(e) => {
+        // Accept effect drops from the Asset Library
+        if (e.dataTransfer.types.includes(EFFECT_DRAG_MIME)) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = "copy";
+          setFxHover(true);
+        }
+      }}
+      onDragLeave={() => setFxHover(false)}
+      onDrop={(e) => {
+        setFxHover(false);
+        const effectId = e.dataTransfer.getData(EFFECT_DRAG_MIME);
+        if (!effectId) return;
+        e.preventDefault();
+        e.stopPropagation();
+        onApplyEffectPreset(effectId, clip.id);
+      }}
+      className={cn(
+        "absolute top-0.5 bottom-0.5 overflow-hidden rounded-md border bg-gradient-to-b transition-colors",
+        kind === "video" ? "from-violet-600/45 to-indigo-800/30" : "from-emerald-600/40 to-emerald-800/25",
+        isSelected
+          ? "z-10 border-cyan-300 ring-1 ring-cyan-300/60"
+          : kind === "video"
+          ? "border-white/20 hover:border-white/50"
+          : "border-emerald-400/25 hover:border-emerald-300/60",
+        slipping && "border-amber-300",
+        sliding && "border-fuchsia-300 ring-1 ring-fuchsia-300/60",
+        fxHover && "z-20 border-fuchsia-400 ring-2 ring-fuchsia-400/70 shadow-lg shadow-fuchsia-500/40",
+        trackLocked && "pointer-events-none"
+      )}
+      style={{
+        left: `${(clip.start / seqDur) * 100}%`,
+        width: `${Math.max(0.3, (clip.duration / seqDur) * 100)}%`,
+        // real-time opacity feedback: clip block dims as the Opacity slider drops
+        opacity: 0.35 + (fx.opacity / 100) * 0.65,
+      }}
+      title={`${asset.name} · ${fmtDuration(clip.duration)}${hasFx ? " · fx applied" : ""}`}
+    >
+      {kind === "video" && asset.thumb && (
+        <div
+          className="absolute inset-0 opacity-40 transition-transform duration-100"
+          style={{
+            backgroundImage: `url(${asset.thumb})`,
+            backgroundSize: "auto 100%",
+            backgroundRepeat: "repeat-x",
+            backgroundPositionX: `${-clip.offset * 8}px`,
+            // let scale/rotation subtly warp the filmstrip so timeline "feels" the change
+            transform: `scale(${Math.min(1.4, Math.max(0.7, fx.scale / 100))}) rotate(${
+              Math.max(-8, Math.min(8, fx.rotation / 20))
+            }deg)`,
+            transformOrigin: "center center",
+          }}
+        />
+      )}
+      {kind === "audio" && (
+        <div className="absolute inset-0 flex items-center gap-px px-1 pt-2.5">
+          {bars.map((v, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded-sm bg-emerald-300"
+              // audio "opacity" reads as level so the waveform gets shorter as it drops
+              style={{ height: `${v * 70 * (fx.opacity / 100)}%`, opacity: 0.4 + 0.6 * (fx.opacity / 100) }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* name strip */}
+      <div className="absolute inset-x-0 top-0 flex items-center gap-1 bg-black/45 px-1.5 py-px">
+        {fx.presetLabel ? (
+          <span
+            className="rounded bg-gradient-to-r from-fuchsia-500 via-fuchsia-600 to-violet-600 px-1 py-px text-[7.5px] font-extrabold tracking-widest text-white shadow-[0_0_8px_rgba(217,70,239,0.7)]"
+            title={`Active Effect applied: ${fx.presetLabel} · click to adjust`}
+          >
+            FX
+          </span>
+        ) : hasFx ? (
+          <span
+            className="rounded-sm bg-gradient-to-r from-violet-500 to-fuchsia-500 px-1 py-px text-[7px] font-bold text-white shadow shadow-fuchsia-500/40"
+            title="Effects modified — click to open Effect Controls"
+          >
+            fx
+          </span>
+        ) : null}
+        <span className={cn("block flex-1 truncate text-[8px] font-medium", kind === "video" ? "text-white/90" : "text-emerald-100/90")}>
+          {asset.name}
+        </span>
+        {slipping && <span className="text-[8px] text-amber-300">in {clip.offset.toFixed(1)}s</span>}
+        {sliding && <span className="text-[8px] text-fuchsia-300">↔</span>}
+      </div>
+
+      {/* Direct Timeline Multi-Effects Mapping: Visual row of independent, stackable adjustment badges */}
+      {clip.appliedEffects && clip.appliedEffects.length > 0 && (
+        <div className="pointer-events-none absolute bottom-1.5 left-1.5 right-1.5 flex flex-wrap gap-1">
+          {clip.appliedEffects.map((ae) => (
+            <div
+              key={ae.id}
+              className={cn(
+                "flex items-center gap-1 rounded px-1.5 py-0.5 text-[7px] font-bold transition-opacity shadow backdrop-blur-sm",
+                ae.enabled
+                  ? "bg-violet-500/90 text-white shadow-violet-500/20"
+                  : "bg-zinc-800/80 text-zinc-500 opacity-60"
+              )}
+            >
+              {/* Green active dot / grey bypassed dot */}
+              <span className={cn("h-1 w-1 rounded-full", ae.enabled ? "bg-emerald-400" : "bg-zinc-600")} />
+              {ae.name}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* live parameter chips row (bottom, only when selected + has fx) */}
+      {isSelected && chips.length > 0 && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center gap-0.5 bg-black/55 px-1 py-px">
+          {chips.map((c) => (
+            <span
+              key={c.key}
+              className="rounded bg-white/[0.09] px-1 py-px font-mono text-[7.5px] text-cyan-200"
+            >
+              {c.label}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* opacity band along the top edge — visual level meter of the Opacity slider */}
+      {Math.abs(fx.opacity - 100) > 0.1 && (
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-0.5 bg-black/50">
+          <div
+            className="h-full bg-gradient-to-r from-violet-400 to-fuchsia-400"
+            style={{ width: `${fx.opacity}%` }}
+          />
+        </div>
+      )}
+
+      {/* keyframe rubber band */}
+      {clip.keyframes.length > 0 && (
+        <div className="pointer-events-none absolute inset-x-0 top-[55%] h-px bg-white/30">
+          {clip.keyframes.map((k, i) => (
+            <div
+              key={i}
+              className="absolute top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-[1px] bg-fuchsia-400 shadow-[0_0_4px] shadow-fuchsia-400/70"
+              style={{ left: `${(k / clip.duration) * 100}%` }}
+            />
+          ))}
+        </div>
+      )}
+
+       {/* ripple edit handle (right edge) */}
+      <div
+        onMouseDown={tool === "ripple" || tool === "select" ? handleRippleEdge : undefined}
+        className={cn(
+          "absolute right-0 top-0 h-full w-1.5 cursor-col-resize transition",
+          tool === "ripple" ? "bg-fuchsia-400/60" : "bg-white/25 opacity-0 hover:opacity-100"
+        )}
+      />
+    </div>
+  );
+}
+
+/* ---------------- Dedicated Effects Sub-Track directly under V1 ---------------- */
+interface EffectsSubTrackProps {
+  clips: Clip[];
+  seqDur: number;
+  onSelectClip: (id: string | null) => void;
+  selected: string[];
+  onUpdateAppliedEffect?: (clipId: string, effectId: string, patch: Partial<AppliedEffect>) => void;
+}
+
+function EffectsSubTrack({ clips, seqDur, onSelectClip, selected, onUpdateAppliedEffect }: EffectsSubTrackProps) {
+  // Find all V1 video clips with active, non-destructive applied effects
+  const v1ClipsWithFx = clips.filter((c) => c.track === "V1" && c.appliedEffects && c.appliedEffects.length > 0);
+
+  return (
+    <div className="flex h-8 shrink-0 border-b border-white/[0.04] bg-[#0c0d13]/70">
+      {/* Sub-track header */}
+      <div
+        className="sticky left-0 z-10 flex shrink-0 items-center gap-1 bg-[#111218] px-2 text-[9.5px] font-bold text-fuchsia-400 border-r border-white/[0.05]"
+        style={{ width: HEAD_W }}
+      >
+        <span className="rounded bg-fuchsia-500/15 px-1.5 py-0.5 tracking-wider ring-1 ring-fuchsia-500/30">
+          FX (V1)
+        </span>
+        <span className="truncate text-[8.5px] text-zinc-500">Applied Effects</span>
+      </div>
+
+      {/* Sub-track lane */}
+      <div className="relative flex-1 bg-black/25">
+        {v1ClipsWithFx.map((clip) => {
+          const isParentSelected = selected.includes(clip.id);
+
+          return (
+            <div
+              key={`fx-subtrack-parent-${clip.id}`}
+              className="absolute inset-y-0"
+              style={{
+                left: `${(clip.start / seqDur) * 100}%`,
+                width: `${(clip.duration / seqDur) * 100}%`,
+              }}
+            >
+              {clip.appliedEffects?.map((ae) => {
+                // Track dragging motion locally inside the parent clip bounds
+                const handleMouseDown = (e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  onSelectClip(clip.id);
+
+                  const startX = e.clientX;
+                  const origOffset = ae.startOffset ?? 0;
+                  const origDuration = ae.duration ?? clip.duration;
+                  const pps = (e.currentTarget.parentElement?.getBoundingClientRect().width ?? 1) / clip.duration;
+
+                  const move = (ev: MouseEvent) => {
+                    const deltaSec = (ev.clientX - startX) / pps;
+                    const maxOffset = clip.duration - origDuration;
+                    const nextOffset = Math.max(0, Math.min(maxOffset, origOffset + deltaSec));
+                    onUpdateAppliedEffect?.(clip.id, ae.id, { startOffset: nextOffset });
+                  };
+
+                  const up = () => {
+                    window.removeEventListener("mousemove", move);
+                    window.removeEventListener("mouseup", up);
+                  };
+
+                  window.addEventListener("mousemove", move);
+                  window.addEventListener("mouseup", up);
+                };
+
+                // Track edge trimming / resizing to shorten or lengthen the effect
+                const handleTrimRight = (e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  
+                  const startX = e.clientX;
+                  const origDuration = ae.duration ?? clip.duration;
+                  const maxDur = clip.duration - (ae.startOffset ?? 0);
+                  const pps = (e.currentTarget.parentElement?.getBoundingClientRect().width ?? 1) / clip.duration;
+
+                  const move = (ev: MouseEvent) => {
+                    const deltaSec = (ev.clientX - startX) / pps;
+                    const nextDuration = Math.max(0.5, Math.min(maxDur, origDuration + deltaSec));
+                    onUpdateAppliedEffect?.(clip.id, ae.id, { duration: nextDuration });
+                  };
+
+                  const up = () => {
+                    window.removeEventListener("mousemove", move);
+                    window.removeEventListener("mouseup", up);
+                  };
+
+                  window.addEventListener("mousemove", move);
+                  window.addEventListener("mouseup", up);
+                };
+
+                const handleTrimLeft = (e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+
+                  const startX = e.clientX;
+                  const origOffset = ae.startOffset ?? 0;
+                  const origDuration = ae.duration ?? clip.duration;
+                  const pps = (e.currentTarget.parentElement?.getBoundingClientRect().width ?? 1) / clip.duration;
+
+                  const move = (ev: MouseEvent) => {
+                    const deltaSec = (ev.clientX - startX) / pps;
+                    const nextOffset = Math.max(0, Math.min(origOffset + origDuration - 0.5, origOffset + deltaSec));
+                    const nextDuration = Math.max(0.5, origDuration - (nextOffset - origOffset));
+                    onUpdateAppliedEffect?.(clip.id, ae.id, { startOffset: nextOffset, duration: nextDuration });
+                  };
+
+                  const up = () => {
+                    window.removeEventListener("mousemove", move);
+                    window.removeEventListener("mouseup", up);
+                  };
+
+                  window.addEventListener("mousemove", move);
+                  window.addEventListener("mouseup", up);
+                };
+
+                // Compute horizontal layout based on its draggable startOffset & duration
+                const leftPct = ((ae.startOffset ?? 0) / clip.duration) * 100;
+                const widthPct = ((ae.duration ?? clip.duration) / clip.duration) * 100;
+
+                return (
+                  <div
+                    key={ae.id}
+                    onMouseDown={handleMouseDown}
+                    className={cn(
+                      "absolute top-0.5 bottom-0.5 flex items-center justify-between rounded border px-2 py-0.5 transition-all duration-150 cursor-grab active:cursor-grabbing group overflow-hidden shadow",
+                      ae.enabled
+                        ? "from-fuchsia-600/30 to-violet-700/20 bg-gradient-to-br text-white border-fuchsia-500/20 shadow-fuchsia-500/10"
+                        : "from-zinc-800/40 to-zinc-900/20 bg-gradient-to-br text-zinc-400 border-zinc-700/25 opacity-60",
+                      isParentSelected && "ring-1 ring-fuchsia-400/40 border-fuchsia-400"
+                    )}
+                    style={{
+                      left: `${leftPct}%`,
+                      width: `${Math.max(4, widthPct)}%`,
+                    }}
+                    title={`Effect: ${ae.name} (${ae.enabled ? "Active" : "Bypassed"}) · Drag to move · Drag edges to trim / resize`}
+                  >
+                    {/* Left Trim Handle */}
+                    <div
+                      onMouseDown={handleTrimLeft}
+                      className="absolute left-0 top-0 h-full w-1 cursor-ew-resize bg-white/20 opacity-0 group-hover:opacity-100 transition"
+                      title="Trim Left"
+                    />
+
+                    <div className="flex items-center gap-1.5 min-w-0 select-none pointer-events-none">
+                      <span className={cn("h-1 w-1 rounded-full", ae.enabled ? "bg-emerald-400 shadow-[0_0_4px_#34d399]" : "bg-zinc-600")} />
+                      <span className="truncate text-[8.5px] font-bold tracking-wide">{ae.name}</span>
+                    </div>
+
+                    {/* Right Trim Handle */}
+                    <div
+                      onMouseDown={handleTrimRight}
+                      className="absolute right-0 top-0 h-full w-1 cursor-ew-resize bg-white/20 opacity-0 group-hover:opacity-100 transition"
+                      title="Trim Right"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

@@ -1,24 +1,48 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, ClientOnly } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+const NovaApp = lazy(() => import("../nova/App"));
+
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "NOVA Studio — Pro Video Editor & Effects Library" },
+      {
+        name: "description",
+        content:
+          "NOVA Studio is a browser video editor with a Filmora-grade effects panel: live looping previews, 220+ presets, LUTs, transitions and a multi-track timeline.",
+      },
+      { property: "og:title", content: "NOVA Studio — Pro Video Editor & Effects Library" },
+      {
+        property: "og:description",
+        content:
+          "Edit in the browser with live video preset previews, LUTs, transitions and a multi-track timeline.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
+    <ClientOnly
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#0c0d13] text-sm text-zinc-500">
+          Loading NOVA Studio…
+        </div>
+      }
     >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+      <Suspense
+        fallback={
+          <div className="flex min-h-screen items-center justify-center bg-[#0c0d13] text-sm text-zinc-500">
+            Loading NOVA Studio…
+          </div>
+        }
+      >
+        <NovaApp />
+      </Suspense>
+    </ClientOnly>
   );
 }

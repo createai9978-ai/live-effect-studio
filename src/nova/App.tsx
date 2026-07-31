@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import TopBar from "./components/TopBar";
-import MediaBin from "./components/MediaBin";
-import LeftMonitorPanel from "./components/LeftMonitorPanel";
-import PreviewPlayer from "./components/PreviewPlayer";
-import LumetriPanel from "./components/LumetriPanel";
-import { AudioMixerPanel, GraphicsPanel } from "./components/WorkspacePanels";
-import Timeline from "./components/Timeline";
-import AudioMeters from "./components/AudioMeters";
-import AudioEngine from "./components/AudioEngine";
-import { MenuActions } from "./components/MenuBar";
+import TopBar from "../components/TopBar";
+import MediaBin from "../components/MediaBin";
+import LeftMonitorPanel from "../components/LeftMonitorPanel";
+import PreviewPlayer from "../components/PreviewPlayer";
+import LumetriPanel from "../components/LumetriPanel";
+import { AudioMixerPanel, GraphicsPanel } from "../components/WorkspacePanels";
+import Timeline from "../components/Timeline";
+import AudioMeters from "../components/AudioMeters";
+import AudioEngine from "../components/AudioEngine";
+import { MenuActions } from "../components/MenuBar";
 import {
   AboutModal,
   ConfirmModal,
@@ -16,9 +16,9 @@ import {
   ShortcutsModal,
   SpeedDialog,
   Toast,
-} from "./components/Modals";
-import AssetBrowser from "./components/AssetBrowser";
-import { AssetItem, AssetTab, findAssetItem } from "./editor/assetLibrary";
+} from "../components/Modals";
+import AssetBrowser from "../components/AssetBrowser";
+import { AssetItem, AssetTab, findAssetItem } from "../editor/assetLibrary";
 import {
   Asset,
   Clip,
@@ -39,7 +39,7 @@ import {
   gradeToFilter,
   probeFile,
   uid,
-} from "./editor/types";
+} from "../editor/types";
 
 type ModalKind =
   | { kind: "confirmNew" }

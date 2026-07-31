@@ -767,7 +767,8 @@ function AssetCard({
   onApply,
   onHover,
   tall,
-  previewFrameUrl,
+  // previewFrameUrl is intentionally unused: cards now stream live video previews.
+
   favorited,
   onToggleFavorite,
   size = "m",

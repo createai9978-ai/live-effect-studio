@@ -272,7 +272,9 @@ const item = (
 ): AssetItem => ({ id, name, glyph, gradient, ...extras });
 
 /* ==============================================================
-   Cinematic and Creative Video Presets (Dynamic Procedural Generation)
+   Professional preset library — Filmora-style production suite +
+   CapCut-style trending/social suite. Generated procedurally so every
+   category ships a full, industry-scale count of presets.
    ============================================================== */
 
 const presetStills = [
@@ -288,115 +290,205 @@ const presetStills = [
   PREVIEW_IMAGES.fpvDynamic,
 ];
 
-const subTags = ["cinematic", "vlog", "gaming", "music"] as ContentTag[];
+const subTags = ["cinematic", "vlog", "gaming", "music", "travel", "wedding"] as ContentTag[];
 
-// Category 1: Dynamic Velocity & Speed Ramping Curves (35 items)
-const mfxSpeedRamps: AssetItem[] = Array.from({ length: 35 }).map((_, i) => {
-  const curves = ["Velocity Shift", "Bullet Time Curve", "Exponential deceleration", "Ramp Up Velocity", "BPM Drop Sync", "Sine Wave Ramp", "Time Warp Curve"];
-  const name = `${curves[i % curves.length]} #${Math.floor(i / curves.length) + 1}`;
-  // Unique natural emerald/teal gradients for Speed Ramps
-  return item(`mfx-ramp-${i}`, name, "trend", grad("#064e3b", "#059669"), {
-    tag: "RAMP",
-    isPro: i % 3 === 0,
-    isExclusive: i % 5 === 0,
-    tags: [subTags[i % subTags.length]],
-    preview: presetStills[i % presetStills.length],
+type SetSpec = {
+  prefix: string;
+  count: number;
+  names: string[];
+  glyph: ThumbGlyph;
+  gradient: [string, string];
+  tag: string;
+  tags?: ContentTag[];
+  ai?: boolean;
+};
+
+function makeSet(spec: SetSpec): AssetItem[] {
+  return Array.from({ length: spec.count }).map((_, i) => {
+    const base = spec.names[i % spec.names.length];
+    const variant = Math.floor(i / spec.names.length) + 1;
+    const name = variant > 1 ? `${base} #${variant}` : base;
+    const pool = spec.tags ?? subTags;
+    return item(`${spec.prefix}-${i}`, name, spec.glyph, grad(spec.gradient[0], spec.gradient[1]), {
+      tag: spec.tag,
+      isNew: i % 7 === 0,
+      isPro: i % 3 === 1,
+      isExclusive: i % 9 === 0,
+      isAiPro: spec.ai || undefined,
+      tags: [pool[i % pool.length]],
+      preview: presetStills[i % presetStills.length],
+    });
   });
+}
+
+/* ---------- Filmora-style production suite ---------- */
+
+const fCinematic = makeSet({
+  prefix: "flm-cine", count: 32, glyph: "star", tag: "LUT",
+  gradient: ["#0b1120", "#1e3a8a"],
+  tags: ["cinematic", "wedding", "travel"],
+  names: [
+    "Teal & Orange Blockbuster", "Moody Noir Contrast", "Golden Hour Warmth",
+    "Bleach Bypass Drama", "Kodak 2383 Print", "Nordic Cold Grade",
+    "Anamorphic Night Grade", "Desaturated Steel",
+  ],
 });
 
-// Category 2: Inertial Punch Zooms, Lens Distortions & Shake Presets (40 items)
-const mfxShakes: AssetItem[] = Array.from({ length: 40 }).map((_, i) => {
-  const shakes = ["Inertial Whip Zoom", "Directional Jolt Shake", "Lens Distortion Warp", "Horizontal Bump Jitter", "Elastic Scale Bounce", "Handheld Cine Tremor"];
-  const name = `${shakes[i % shakes.length]} #${Math.floor(i / shakes.length) + 1}`;
-  // Unique natural red/orange gradients for Camera Shakes
-  return item(`mfx-shake-${i}`, name, "shake", grad("#7f1d1d", "#f43f5e"), {
-    tag: "MOTION",
-    isNew: i % 4 === 0,
-    isExclusive: i % 6 === 0,
-    tags: [subTags[(i + 1) % subTags.length]],
-    preview: presetStills[(i + 1) % presetStills.length],
-  });
+const fOverlays = makeSet({
+  prefix: "flm-ovl", count: 30, glyph: "leak", tag: "OVERLAY",
+  gradient: ["#3b0764", "#a855f7"],
+  names: [
+    "Dust & Particles Drift", "Anamorphic Lens Flare", "Rain Streak Overlay",
+    "Bokeh Light Leak", "Film Burn Halation", "Snowfall Depth Pass",
+    "Smoke Atmosphere", "Golden Confetti Burst",
+  ],
 });
 
-// Category 3: Professional RGB Splits, Glitches, VHS Retro Artifacts & Light Leaks (45 items)
-const mfxGlitches: AssetItem[] = Array.from({ length: 45 }).map((_, i) => {
-  const glitches = ["RGB Channel Split", "Retro VHS Scanline", "CRT Phosphor Jitter", "Chromatic Wave Aberration", "Light Leak Flare", "Halation Leak Overlay"];
-  const name = `${glitches[i % glitches.length]} #${Math.floor(i / glitches.length) + 1}`;
-  // Unique natural violet/pink gradients for Glitch & Leaks
-  return item(`mfx-glitch-${i}`, name, "vhs", grad("#4c1d95", "#8b5cf6"), {
-    tag: "GLITCH",
-    isPro: i % 3 === 0,
-    isExclusive: i % 7 === 0,
-    tags: [subTags[(i + 2) % subTags.length]],
-    preview: presetStills[(i + 2) % presetStills.length],
-  });
+const fSplitScreen = makeSet({
+  prefix: "flm-split", count: 24, glyph: "grid", tag: "SPLIT",
+  gradient: ["#164e63", "#0ea5e9"],
+  tags: ["corporate", "vlog", "gaming"],
+  names: [
+    "2-Up Vertical Split", "3-Way Reaction Grid", "4-Panel Quad View",
+    "Picture-in-Picture Corner", "Diagonal Cinemascope Split", "Sliding Compare Wipe",
+  ],
 });
 
-// Category 4: Seamless Whip Pans, Spin Drifts, & Optical Flash Cuts (35 items)
-const mfxTransitions: AssetItem[] = Array.from({ length: 35 }).map((_, i) => {
-  const trans = ["Whip Pan Sweep", "Spin Drift Spin", "Seamless Light Burst", "Flash Cut Overlay", "Optical Zoom Blur", "Directional Slit Transition"];
-  const name = `${trans[i % trans.length]} #${Math.floor(i / trans.length) + 1}`;
-  // Unique natural orange/amber gradients for transitions
-  return item(`mfx-trans-${i}`, name, "pan", grad("#7c2d12", "#f97316"), {
-    tag: "TRANSITION",
-    isNew: i % 5 === 0,
-    isExclusive: i % 8 === 0,
-    tags: [subTags[(i + 3) % subTags.length]],
-    preview: presetStills[(i + 3) % presetStills.length],
-  });
+const fMotionElements = makeSet({
+  prefix: "flm-motion", count: 30, glyph: "sparkle", tag: "ELEMENT",
+  gradient: ["#7c2d12", "#f59e0b"],
+  names: [
+    "Animated Lower Third", "Callout Arrow Pop", "Progress Bar Wipe",
+    "Location Pin Reveal", "Subscribe Bounce Badge", "Neon Frame Element",
+    "Counter Odometer", "Logo Sting Reveal",
+  ],
 });
 
-// Category 5: Cinematic Moody & High-Contrast Automotive LUTs (35 items)
-const mfxLuts: AssetItem[] = Array.from({ length: 35 }).map((_, i) => {
-  const luts = ["Cinematic Moody Auto", "High Contrast Track", "Amber Shadow Glow", "Tokyo Night Neon", "Fuji Film Emulation", "Desaturated Steel"];
-  const name = `${luts[i % luts.length]} #${Math.floor(i / luts.length) + 1}`;
-  // Unique natural cyan/teal gradients for Color LUTs
-  return item(`mfx-lut-${i}`, name, "star", grad("#083344", "#06b6d4"), {
-    tag: "LUT",
-    isPro: i % 2 === 0,
-    isExclusive: i % 4 === 0,
-    tags: [subTags[(i + 4) % subTags.length]],
-    preview: presetStills[(i + 4) % presetStills.length],
-  });
+const fSpeedRamp = makeSet({
+  prefix: "flm-ramp", count: 26, glyph: "trend", tag: "RAMP",
+  gradient: ["#064e3b", "#10b981"],
+  names: [
+    "Velocity Shift Ramp", "Bullet Time Freeze", "Exponential Deceleration",
+    "Beat Drop Sync Ramp", "Smooth Slow-Mo Curve", "Time Warp Curve",
+  ],
 });
 
-// Category 6: Auto Motion Blur & Keyframable Motion Graphics (35 items)
-const mfxAiMotion: AssetItem[] = Array.from({ length: 35 }).map((_, i) => {
-  const motion = ["Auto Motion Blur", "Keyframe Specular Shimmer", "Neural Rotoscope AI", "Smart Target tracking", "AI Depth Estimator", "Vector Motion Trail"];
-  const name = `${motion[i % motion.length]} #${Math.floor(i / motion.length) + 1}`;
-  // Unique natural fuchsia/magenta gradients for AI Motion
-  return item(`mfx-ai-${i}`, name, "star", grad("#701a75", "#d946ef"), {
-    tag: "AI_MOTION",
-    isAiPro: true,
-    isExclusive: i % 5 === 0,
-    tags: [subTags[(i + 5) % subTags.length]],
-    preview: presetStills[(i + 5) % presetStills.length],
-  });
+const fAiPortrait = makeSet({
+  prefix: "flm-ai", count: 24, glyph: "beauty", tag: "AI", ai: true,
+  gradient: ["#831843", "#f472b6"],
+  tags: ["wedding", "vlog", "cinematic"],
+  names: [
+    "AI Skin Retouch", "Smart Portrait Cutout", "Relight Studio Key",
+    "Auto Motion Blur", "AI Object Tracker", "Depth Blur Bokeh",
+  ],
 });
 
-const allCreatorMotionFx: AssetItem[] = [
-  ...mfxLuts, ...mfxShakes, ...mfxGlitches, ...mfxTransitions, ...mfxSpeedRamps, ...mfxAiMotion
+const filmoraAll = [
+  ...fCinematic, ...fOverlays, ...fSplitScreen, ...fMotionElements, ...fSpeedRamp, ...fAiPortrait,
+];
+
+/* ---------- CapCut-style trending suite ---------- */
+
+const ccTransitions = makeSet({
+  prefix: "cc-trans", count: 32, glyph: "wipe", tag: "TRANSITION",
+  gradient: ["#831843", "#fb7185"],
+  names: [
+    "Whip Pan Sweep", "Zoom Punch Cut", "Spin Blur Drift",
+    "Flash Bang Cut", "Glitch Slice Jump", "Liquid Warp Melt",
+    "Shutter Slide", "3D Cube Flip",
+  ],
+});
+
+const ccCaptions = makeSet({
+  prefix: "cc-text", count: 28, glyph: "text", tag: "TEXT",
+  gradient: ["#1e1b4b", "#6366f1"],
+  names: [
+    "Auto Caption Karaoke", "Word-by-Word Pop", "Bold Highlight Sub",
+    "Typewriter Caption", "Neon Outline Title", "Bounce Emoji Caption",
+    "Podcast Wave Caption", "Shake Impact Title",
+  ],
+});
+
+const ccBody = makeSet({
+  prefix: "cc-body", count: 24, glyph: "portrait", tag: "BODY",
+  gradient: ["#4a044e", "#d946ef"],
+  tags: ["music", "vlog", "gaming"],
+  names: [
+    "Body Glow Outline", "Silhouette Trail Echo", "Clone Motion Trail",
+    "Neon Skeleton Track", "Aura Pulse Wrap", "Freeze Frame Cutout",
+  ],
+});
+
+const ccAesthetic = makeSet({
+  prefix: "cc-aes", count: 30, glyph: "film", tag: "FILTER",
+  gradient: ["#312e81", "#22d3ee"],
+  names: [
+    "Clean Girl Soft Glow", "Y2K Camcorder", "Tokyo Neon Night",
+    "Film Grain Vintage", "Pastel Dream Fade", "HDR Punch Pop",
+    "Cold Blue Aesthetic", "Sunset Peach Fade",
+  ],
+});
+
+const ccGlitch = makeSet({
+  prefix: "cc-glitch", count: 26, glyph: "vhs", tag: "GLITCH",
+  gradient: ["#4c1d95", "#8b5cf6"],
+  tags: ["gaming", "music", "retro"],
+  names: [
+    "RGB Channel Split", "VHS Scanline Retro", "Datamosh Smear",
+    "CRT Phosphor Jitter", "Signal Loss Static", "Chromatic Shockwave",
+  ],
+});
+
+const ccViral = makeSet({
+  prefix: "cc-viral", count: 26, glyph: "trend", tag: "VIRAL",
+  gradient: ["#7f1d1d", "#f97316"],
+  names: [
+    "Velocity Edit Beat Sync", "Shake On Bass Hit", "Vlog Snap Zoom",
+    "Trending Photo Slideshow", "Anime Impact Frame", "Retro Bounce Loop",
+  ],
+});
+
+const capcutAll = [
+  ...ccTransitions, ...ccCaptions, ...ccBody, ...ccAesthetic, ...ccGlitch, ...ccViral,
 ];
 
 /* ================= EFFECTS TREE ================= */
 
 export const EFFECTS_TREE: EffectCategory[] = [
   {
-    id: "video-creator-motion-fx",
-    label: "Cinematic Video Effects",
-    icon: "ai",
-    count: allCreatorMotionFx.length,
-    items: allCreatorMotionFx,
-    accent: "#c084fc",
-    gradient: ["#8b5cf6", "#ec4899"],
-    badge: "CINEMATIC",
+    id: "pro-studio-suite",
+    label: "Pro Studio Suite",
+    icon: "film",
+    count: filmoraAll.length,
+    items: filmoraAll,
+    accent: "#38bdf8",
+    gradient: ["#0ea5e9", "#8b5cf6"],
+    badge: "PRO",
     children: [
-      { id: "mfx-speed-ramps", label: "Dynamic Speed Ramps", icon: "flame", count: mfxSpeedRamps.length, items: mfxSpeedRamps, accent: "#34d399", badge: "RAMP" },
-      { id: "mfx-shakes", label: "Inertial Shakes & Zooms", icon: "camera", count: mfxShakes.length, items: mfxShakes, accent: "#fb7185", badge: "MOTION" },
-      { id: "mfx-glitches", label: "Glitch & VHS Artifacts", icon: "glitch", count: mfxGlitches.length, items: mfxGlitches, accent: "#f43f5e", badge: "GLITCH" },
-      { id: "mfx-transitions", label: "Seamless Whip & Spins", icon: "wand", count: mfxTransitions.length, items: mfxTransitions, accent: "#e879f9", badge: "WIPE" },
-      { id: "mfx-luts", label: "Moody Automotive LUTs", icon: "brush", count: mfxLuts.length, items: mfxLuts, accent: "#22d3ee", badge: "LUT" },
-      { id: "mfx-ai-motion", label: "Auto Motion Blur", icon: "ai", count: mfxAiMotion.length, items: mfxAiMotion, accent: "#c084fc", badge: "AI" },
+      { id: "flm-cinematic", label: "Cinematic Filters", icon: "brush", count: fCinematic.length, items: fCinematic, accent: "#60a5fa", badge: "LUT" },
+      { id: "flm-overlays", label: "Dynamic Overlays", icon: "overlay", count: fOverlays.length, items: fOverlays, accent: "#a855f7", badge: "FX" },
+      { id: "flm-split", label: "Split Screen", icon: "layers", count: fSplitScreen.length, items: fSplitScreen, accent: "#0ea5e9", badge: "LAYOUT" },
+      { id: "flm-elements", label: "Motion Elements", icon: "shapes", count: fMotionElements.length, items: fMotionElements, accent: "#f59e0b", badge: "MOTION" },
+      { id: "flm-ramps", label: "Speed Ramping", icon: "flame", count: fSpeedRamp.length, items: fSpeedRamp, accent: "#10b981", badge: "RAMP" },
+      { id: "flm-ai", label: "AI Portrait & Beauty", icon: "ai", count: fAiPortrait.length, items: fAiPortrait, accent: "#f472b6", badge: "AI" },
+    ],
+  },
+  {
+    id: "trending-social-suite",
+    label: "Trending Social FX",
+    icon: "flame",
+    count: capcutAll.length,
+    items: capcutAll,
+    accent: "#fb7185",
+    gradient: ["#f43f5e", "#f97316"],
+    badge: "VIRAL",
+    children: [
+      { id: "cc-transitions", label: "Trending Transitions", icon: "target", count: ccTransitions.length, items: ccTransitions, accent: "#fb7185", badge: "HOT" },
+      { id: "cc-captions", label: "Auto-Caption Text FX", icon: "brush", count: ccCaptions.length, items: ccCaptions, accent: "#6366f1", badge: "TEXT" },
+      { id: "cc-body", label: "Body Effects", icon: "smiley", count: ccBody.length, items: ccBody, accent: "#d946ef", badge: "BODY" },
+      { id: "cc-aesthetic", label: "Aesthetic Filters", icon: "wand", count: ccAesthetic.length, items: ccAesthetic, accent: "#22d3ee", badge: "AES" },
+      { id: "cc-glitch", label: "Glitch & Retro", icon: "glitch", count: ccGlitch.length, items: ccGlitch, accent: "#8b5cf6", badge: "GLITCH" },
+      { id: "cc-viral", label: "Viral Velocity Edits", icon: "sparkle", count: ccViral.length, items: ccViral, accent: "#f97316", badge: "TREND" },
     ],
   },
 ];

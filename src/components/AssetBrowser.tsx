@@ -56,9 +56,10 @@ export default function AssetBrowser({
   const [tab, setTab] = useState<AssetTab>(initialTab);
   const [query, setQuery] = useState("");
   const [globalQuery, setGlobalQuery] = useState("");
-  const [activeCat, setActiveCat] = useState<string>("video-creator-motion-fx");
+  const [activeCat, setActiveCat] = useState<string>("pro-studio-suite");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    "video-creator-motion-fx": true,
+    "pro-studio-suite": true,
+    "trending-social-suite": true,
   });
   const [hovered, setHovered] = useState<string | null>(null);
 
@@ -790,28 +791,58 @@ function AssetCard({
     const lower = item.name.toLowerCase();
     const result = { filter: "", transform: "", animateClass: "" };
 
-    // Motion character
-    if (lower.includes("shake") || lower.includes("jitter") || lower.includes("jolt")) {
+    // Motion character — matches how the real effect behaves on the timeline
+    if (lower.includes("shake") || lower.includes("jitter") || lower.includes("impact") || lower.includes("bounce")) {
       result.animateClass = "animate-[nova-shake_0.24s_ease-in-out_infinite]";
-    } else if (lower.includes("zoom") || lower.includes("ramp") || lower.includes("curve")) {
+    } else if (lower.includes("zoom") || lower.includes("ramp") || lower.includes("curve") || lower.includes("punch") || lower.includes("freeze")) {
       result.animateClass = "animate-[nova-zoom_2.4s_cubic-bezier(0.45,0,0.55,1)_infinite_alternate]";
-    } else if (lower.includes("whip") || lower.includes("pan") || lower.includes("transition")) {
+    } else if (lower.includes("whip") || lower.includes("pan") || lower.includes("slide") || lower.includes("wipe") || lower.includes("split")) {
       result.animateClass = "animate-[nova-pan_2.6s_cubic-bezier(0.45,0,0.55,1)_infinite_alternate]";
-    } else if (lower.includes("spin") || lower.includes("drift") || lower.includes("orbit")) {
+    } else if (lower.includes("spin") || lower.includes("drift") || lower.includes("flip") || lower.includes("orbit") || lower.includes("warp")) {
       result.animateClass = "animate-[nova-orbit_3s_cubic-bezier(0.45,0,0.55,1)_infinite_alternate]";
-    } else if (lower.includes("flicker") || lower.includes("leak") || lower.includes("flash")) {
+    } else if (lower.includes("flicker") || lower.includes("leak") || lower.includes("flash") || lower.includes("glow") || lower.includes("static")) {
       result.animateClass = "animate-[nova-flicker_1.6s_ease-in-out_infinite]";
     }
 
-    // Colour grades — contrast/saturation only, so hues stay true
-    if (item.tag === "LUT") {
-      if (lower.includes("moody") || lower.includes("contrast")) {
-        result.filter = "contrast(1.22) saturate(1.18) brightness(0.94)";
-      } else if (lower.includes("amber") || lower.includes("neon")) {
-        result.filter = "contrast(1.14) saturate(1.3) sepia(0.12)";
-      }
-    } else if (lower.includes("chromatic") || lower.includes("aberration")) {
-      result.filter = "contrast(1.12) saturate(1.15)";
+    // Colour treatment per category — contrast/saturation/soft-light only,
+    // deliberately hue-rotation-free so footage never turns blue.
+    switch (item.tag) {
+      case "LUT":
+        if (lower.includes("noir") || lower.includes("bleach") || lower.includes("steel")) {
+          result.filter = "contrast(1.28) saturate(0.7) brightness(0.93)";
+        } else if (lower.includes("golden") || lower.includes("kodak")) {
+          result.filter = "contrast(1.12) saturate(1.22) sepia(0.14)";
+        } else {
+          result.filter = "contrast(1.2) saturate(1.16)";
+        }
+        break;
+      case "FILTER":
+        result.filter = lower.includes("vintage") || lower.includes("y2k")
+          ? "contrast(1.08) saturate(0.88) sepia(0.18) brightness(1.04)"
+          : "contrast(1.14) saturate(1.28) brightness(1.03)";
+        break;
+      case "GLITCH":
+        result.filter = "contrast(1.24) saturate(1.35)";
+        break;
+      case "OVERLAY":
+        result.filter = "contrast(1.06) brightness(1.08) saturate(1.1)";
+        break;
+      case "BODY":
+        result.filter = "contrast(1.18) saturate(1.24) brightness(1.02)";
+        break;
+      case "AI":
+        result.filter = "contrast(1.04) saturate(1.08) brightness(1.06)";
+        break;
+      case "SPLIT":
+      case "TEXT":
+      case "ELEMENT":
+        result.filter = "contrast(1.06) saturate(1.04)";
+        break;
+      case "VIRAL":
+        result.filter = "contrast(1.16) saturate(1.2)";
+        break;
+      default:
+        break;
     }
 
     return result;

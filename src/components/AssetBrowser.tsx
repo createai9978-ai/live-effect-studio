@@ -862,105 +862,49 @@ function AssetCard({
     >
       <div
         className={cn(
-          "relative overflow-hidden bg-[#0e0f15]",
+          "relative overflow-hidden bg-[#101119] [contain:paint]",
           tall ? "aspect-[4/3]" : size === "s" ? "aspect-[16/10]" : size === "l" ? "aspect-[21/9]" : "aspect-video"
         )}
       >
         {/*
-          Layer 1 — POSTER: cinematic Pexels still if the item has one,
-          otherwise the SVG glyph on the gradient background.
-          Rendered slightly darkened & desaturated so it reads as "before" footage.
+          LIVE PREVIEW — every card streams a real, muted, seamlessly looping
+          clip. No static thumbnails, no posters, no scan-line gimmicks and no
+          tinted overlays: the effect's own grade is the only colour treatment.
         */}
-        {item.preview ? (
-          <img
-            src={item.preview}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-cover transition-[filter,transform] duration-300 group-hover:scale-[1.06]"
-            style={{ filter: "saturate(0.85) brightness(0.9)" }}
-          />
-        ) : (
-          <>
-            <div className="absolute inset-0 opacity-70 mix-blend-overlay">
-              <div className="absolute -inset-1 animate-pulse bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.25),transparent_60%)]" />
-            </div>
-            <ThumbArt glyph={item.glyph} />
-          </>
-        )}
+        <LivePreviewVideo
+          src={previewClipFor(item.id)}
+          hovered={localHovered}
+          animateClass={localHovered ? cardStyles.animateClass : undefined}
+          style={{
+            filter: [preview.filter, cardStyles.filter].filter(Boolean).join(" ") || undefined,
+            transform: preview.transform,
+            transformOrigin: "center center",
+          }}
+        />
 
-        {/*
-          Layer 2 — LIVE HOVER PREVIEW (Forced-enabled across all preset cards).
-          Plays a real-time looping video of a drifting sports car with the exact
-          shaders/filters/transforms applied directly inside the card thumbnail.
-        */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-          {localHovered ? (
-            <video
-              src="https://player.vimeo.com/external/434045526.sd.mp4?s=c27d2c31e98d9e2b1af2a34493e878bd90977a49&profile_id=165&oauth2_token_id=57447761"
-              autoPlay
-              muted
-              loop
-              playsInline
-              className={cn("absolute inset-0 h-full w-full object-cover", cardStyles.animateClass)}
-              style={{
-                filter: [preview.filter, cardStyles.filter].filter(Boolean).join(" "),
-                transform: preview.transform,
-                transformOrigin: "center center",
-              }}
-            />
-          ) : (
-            <img
-              src={previewFrameUrl ?? item.preview ?? "https://images.pexels.com/photos/1125137/pexels-photo-1125137.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-              style={{
-                filter: preview.filter,
-                transform: preview.transform,
-                animation: animName,
-                transformOrigin: "center center",
-              }}
-            />
-          )}
-          {preview.overlay && (
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: preview.overlay,
-                mixBlendMode: (preview.overlayMix as React.CSSProperties["mixBlendMode"]) ?? undefined,
-                opacity: preview.overlayOpacity ?? 1,
-                animation:
-                  preview.animate === "flicker" ? "nova-flicker 1.4s ease-in-out infinite" :
-                  preview.animate === "pulse"   ? "nova-pulse 1.6s ease-in-out infinite" : undefined,
-              }}
-            />
-          )}
-          {/* Live scan line to make it feel like a video preview */}
+        {preview.overlay && (
           <div
-            className="absolute inset-x-0 h-6 opacity-40"
+            className="pointer-events-none absolute inset-0"
             style={{
-              top: 0,
-              background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.35), transparent)",
-              animation: "nova-scan 2.2s linear infinite",
+              backgroundImage: preview.overlay,
+              mixBlendMode: (preview.overlayMix as React.CSSProperties["mixBlendMode"]) ?? undefined,
+              opacity: preview.overlayOpacity ?? 1,
             }}
           />
-          <span className="absolute bottom-1 left-1.5 flex items-center gap-1 rounded bg-black/70 px-1.5 py-px font-mono text-[8px] text-cyan-200">
-            <span className="h-1 w-1 animate-pulse rounded-full bg-cyan-300" />
-            LIVE
-          </span>
-        </div>
+        )}
 
-        {/* Bottom fade so text badges are always legible over bright poster imagery */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/60 to-transparent" />
+        {/* Neutral legibility scrim (pure black → transparent, never tinted) */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
 
-        {/* hover Play button */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2 bg-black/25 opacity-0 transition group-hover:opacity-100">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-600/40">
+        {/* Premium hover affordance: soft vignette + play control */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100">
+          <div className="flex h-9 w-9 scale-75 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-600/40 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-100">
             <svg className="ml-0.5 h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor">
               <path d="M8 5v14l11-7L8 5z" />
             </svg>
           </div>
         </div>
+
         {/* badges */}
         <div className="absolute left-1.5 top-1.5 flex items-center gap-1">
           {item.tag && (

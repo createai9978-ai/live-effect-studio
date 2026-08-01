@@ -77,6 +77,8 @@ export default function Timeline(props: Props) {
   const {
     clips, videoTracks, audioTracks, time, seqDur, contentEnd, tool, zoom,
     onSetZoom, onSetTool, selected, onSeek, onDeleteSelected, onSelectClip, onUpdateAppliedEffect,
+    rampOpen, onToggleRamp,
+
   } = props;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [razorHoverX, setRazorHoverX] = useState<number | null>(null);

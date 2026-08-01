@@ -43,7 +43,10 @@ type Props = {
   onDeleteSelected: () => void;
   onApplyEffectPreset: (effectId: string, targetClipId: string) => void;
   onUpdateAppliedEffect?: (clipId: string, effectId: string, patch: Partial<AppliedEffect>) => void;
+  rampOpen?: boolean;
+  onToggleRamp?: () => void;
 };
+
 
 /* ---------------- tool definitions ---------------- */
 const TOOLS: { id: Tool; key: string; label: string; icon: string }[] = [

@@ -316,3 +316,15 @@ input[type="range"]::-moz-range-thumb {
 .nova-modal-in {
   animation: nova-modal-in 200ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
+
+/* Tooltip pop-in */
+@keyframes nova-tip {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+
+/* Side panel slide-in (workspace switching, speed curve editor) */
+@keyframes nova-panel {
+  from { opacity: 0; transform: translateX(14px) }
+  to   { opacity: 1; transform: translateX(0)    }
+}

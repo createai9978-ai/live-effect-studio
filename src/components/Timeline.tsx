@@ -13,6 +13,8 @@ import {
 } from "../editor/types";
 import { EFFECT_DRAG_MIME } from "../editor/assetLibrary";
 import { cn } from "../utils/cn";
+import Tooltip from "./Tooltip";
+
 
 const HEAD_W = 148;
 
@@ -43,7 +45,10 @@ type Props = {
   onDeleteSelected: () => void;
   onApplyEffectPreset: (effectId: string, targetClipId: string) => void;
   onUpdateAppliedEffect?: (clipId: string, effectId: string, patch: Partial<AppliedEffect>) => void;
+  rampOpen?: boolean;
+  onToggleRamp?: () => void;
 };
+
 
 /* ---------------- tool definitions ---------------- */
 const TOOLS: { id: Tool; key: string; label: string; icon: string }[] = [
@@ -74,6 +79,8 @@ export default function Timeline(props: Props) {
   const {
     clips, videoTracks, audioTracks, time, seqDur, contentEnd, tool, zoom,
     onSetZoom, onSetTool, selected, onSeek, onDeleteSelected, onSelectClip, onUpdateAppliedEffect,
+    rampOpen, onToggleRamp,
+
   } = props;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [razorHoverX, setRazorHoverX] = useState<number | null>(null);
@@ -122,26 +129,44 @@ export default function Timeline(props: Props) {
       {/* ============ TOOL RAIL ============ */}
       <div className="flex w-11 shrink-0 flex-col items-center gap-1 border-r border-white/[0.06] bg-[#14151d] py-2">
         {TOOLS.map((t) => (
+          <Tooltip key={t.id} label={t.label.split(" — ")[0]} hint={`Shortcut ${t.key}${t.label.includes(" — ") ? ` · ${t.label.split(" — ")[1]}` : ""}`} side="right">
+            <button
+              type="button"
+              aria-label={t.label}
+              aria-pressed={tool === t.id}
+              onClick={() => onSetTool(t.id)}
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ease-[cubic-bezier(.22,1,.36,1)] hover:scale-105 active:scale-95",
+                tool === t.id
+                  ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-600/40 ring-1 ring-white/20"
+                  : "text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-100"
+              )}
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                <path d={t.icon} />
+              </svg>
+            </button>
+          </Tooltip>
+        ))}
+        <Tooltip label="Speed Ramping & Curve Editor" hint="Draw velocity curves, bullet time, beat-drop ramps" side="right">
           <button
-            key={t.id}
             type="button"
-            title={`${t.label} (${t.key})`}
-            aria-label={t.label}
-            aria-pressed={tool === t.id}
-            onMouseDown={(e) => e.preventDefault() /* keep focus out of way */}
-            onClick={() => onSetTool(t.id)}
+            aria-pressed={!!rampOpen}
+            onClick={onToggleRamp}
             className={cn(
-              "flex h-8 w-8 items-center justify-center rounded-lg transition-all active:scale-95",
-              tool === t.id
-                ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-600/40 ring-1 ring-white/20"
+              "mt-1 flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ease-[cubic-bezier(.22,1,.36,1)] hover:scale-105 active:scale-95",
+              rampOpen
+                ? "bg-gradient-to-br from-fuchsia-600 to-orange-500 text-white shadow-lg shadow-fuchsia-600/40 ring-1 ring-white/20"
                 : "text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-100"
             )}
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-              <path d={t.icon} />
+              <path d="M3 18C7 18 8 6 12 6s5 12 9 12" />
+              <circle cx="12" cy="6" r="1.6" />
             </svg>
           </button>
-        ))}
+        </Tooltip>
+
         <div className="mt-auto flex flex-col items-center gap-0.5 pt-2">
           <button
             type="button"

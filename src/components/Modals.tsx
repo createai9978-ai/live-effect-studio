@@ -184,6 +184,23 @@ export function SpeedDialog({
 }
 
 /* ============================ Export ============================ */
+const PRESETS: Record<string, { resolution: string; format: string; fps: string; quality: string }> = {
+  "YouTube 4K": { resolution: "3840×2160", format: "H.264 (MP4)", fps: "30", quality: "High" },
+  "YouTube 1080p": { resolution: "1920×1080", format: "H.264 (MP4)", fps: "30", quality: "High" },
+  "Vimeo 4K": { resolution: "3840×2160", format: "H.265 (HEVC)", fps: "24", quality: "Maximum" },
+  "Instagram Reels": { resolution: "1080×1920", format: "H.264 (MP4)", fps: "30", quality: "High" },
+  "TikTok Vertical": { resolution: "1080×1920", format: "H.264 (MP4)", fps: "60", quality: "High" },
+  "Broadcast ProRes": { resolution: "1920×1080", format: "ProRes 422", fps: "25", quality: "Maximum" },
+  "Match Source": { resolution: "1920×1080", format: "H.264 (MP4)", fps: "30", quality: "Medium" },
+};
+
+const RESOLUTIONS = ["3840×2160", "2560×1440", "1920×1080", "1280×720", "1080×1920"];
+const FORMATS = ["H.264 (MP4)", "H.265 (HEVC)", "ProRes 422", "DNxHR", "WebM", "GIF"];
+const FRAMERATES = ["23.976", "24", "25", "29.97", "30", "50", "60", "120"];
+const QUALITIES = ["Draft", "Medium", "High", "Maximum"];
+
+const BITRATE: Record<string, number> = { Draft: 8, Medium: 20, High: 45, Maximum: 90 }; // Mbps @4K
+
 export function ExportModal({
   contentEnd,
   onCancel,
@@ -191,12 +208,35 @@ export function ExportModal({
 }: {
   contentEnd: number;
   onCancel: () => void;
-  onExport: (opts: { preset: string; format: string; resolution: string }) => void;
+  onExport: (opts: {
+    preset: string;
+    format: string;
+    resolution: string;
+    fps: string;
+    quality: string;
+  }) => void;
 }) {
   const [preset, setPreset] = useState("YouTube 4K");
-  const [format, setFormat] = useState("H.264 (MP4)");
-  const [resolution, setResolution] = useState("3840×2160");
+  const [format, setFormat] = useState(PRESETS["YouTube 4K"].format);
+  const [resolution, setResolution] = useState(PRESETS["YouTube 4K"].resolution);
+  const [fps, setFps] = useState(PRESETS["YouTube 4K"].fps);
+  const [quality, setQuality] = useState(PRESETS["YouTube 4K"].quality);
   const [progress, setProgress] = useState<number | null>(null);
+
+  const applyPreset = (p: string) => {
+    setPreset(p);
+    const def = PRESETS[p];
+    if (!def) return;
+    setResolution(def.resolution);
+    setFormat(def.format);
+    setFps(def.fps);
+    setQuality(def.quality);
+  };
+
+  const pixels = resolution.split("×").reduce((a, b) => a * Number(b), 1);
+  const scale = pixels / (3840 * 2160);
+  const mbps = BITRATE[quality] * scale * (Number(fps) / 30);
+  const sizeMb = (mbps * Math.max(contentEnd, 0)) / 8;
 
   const start = () => {
     setProgress(0);
@@ -206,7 +246,7 @@ export function ExportModal({
         const next = p + 4 + Math.random() * 6;
         if (next >= 100) {
           clearInterval(id);
-          setTimeout(() => onExport({ preset, format, resolution }), 400);
+          setTimeout(() => onExport({ preset, format, resolution, fps, quality }), 400);
           return 100;
         }
         return next;
@@ -222,57 +262,93 @@ export function ExportModal({
             <Field label="Preset">
               <select
                 value={preset}
-                onChange={(e) => setPreset(e.target.value)}
-                className="w-full rounded-md bg-black/40 px-2 py-1.5 text-[11px] text-zinc-100 outline-none ring-1 ring-white/[0.06] focus:ring-violet-500/50"
+                onChange={(e) => applyPreset(e.target.value)}
+                className="w-full rounded-md bg-black/40 px-2 py-1.5 text-[11px] text-zinc-100 outline-none ring-1 ring-white/[0.06] transition focus:ring-violet-500/50"
               >
-                {["YouTube 4K", "YouTube 1080p", "Vimeo 4K", "Instagram Reels", "Broadcast ProRes", "Match Source"].map((p) => (
+                {Object.keys(PRESETS).map((p) => (
                   <option key={p}>{p}</option>
                 ))}
+                {preset === "Custom" && <option>Custom</option>}
               </select>
             </Field>
+
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Format">
-                <select
-                  value={format}
-                  onChange={(e) => setFormat(e.target.value)}
-                  className="w-full rounded-md bg-black/40 px-2 py-1.5 text-[11px] text-zinc-100 outline-none ring-1 ring-white/[0.06]"
-                >
-                  {["H.264 (MP4)", "H.265 (HEVC)", "ProRes 422", "DNxHR", "WebM"].map((f) => (
-                    <option key={f}>{f}</option>
-                  ))}
-                </select>
-              </Field>
               <Field label="Resolution">
                 <select
                   value={resolution}
-                  onChange={(e) => setResolution(e.target.value)}
-                  className="w-full rounded-md bg-black/40 px-2 py-1.5 text-[11px] text-zinc-100 outline-none ring-1 ring-white/[0.06]"
+                  onChange={(e) => { setResolution(e.target.value); setPreset("Custom"); }}
+                  className="w-full rounded-md bg-black/40 px-2 py-1.5 text-[11px] text-zinc-100 outline-none ring-1 ring-white/[0.06] transition focus:ring-violet-500/50"
                 >
-                  {["3840×2160", "1920×1080", "1280×720", "1080×1920", "2560×1440"].map((r) => (
+                  {RESOLUTIONS.map((r) => (
                     <option key={r}>{r}</option>
                   ))}
                 </select>
               </Field>
+              <Field label="Frame rate (fps)">
+                <select
+                  value={fps}
+                  onChange={(e) => { setFps(e.target.value); setPreset("Custom"); }}
+                  className="w-full rounded-md bg-black/40 px-2 py-1.5 text-[11px] text-zinc-100 outline-none ring-1 ring-white/[0.06] transition focus:ring-violet-500/50"
+                >
+                  {FRAMERATES.map((f) => (
+                    <option key={f}>{f}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Format">
+                <select
+                  value={format}
+                  onChange={(e) => { setFormat(e.target.value); setPreset("Custom"); }}
+                  className="w-full rounded-md bg-black/40 px-2 py-1.5 text-[11px] text-zinc-100 outline-none ring-1 ring-white/[0.06] transition focus:ring-violet-500/50"
+                >
+                  {FORMATS.map((f) => (
+                    <option key={f}>{f}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Quality">
+                <select
+                  value={quality}
+                  onChange={(e) => { setQuality(e.target.value); setPreset("Custom"); }}
+                  className="w-full rounded-md bg-black/40 px-2 py-1.5 text-[11px] text-zinc-100 outline-none ring-1 ring-white/[0.06] transition focus:ring-violet-500/50"
+                >
+                  {QUALITIES.map((q) => (
+                    <option key={q}>{q}</option>
+                  ))}
+                </select>
+              </Field>
             </div>
-            <div className="rounded-lg bg-black/30 px-3 py-2 text-[10.5px] text-zinc-400">
-              Sequence duration: <span className="font-mono text-zinc-200">{fmtDuration(contentEnd)}</span>
-              {contentEnd < 0.1 && (
-                <div className="mt-1 text-fuchsia-300">
-                  Nothing to export — add clips to the timeline first.
+
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                ["Duration", fmtDuration(contentEnd)],
+                ["Bitrate", `${mbps.toFixed(1)} Mb/s`],
+                ["Est. size", contentEnd > 0 ? `${sizeMb.toFixed(1)} MB` : "—"],
+              ].map(([k, v]) => (
+                <div key={k} className="rounded-lg bg-black/30 px-2 py-1.5">
+                  <div className="text-[8.5px] uppercase tracking-wider text-zinc-600">{k}</div>
+                  <div className="font-mono text-[11px] text-zinc-200">{v}</div>
                 </div>
-              )}
+              ))}
             </div>
+
+            {contentEnd < 0.1 && (
+              <div className="rounded-lg border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-2 text-[10.5px] text-fuchsia-200">
+                Nothing to export — add clips to the timeline first.
+              </div>
+            )}
+
             <div className="flex justify-end gap-2">
               <button
                 onClick={onCancel}
-                className="rounded-md border border-white/[0.08] px-3 py-1.5 text-[11px] text-zinc-300 transition hover:bg-white/[0.05]"
+                className="rounded-md border border-white/[0.08] px-3 py-1.5 text-[11px] text-zinc-300 transition hover:bg-white/[0.05] active:scale-[.97]"
               >
                 Cancel
               </button>
               <button
                 onClick={start}
                 disabled={contentEnd < 0.1}
-                className="rounded-md bg-gradient-to-r from-violet-600 to-fuchsia-600 px-3 py-1.5 text-[11px] font-medium text-white shadow-md shadow-violet-600/25 transition hover:brightness-110 disabled:opacity-40"
+                className="rounded-md bg-gradient-to-r from-violet-600 to-fuchsia-600 px-3 py-1.5 text-[11px] font-medium text-white shadow-md shadow-violet-600/25 transition hover:brightness-110 active:scale-[.98] disabled:opacity-40"
               >
                 Start Export
               </button>
@@ -281,7 +357,7 @@ export function ExportModal({
         ) : (
           <div className="space-y-3 py-6 text-center">
             <div className="text-[11px] text-zinc-400">
-              Encoding <span className="text-zinc-200">{preset}</span> · {format}
+              Encoding <span className="text-zinc-200">{resolution}</span> · {format} · {fps} fps · {quality}
             </div>
             <div className="mx-auto h-2 w-full overflow-hidden rounded-full bg-white/[0.07]">
               <div
@@ -296,6 +372,7 @@ export function ExportModal({
     </ModalShell>
   );
 }
+
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

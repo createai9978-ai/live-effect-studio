@@ -1209,10 +1209,20 @@ export default function App() {
           hoveredEffectId={hoveredEffectId}
         />
         {workspace === "color" && panels.lumetri && (
-          <LumetriPanel grade={grade} onGradeChange={(g) => { pushHistory(); setGrade(g); }} />
+          <div key="ws-color" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+            <LumetriPanel grade={grade} onGradeChange={(g) => { pushHistory(); setGrade(g); }} />
+          </div>
         )}
-        {workspace === "audio" && <AudioMixerPanel />}
-        {workspace === "graphics" && <GraphicsPanel />}
+        {workspace === "audio" && (
+          <div key="ws-audio" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+            <AudioMixerPanel />
+          </div>
+        )}
+        {workspace === "graphics" && (
+          <div key="ws-graphics" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+            <GraphicsPanel />
+          </div>
+        )}
       </div>
 
       {/* ===== Lower row ===== */}

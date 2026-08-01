@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import TopBar from "../components/TopBar";
+import SpeedCurveEditor from "../components/SpeedCurveEditor";
 import MediaBin from "../components/MediaBin";
 import LeftMonitorPanel from "../components/LeftMonitorPanel";
 import PreviewPlayer from "../components/PreviewPlayer";
@@ -199,6 +200,7 @@ export default function App() {
 
   // Modal + toast state
   const [modal, setModal] = useState<ModalKind | null>(null);
+  const [rampOpen, setRampOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; tone: "info" | "success" | "error" } | null>(
     null
   );
@@ -1252,7 +1254,20 @@ export default function App() {
           onDeleteSelected={deleteSelected}
           onApplyEffectPreset={applyEffectToClip}
           onUpdateAppliedEffect={updateAppliedEffect}
+          rampOpen={rampOpen}
+          onToggleRamp={() => setRampOpen((v) => !v)}
         />
+        {rampOpen && (
+          <SpeedCurveEditor
+            clipName={selectedClipObj ? (selectedAsset?.name ?? "Clip") : null}
+            clipDuration={selectedClipObj?.duration ?? 0}
+            onClose={() => setRampOpen(false)}
+            onApply={(speedPercent) => {
+              if (!selectedClipObj) return;
+              applySpeed(selectedClipObj.id, speedPercent);
+            }}
+          />
+        )}
         {panels.audioMeters && <AudioMeters playing={playing} hasAudio={clips.length > 0} />}
       </div>
 
@@ -1286,7 +1301,10 @@ export default function App() {
           onCancel={() => setModal(null)}
           onExport={(opts) => {
             setModal(null);
-            showToast(`Exported · ${opts.preset} · ${opts.format}`, "success");
+            showToast(
+              `Exported · ${opts.resolution} · ${opts.fps} fps · ${opts.format}`,
+              "success"
+            );
           }}
         />
       )}

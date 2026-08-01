@@ -13,6 +13,8 @@ import {
 } from "../editor/types";
 import { EFFECT_DRAG_MIME } from "../editor/assetLibrary";
 import { cn } from "../utils/cn";
+import Tooltip from "./Tooltip";
+
 
 const HEAD_W = 148;
 

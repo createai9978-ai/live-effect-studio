@@ -319,7 +319,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* Tooltip pop-in */
 @keyframes nova-tip {
-  from { opacity: 0; transform: var(--tw-transform) }
+  from { opacity: 0 }
   to   { opacity: 1 }
 }
 

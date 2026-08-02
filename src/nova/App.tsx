@@ -1347,6 +1347,11 @@ export default function App() {
           onDeleteSelected={deleteSelected}
           onApplyEffectPreset={applyEffectToClip}
           onUpdateAppliedEffect={updateAppliedEffect}
+          selectedEffect={selectedFx}
+          onSelectEffect={(clipId, effectId) =>
+            setSelectedFx(clipId && effectId ? { clipId, effectId } : null)
+          }
+          onDeleteAppliedEffect={deleteAppliedEffect}
           rampOpen={rampOpen}
           onToggleRamp={() => setRampOpen((v) => !v)}
         />

@@ -39,6 +39,7 @@ type Props = {
   previewFrameUrl?: string | null;
   /** Human-readable name of the selected clip, shown in the preview badge. */
   previewClipName?: string | null;
+  projectClipSrc?: string | null;
   onHoverEffect?: (id: string | null) => void;
 };
 
@@ -51,6 +52,7 @@ export default function AssetBrowser({
   onOpenImport,
   previewFrameUrl,
   previewClipName,
+  projectClipSrc,
   onHoverEffect,
 }: Props) {
   const [tab, setTab] = useState<AssetTab>(initialTab);

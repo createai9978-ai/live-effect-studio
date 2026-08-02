@@ -375,7 +375,11 @@ export default function App() {
   );
 
   const updateClipEffects = useCallback(
-    (clipId: string, patch: Partial<ClipEffects>) => {
+    (
+      clipId: string,
+      patch: Partial<ClipEffects>,
+      fxMeta?: { family?: string; params?: Record<string, number | string>; preset?: string; sourceItemId?: string }
+    ) => {
       // no history push per drag frame; only on significant changes
       setClips((prev) =>
         prev.map((c) => {
@@ -396,6 +400,7 @@ export default function App() {
               overlayBlend: patch.overlayBlend,
               startOffset: 0,
               duration: c.duration,
+              ...fxMeta,
             };
             if (idx >= 0) {
               applied[idx] = { ...applied[idx], ...newEffect };

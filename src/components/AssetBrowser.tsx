@@ -414,6 +414,7 @@ export default function AssetBrowser({
               item={findItem(hovered) ?? (pinnedPreviewId ? findItem(pinnedPreviewId) : null)}
               previewFrameUrl={previewFrameUrl ?? null}
               previewClipName={previewClipName ?? null}
+              projectClipSrc={projectClipSrc ?? null}
               pinned={!!pinnedPreviewId && hovered === null}
               onPin={() => setPinnedPreviewId(hovered)}
               onUnpin={() => setPinnedPreviewId(null)}
@@ -1290,6 +1291,7 @@ function ReferenceMonitor({
   item: AssetItem | null;
   previewFrameUrl: string | null;
   previewClipName: string | null;
+  projectClipSrc?: string | null;
   pinned: boolean;
   onPin: () => void;
   onUnpin: () => void;

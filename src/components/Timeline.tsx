@@ -263,27 +263,37 @@ export default function Timeline(props: Props) {
               }}
               onMouseLeave={() => setRazorHoverX(null)}
             >
-              {videoTracks.map((t) => (
-                <Fragment key={t}>
-                  <TrackLane
-                    track={t}
-                    kind="video"
-                    {...props}
-                    timeFromClientX={timeFromClientX}
-                    pxPerSec={pxPerSec}
-                    scrollRef={scrollRef}
-                  />
-                  {t === "V1" && (
-                    <EffectsSubTrack
-                      clips={clips}
-                      seqDur={seqDur}
-                      onSelectClip={onSelectClip}
-                      selected={selected}
-                      onUpdateAppliedEffect={onUpdateAppliedEffect}
+              {videoTracks.map((t) => {
+                const trackHasFx = clips.some(
+                  (c) => c.track === t && (c.appliedEffects?.length ?? 0) > 0
+                );
+                return (
+                  <Fragment key={t}>
+                    <TrackLane
+                      track={t}
+                      kind="video"
+                      {...props}
+                      timeFromClientX={timeFromClientX}
+                      pxPerSec={pxPerSec}
+                      scrollRef={scrollRef}
                     />
-                  )}
-                </Fragment>
-              ))}
+                    {trackHasFx && (
+                      <EffectsSubTrack
+                        track={t}
+                        clips={clips}
+                        seqDur={seqDur}
+                        onSelectClip={onSelectClip}
+                        selected={selected}
+                        onUpdateAppliedEffect={onUpdateAppliedEffect}
+                        selectedEffect={selectedEffect ?? null}
+                        onSelectEffect={onSelectEffect}
+                        onDeleteAppliedEffect={onDeleteAppliedEffect}
+                        onApplyEffectPreset={onApplyEffectPreset}
+                      />
+                    )}
+                  </Fragment>
+                );
+              })}
               <div className="flex h-1 shrink-0">
                 <div className="shrink-0 bg-[#14151d]" style={{ width: HEAD_W }} />
                 <div className="flex-1 bg-black/40" />

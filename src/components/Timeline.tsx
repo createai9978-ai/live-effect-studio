@@ -45,6 +45,9 @@ type Props = {
   onDeleteSelected: () => void;
   onApplyEffectPreset: (effectId: string, targetClipId: string) => void;
   onUpdateAppliedEffect?: (clipId: string, effectId: string, patch: Partial<AppliedEffect>) => void;
+  selectedEffect?: { clipId: string; effectId: string } | null;
+  onSelectEffect?: (clipId: string | null, effectId: string | null) => void;
+  onDeleteAppliedEffect?: (clipId: string, effectId: string) => void;
   rampOpen?: boolean;
   onToggleRamp?: () => void;
 };
@@ -79,6 +82,7 @@ export default function Timeline(props: Props) {
   const {
     clips, videoTracks, audioTracks, time, seqDur, contentEnd, tool, zoom,
     onSetZoom, onSetTool, selected, onSeek, onDeleteSelected, onSelectClip, onUpdateAppliedEffect,
+    selectedEffect, onSelectEffect, onDeleteAppliedEffect, onApplyEffectPreset,
     rampOpen, onToggleRamp,
 
   } = props;
@@ -259,27 +263,37 @@ export default function Timeline(props: Props) {
               }}
               onMouseLeave={() => setRazorHoverX(null)}
             >
-              {videoTracks.map((t) => (
-                <Fragment key={t}>
-                  <TrackLane
-                    track={t}
-                    kind="video"
-                    {...props}
-                    timeFromClientX={timeFromClientX}
-                    pxPerSec={pxPerSec}
-                    scrollRef={scrollRef}
-                  />
-                  {t === "V1" && (
-                    <EffectsSubTrack
-                      clips={clips}
-                      seqDur={seqDur}
-                      onSelectClip={onSelectClip}
-                      selected={selected}
-                      onUpdateAppliedEffect={onUpdateAppliedEffect}
+              {videoTracks.map((t) => {
+                const trackHasFx = clips.some(
+                  (c) => c.track === t && (c.appliedEffects?.length ?? 0) > 0
+                );
+                return (
+                  <Fragment key={t}>
+                    <TrackLane
+                      track={t}
+                      kind="video"
+                      {...props}
+                      timeFromClientX={timeFromClientX}
+                      pxPerSec={pxPerSec}
+                      scrollRef={scrollRef}
                     />
-                  )}
-                </Fragment>
-              ))}
+                    {trackHasFx && (
+                      <EffectsSubTrack
+                        track={t}
+                        clips={clips}
+                        seqDur={seqDur}
+                        onSelectClip={onSelectClip}
+                        selected={selected}
+                        onUpdateAppliedEffect={onUpdateAppliedEffect}
+                        selectedEffect={selectedEffect ?? null}
+                        onSelectEffect={onSelectEffect}
+                        onDeleteAppliedEffect={onDeleteAppliedEffect}
+                        onApplyEffectPreset={onApplyEffectPreset}
+                      />
+                    )}
+                  </Fragment>
+                );
+              })}
               <div className="flex h-1 shrink-0">
                 <div className="shrink-0 bg-[#14151d]" style={{ width: HEAD_W }} />
                 <div className="flex-1 bg-black/40" />
@@ -901,94 +915,128 @@ function ClipBlock(
   );
 }
 
-/* ---------------- Dedicated Effects Sub-Track directly under V1 ---------------- */
+/* ---------------- Per-track effects lane: "V1 - Effects" ---------------- */
 interface EffectsSubTrackProps {
+  track: TrackId;
   clips: Clip[];
   seqDur: number;
   onSelectClip: (id: string | null) => void;
   selected: string[];
   onUpdateAppliedEffect?: (clipId: string, effectId: string, patch: Partial<AppliedEffect>) => void;
+  selectedEffect: { clipId: string; effectId: string } | null;
+  onSelectEffect?: (clipId: string | null, effectId: string | null) => void;
+  onDeleteAppliedEffect?: (clipId: string, effectId: string) => void;
+  onApplyEffectPreset: (effectId: string, targetClipId: string) => void;
 }
 
-function EffectsSubTrack({ clips, seqDur, onSelectClip, selected, onUpdateAppliedEffect }: EffectsSubTrackProps) {
-  // Find all V1 video clips with active, non-destructive applied effects
-  const v1ClipsWithFx = clips.filter((c) => c.track === "V1" && c.appliedEffects && c.appliedEffects.length > 0);
+function EffectsSubTrack({
+  track,
+  clips,
+  seqDur,
+  onSelectClip,
+  onUpdateAppliedEffect,
+  selectedEffect,
+  onSelectEffect,
+  onDeleteAppliedEffect,
+  onApplyEffectPreset,
+}: EffectsSubTrackProps) {
+  const trackClips = clips.filter((c) => c.track === track);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
 
   return (
-    <div className="flex h-8 shrink-0 border-b border-white/[0.04] bg-[#0c0d13]/70">
-      {/* Sub-track header */}
+    <div className="flex h-9 shrink-0 border-b border-white/[0.04] bg-[#0c0d13]/70">
+      {/* Lane header */}
       <div
-        className="sticky left-0 z-10 flex shrink-0 items-center gap-1 bg-[#111218] px-2 text-[9.5px] font-bold text-fuchsia-400 border-r border-white/[0.05]"
+        className="sticky left-0 z-10 flex shrink-0 items-center gap-1 border-r border-white/[0.05] bg-[#111218] px-2 text-[9.5px] font-bold text-fuchsia-300"
         style={{ width: HEAD_W }}
       >
         <span className="rounded bg-fuchsia-500/15 px-1.5 py-0.5 tracking-wider ring-1 ring-fuchsia-500/30">
-          FX (V1)
+          {track} · Effects
         </span>
-        <span className="truncate text-[8.5px] text-zinc-500">Applied Effects</span>
       </div>
 
-      {/* Sub-track lane */}
+      {/* Lane */}
       <div className="relative flex-1 bg-black/25">
-        {v1ClipsWithFx.map((clip) => {
-          const isParentSelected = selected.includes(clip.id);
-
+        {trackClips.map((clip) => {
+          const hasFx = (clip.appliedEffects?.length ?? 0) > 0;
           return (
             <div
-              key={`fx-subtrack-parent-${clip.id}`}
-              className="absolute inset-y-0"
+              key={`fx-lane-${clip.id}`}
+              className={cn(
+                "absolute inset-y-0 rounded-sm transition",
+                dropTarget === clip.id && "ring-2 ring-fuchsia-400/70",
+                !hasFx && "border border-dashed border-white/[0.06]"
+              )}
               style={{
                 left: `${(clip.start / seqDur) * 100}%`,
                 width: `${(clip.duration / seqDur) * 100}%`,
               }}
+              onDragOver={(e) => {
+                if (e.dataTransfer.types.includes(EFFECT_DRAG_MIME)) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.dataTransfer.dropEffect = "copy";
+                  setDropTarget(clip.id);
+                }
+              }}
+              onDragLeave={() => setDropTarget(null)}
+              onDrop={(e) => {
+                setDropTarget(null);
+                const effectId = e.dataTransfer.getData(EFFECT_DRAG_MIME);
+                if (!effectId) return;
+                e.preventDefault();
+                e.stopPropagation();
+                onApplyEffectPreset(effectId, clip.id);
+              }}
+              title={hasFx ? undefined : `Drop an effect here to attach it to ${clip.id}`}
             >
               {clip.appliedEffects?.map((ae) => {
-                // Track dragging motion locally inside the parent clip bounds
+                const isSelected =
+                  selectedEffect?.clipId === clip.id && selectedEffect?.effectId === ae.id;
+
+                const laneWidth = (el: HTMLElement | null) =>
+                  (el?.parentElement?.getBoundingClientRect().width ?? 1) / clip.duration;
+
                 const handleMouseDown = (e: React.MouseEvent) => {
                   e.stopPropagation();
                   onSelectClip(clip.id);
+                  onSelectEffect?.(clip.id, ae.id);
 
                   const startX = e.clientX;
                   const origOffset = ae.startOffset ?? 0;
                   const origDuration = ae.duration ?? clip.duration;
-                  const pps = (e.currentTarget.parentElement?.getBoundingClientRect().width ?? 1) / clip.duration;
+                  const pps = laneWidth(e.currentTarget as HTMLElement);
 
                   const move = (ev: MouseEvent) => {
                     const deltaSec = (ev.clientX - startX) / pps;
                     const maxOffset = clip.duration - origDuration;
-                    const nextOffset = Math.max(0, Math.min(maxOffset, origOffset + deltaSec));
+                    const nextOffset = Math.max(0, Math.min(Math.max(0, maxOffset), origOffset + deltaSec));
                     onUpdateAppliedEffect?.(clip.id, ae.id, { startOffset: nextOffset });
                   };
-
                   const up = () => {
                     window.removeEventListener("mousemove", move);
                     window.removeEventListener("mouseup", up);
                   };
-
                   window.addEventListener("mousemove", move);
                   window.addEventListener("mouseup", up);
                 };
 
-                // Track edge trimming / resizing to shorten or lengthen the effect
                 const handleTrimRight = (e: React.MouseEvent) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  
                   const startX = e.clientX;
                   const origDuration = ae.duration ?? clip.duration;
                   const maxDur = clip.duration - (ae.startOffset ?? 0);
-                  const pps = (e.currentTarget.parentElement?.getBoundingClientRect().width ?? 1) / clip.duration;
-
+                  const pps = laneWidth((e.currentTarget as HTMLElement).parentElement);
                   const move = (ev: MouseEvent) => {
                     const deltaSec = (ev.clientX - startX) / pps;
-                    const nextDuration = Math.max(0.5, Math.min(maxDur, origDuration + deltaSec));
+                    const nextDuration = Math.max(0.3, Math.min(maxDur, origDuration + deltaSec));
                     onUpdateAppliedEffect?.(clip.id, ae.id, { duration: nextDuration });
                   };
-
                   const up = () => {
                     window.removeEventListener("mousemove", move);
                     window.removeEventListener("mouseup", up);
                   };
-
                   window.addEventListener("mousemove", move);
                   window.addEventListener("mouseup", up);
                 };
@@ -996,29 +1044,24 @@ function EffectsSubTrack({ clips, seqDur, onSelectClip, selected, onUpdateApplie
                 const handleTrimLeft = (e: React.MouseEvent) => {
                   e.stopPropagation();
                   e.preventDefault();
-
                   const startX = e.clientX;
                   const origOffset = ae.startOffset ?? 0;
                   const origDuration = ae.duration ?? clip.duration;
-                  const pps = (e.currentTarget.parentElement?.getBoundingClientRect().width ?? 1) / clip.duration;
-
+                  const pps = laneWidth((e.currentTarget as HTMLElement).parentElement);
                   const move = (ev: MouseEvent) => {
                     const deltaSec = (ev.clientX - startX) / pps;
-                    const nextOffset = Math.max(0, Math.min(origOffset + origDuration - 0.5, origOffset + deltaSec));
-                    const nextDuration = Math.max(0.5, origDuration - (nextOffset - origOffset));
+                    const nextOffset = Math.max(0, Math.min(origOffset + origDuration - 0.3, origOffset + deltaSec));
+                    const nextDuration = Math.max(0.3, origDuration - (nextOffset - origOffset));
                     onUpdateAppliedEffect?.(clip.id, ae.id, { startOffset: nextOffset, duration: nextDuration });
                   };
-
                   const up = () => {
                     window.removeEventListener("mousemove", move);
                     window.removeEventListener("mouseup", up);
                   };
-
                   window.addEventListener("mousemove", move);
                   window.addEventListener("mouseup", up);
                 };
 
-                // Compute horizontal layout based on its draggable startOffset & duration
                 const leftPct = ((ae.startOffset ?? 0) / clip.duration) * 100;
                 const widthPct = ((ae.duration ?? clip.duration) / clip.duration) * 100;
 
@@ -1026,36 +1069,65 @@ function EffectsSubTrack({ clips, seqDur, onSelectClip, selected, onUpdateApplie
                   <div
                     key={ae.id}
                     onMouseDown={handleMouseDown}
-                    className={cn(
-                      "absolute top-0.5 bottom-0.5 flex items-center justify-between rounded border px-2 py-0.5 transition-all duration-150 cursor-grab active:cursor-grabbing group overflow-hidden shadow",
-                      ae.enabled
-                        ? "from-fuchsia-600/30 to-violet-700/20 bg-gradient-to-br text-white border-fuchsia-500/20 shadow-fuchsia-500/10"
-                        : "from-zinc-800/40 to-zinc-900/20 bg-gradient-to-br text-zinc-400 border-zinc-700/25 opacity-60",
-                      isParentSelected && "ring-1 ring-fuchsia-400/40 border-fuchsia-400"
-                    )}
-                    style={{
-                      left: `${leftPct}%`,
-                      width: `${Math.max(4, widthPct)}%`,
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      onSelectEffect?.(clip.id, ae.id);
                     }}
-                    title={`Effect: ${ae.name} (${ae.enabled ? "Active" : "Bypassed"}) · Drag to move · Drag edges to trim / resize`}
+                    className={cn(
+                      "group absolute top-0.5 bottom-0.5 flex cursor-grab items-center overflow-hidden rounded border px-1.5 shadow transition-all duration-150 active:cursor-grabbing",
+                      ae.enabled
+                        ? "border-fuchsia-500/25 bg-gradient-to-br from-fuchsia-600/35 to-violet-700/25 text-white shadow-fuchsia-500/10"
+                        : "border-zinc-700/30 bg-gradient-to-br from-zinc-800/50 to-zinc-900/30 text-zinc-400 opacity-60",
+                      isSelected && "border-cyan-300 ring-2 ring-cyan-300/60"
+                    )}
+                    style={{ left: `${leftPct}%`, width: `${Math.max(4, widthPct)}%` }}
+                    title={`${ae.name} — click to open Effect Controls · drag to move · drag edges to resize`}
                   >
-                    {/* Left Trim Handle */}
                     <div
                       onMouseDown={handleTrimLeft}
-                      className="absolute left-0 top-0 h-full w-1 cursor-ew-resize bg-white/20 opacity-0 group-hover:opacity-100 transition"
-                      title="Trim Left"
+                      className="absolute left-0 top-0 h-full w-1.5 cursor-ew-resize bg-white/25 opacity-0 transition group-hover:opacity-100"
+                      title="Trim left"
                     />
 
-                    <div className="flex items-center gap-1.5 min-w-0 select-none pointer-events-none">
-                      <span className={cn("h-1 w-1 rounded-full", ae.enabled ? "bg-emerald-400 shadow-[0_0_4px_#34d399]" : "bg-zinc-600")} />
+                    <div className="pointer-events-none flex min-w-0 flex-1 select-none items-center gap-1.5">
+                      <span
+                        className={cn(
+                          "h-1 w-1 shrink-0 rounded-full",
+                          ae.enabled ? "bg-emerald-400 shadow-[0_0_4px_#34d399]" : "bg-zinc-600"
+                        )}
+                      />
                       <span className="truncate text-[8.5px] font-bold tracking-wide">{ae.name}</span>
                     </div>
 
-                    {/* Right Trim Handle */}
+                    <button
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUpdateAppliedEffect?.(clip.id, ae.id, { enabled: !ae.enabled });
+                      }}
+                      className="relative z-10 mr-1 hidden shrink-0 rounded px-1 text-[7.5px] font-bold text-zinc-200 transition hover:bg-white/15 group-hover:block"
+                      title={ae.enabled ? "Bypass effect" : "Enable effect"}
+                    >
+                      {ae.enabled ? "FX" : "OFF"}
+                    </button>
+                    <button
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteAppliedEffect?.(clip.id, ae.id);
+                      }}
+                      className="relative z-10 hidden shrink-0 rounded p-0.5 text-rose-200 transition hover:bg-rose-500/25 group-hover:block"
+                      title="Delete effect"
+                    >
+                      <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round">
+                        <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" />
+                      </svg>
+                    </button>
+
                     <div
                       onMouseDown={handleTrimRight}
-                      className="absolute right-0 top-0 h-full w-1 cursor-ew-resize bg-white/20 opacity-0 group-hover:opacity-100 transition"
-                      title="Trim Right"
+                      className="absolute right-0 top-0 h-full w-1.5 cursor-ew-resize bg-white/25 opacity-0 transition group-hover:opacity-100"
+                      title="Trim right"
                     />
                   </div>
                 );

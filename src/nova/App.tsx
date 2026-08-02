@@ -20,6 +20,15 @@ import {
 } from "../components/Modals";
 import AssetBrowser from "../components/AssetBrowser";
 import { AssetItem, AssetTab, findAssetItem } from "../editor/assetLibrary";
+import EffectControlPanel from "../components/EffectControlPanel";
+import {
+  EffectFamily,
+  ParamValues,
+  defaultValues,
+  familyFor,
+  paramsToVisual,
+} from "../editor/effectParams";
+import { previewClipFor } from "../editor/previewVideos";
 import {
   Asset,
   Clip,
@@ -375,7 +384,11 @@ export default function App() {
   );
 
   const updateClipEffects = useCallback(
-    (clipId: string, patch: Partial<ClipEffects>) => {
+    (
+      clipId: string,
+      patch: Partial<ClipEffects>,
+      fxMeta?: { family?: string; params?: Record<string, number | string>; preset?: string; sourceItemId?: string }
+    ) => {
       // no history push per drag frame; only on significant changes
       setClips((prev) =>
         prev.map((c) => {
@@ -396,6 +409,7 @@ export default function App() {
               overlayBlend: patch.overlayBlend,
               startOffset: 0,
               duration: c.duration,
+              ...fxMeta,
             };
             if (idx >= 0) {
               applied[idx] = { ...applied[idx], ...newEffect };
@@ -885,7 +899,11 @@ export default function App() {
 
   /** Apply an effect preset to a specific clip (from a drop) or to the current selection (from a click). */
   const applyAssetPreset = useCallback(
-    (item: AssetItem, targetClipId?: string) => {
+    (
+      item: AssetItem,
+      targetClipId?: string,
+      override?: { family: EffectFamily; params: ParamValues; preset?: string }
+    ) => {
       // Translate the preset's tag + glyph + id into a rich effect patch.
       // The `tag` field carries the pack identity (LUT, MAGIC, GLITCH, ATMOS, RAMP, AI, ...)
       // and lets us layer CSS filters + overlays for real-time visible changes.
@@ -1037,10 +1055,30 @@ export default function App() {
           default: return { scale: 102 };
         }
       })();
+
+      // Parameter-driven application (from the Effect Control Panel) always wins:
+      // the compiled CSS from the live parameters replaces the static preset look.
+      const family = override?.family ?? familyFor(item.name, item.tag);
+      const params = override?.params ?? defaultValues(family);
+      const visual = paramsToVisual(family, params);
+      const finalPatch: Partial<ClipEffects> = {
+        ...patch,
+        presetLabel: item.name,
+        filter: [patch.filter, visual.filter].filter(Boolean).join(" "),
+        overlay: visual.overlay ?? patch.overlay,
+        overlayBlend: visual.overlayBlend ?? patch.overlayBlend,
+        overlayOpacity: visual.overlayOpacity ?? patch.overlayOpacity,
+      };
+
       const target = targetClipId ?? selected[0] ?? clips[0]?.id;
-      if (target && Object.keys(patch).length) {
+      if (target) {
         pushHistory();
-        updateClipEffects(target, patch);
+        updateClipEffects(target, finalPatch, {
+          family,
+          params,
+          preset: override?.preset,
+          sourceItemId: item.id,
+        });
         setSelected([target]);
         // Close the browser only for click-to-apply. Drop-to-apply keeps it open
         // so the user can drag more effects without reopening.
@@ -1061,6 +1099,51 @@ export default function App() {
     },
     [applyAssetPreset]
   );
+
+  /* ---------- timeline FX instance selection + Effect Control Panel ---------- */
+  const [selectedFx, setSelectedFx] = useState<{ clipId: string; effectId: string } | null>(null);
+
+  const fxSelection = useMemo(() => {
+    if (!selectedFx) return null;
+    const clip = clips.find((c) => c.id === selectedFx.clipId);
+    const ae = clip?.appliedEffects?.find((e) => e.id === selectedFx.effectId);
+    if (!clip || !ae) return null;
+    const asset = assets.find((a) => a.id === clip.assetId) ?? null;
+    const family = (ae.family as EffectFamily) ?? familyFor(ae.name);
+    return { clip, ae, asset, family, params: ae.params ?? defaultValues(family) };
+  }, [selectedFx, clips, assets]);
+
+  const updateFxParams = useCallback(
+    (next: ParamValues, presetName?: string) => {
+      if (!selectedFx || !fxSelection) return;
+      const visual = paramsToVisual(fxSelection.family, next);
+      updateAppliedEffect(selectedFx.clipId, selectedFx.effectId, {
+        params: next,
+        preset: presetName ?? fxSelection.ae.preset,
+        family: fxSelection.family,
+        filter: visual.filter,
+        overlay: visual.overlay,
+        overlayBlend: visual.overlayBlend,
+        intensity: Math.round((visual.overlayOpacity ?? 1) * 100),
+      });
+    },
+    [selectedFx, fxSelection, updateAppliedEffect]
+  );
+
+  const deleteAppliedEffect = useCallback(
+    (clipId: string, effectId: string) => {
+      pushHistory();
+      setClips((prev) =>
+        prev.map((c) =>
+          c.id === clipId ? { ...c, appliedEffects: c.appliedEffects?.filter((e) => e.id !== effectId) } : c
+        )
+      );
+      setSelectedFx((cur) => (cur && cur.effectId === effectId ? null : cur));
+    },
+    [pushHistory]
+  );
+
+
 
   const menuActions: MenuActions = {
     newProject,
@@ -1264,6 +1347,11 @@ export default function App() {
           onDeleteSelected={deleteSelected}
           onApplyEffectPreset={applyEffectToClip}
           onUpdateAppliedEffect={updateAppliedEffect}
+          selectedEffect={selectedFx}
+          onSelectEffect={(clipId, effectId) =>
+            setSelectedFx(clipId && effectId ? { clipId, effectId } : null)
+          }
+          onDeleteAppliedEffect={deleteAppliedEffect}
           rampOpen={rampOpen}
           onToggleRamp={() => setRampOpen((v) => !v)}
         />
@@ -1330,8 +1418,37 @@ export default function App() {
         onOpenImport={openImport}
         previewFrameUrl={selectedAsset?.thumb ?? assets.find((a) => a.thumb)?.thumb ?? null}
         previewClipName={selectedAsset?.name ?? assets.find((a) => a.thumb)?.name ?? null}
+        projectClipSrc={selectedAsset?.url ?? assets.find((a) => a.kind === "video")?.url ?? null}
         onHoverEffect={setHoveredEffectId}
       />
+
+      {/* Effect Control Panel for a timeline FX instance */}
+      {fxSelection && (
+        <EffectControlPanel
+          open
+          title={fxSelection.ae.name}
+          subtitle={`Timeline instance on ${fxSelection.clip.track} · ${fxSelection.ae.duration.toFixed(1)}s — parameters update the program monitor live.`}
+          tag={fxSelection.ae.enabled ? "ACTIVE" : "BYPASSED"}
+          family={fxSelection.family}
+          values={fxSelection.params}
+          onChange={(v) => updateFxParams(v)}
+          presetName={fxSelection.ae.preset}
+          onPresetChange={(name) => updateFxParams(fxSelection.params, name)}
+          videoSrc={fxSelection.asset?.url ?? null}
+          posterUrl={fxSelection.asset?.thumb ?? null}
+          clipLabel={fxSelection.asset?.name ?? fxSelection.clip.track}
+          fallbackClip={previewClipFor(fxSelection.ae.sourceItemId ?? fxSelection.ae.id)}
+          onClose={() => setSelectedFx(null)}
+          onDelete={() => deleteAppliedEffect(fxSelection.clip.id, fxSelection.ae.id)}
+          onApply={() => {
+            updateAppliedEffect(fxSelection.clip.id, fxSelection.ae.id, { enabled: true });
+            setSelectedFx(null);
+            showToast(`"${fxSelection.ae.name}" updated`, "success");
+          }}
+          applyLabel="Done"
+        />
+      )}
+
 
       {toast && <Toast message={toast.message} tone={toast.tone} />}
     </div>

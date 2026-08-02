@@ -101,6 +101,14 @@ export type AppliedEffect = {
   overlayBlend?: string;
   startOffset: number;    // seconds relative to parent clip start
   duration: number;       // seconds duration of the effect
+  /** Parameter family of this effect (drives the Effect Control Panel schema). */
+  family?: string;
+  /** Live parameter values for the Effect Control Panel. */
+  params?: Record<string, number | string>;
+  /** Currently selected preset name. */
+  preset?: string;
+  /** Library item this instance came from. */
+  sourceItemId?: string;
 };
 
 export type Clip = {

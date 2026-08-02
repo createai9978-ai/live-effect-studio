@@ -39,6 +39,7 @@ type Props = {
   previewFrameUrl?: string | null;
   /** Human-readable name of the selected clip, shown in the preview badge. */
   previewClipName?: string | null;
+  projectClipSrc?: string | null;
   onHoverEffect?: (id: string | null) => void;
 };
 
@@ -51,6 +52,7 @@ export default function AssetBrowser({
   onOpenImport,
   previewFrameUrl,
   previewClipName,
+  projectClipSrc,
   onHoverEffect,
 }: Props) {
   const [tab, setTab] = useState<AssetTab>(initialTab);
@@ -412,6 +414,7 @@ export default function AssetBrowser({
               item={findItem(hovered) ?? (pinnedPreviewId ? findItem(pinnedPreviewId) : null)}
               previewFrameUrl={previewFrameUrl ?? null}
               previewClipName={previewClipName ?? null}
+              projectClipSrc={projectClipSrc ?? null}
               pinned={!!pinnedPreviewId && hovered === null}
               onPin={() => setPinnedPreviewId(hovered)}
               onUnpin={() => setPinnedPreviewId(null)}
@@ -1288,6 +1291,7 @@ function ReferenceMonitor({
   item: AssetItem | null;
   previewFrameUrl: string | null;
   previewClipName: string | null;
+  projectClipSrc?: string | null;
   pinned: boolean;
   onPin: () => void;
   onUnpin: () => void;

@@ -1418,8 +1418,37 @@ export default function App() {
         onOpenImport={openImport}
         previewFrameUrl={selectedAsset?.thumb ?? assets.find((a) => a.thumb)?.thumb ?? null}
         previewClipName={selectedAsset?.name ?? assets.find((a) => a.thumb)?.name ?? null}
+        projectClipSrc={selectedAsset?.url ?? assets.find((a) => a.kind === "video")?.url ?? null}
         onHoverEffect={setHoveredEffectId}
       />
+
+      {/* Effect Control Panel for a timeline FX instance */}
+      {fxSelection && (
+        <EffectControlPanel
+          open
+          title={fxSelection.ae.name}
+          subtitle={`Timeline instance on ${fxSelection.clip.track} · ${fxSelection.ae.duration.toFixed(1)}s — parameters update the program monitor live.`}
+          tag={fxSelection.ae.enabled ? "ACTIVE" : "BYPASSED"}
+          family={fxSelection.family}
+          values={fxSelection.params}
+          onChange={(v) => updateFxParams(v)}
+          presetName={fxSelection.ae.preset}
+          onPresetChange={(name) => updateFxParams(fxSelection.params, name)}
+          videoSrc={fxSelection.asset?.url ?? null}
+          posterUrl={fxSelection.asset?.thumb ?? null}
+          clipLabel={fxSelection.asset?.name ?? fxSelection.clip.track}
+          fallbackClip={previewClipFor(fxSelection.ae.sourceItemId ?? fxSelection.ae.id)}
+          onClose={() => setSelectedFx(null)}
+          onDelete={() => deleteAppliedEffect(fxSelection.clip.id, fxSelection.ae.id)}
+          onApply={() => {
+            updateAppliedEffect(fxSelection.clip.id, fxSelection.ae.id, { enabled: true });
+            setSelectedFx(null);
+            showToast(`"${fxSelection.ae.name}" updated`, "success");
+          }}
+          applyLabel="Done"
+        />
+      )}
+
 
       {toast && <Toast message={toast.message} tone={toast.tone} />}
     </div>

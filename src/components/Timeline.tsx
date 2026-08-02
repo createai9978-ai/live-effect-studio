@@ -82,6 +82,7 @@ export default function Timeline(props: Props) {
   const {
     clips, videoTracks, audioTracks, time, seqDur, contentEnd, tool, zoom,
     onSetZoom, onSetTool, selected, onSeek, onDeleteSelected, onSelectClip, onUpdateAppliedEffect,
+    selectedEffect, onSelectEffect, onDeleteAppliedEffect, onApplyEffectPreset,
     rampOpen, onToggleRamp,
 
   } = props;

@@ -890,7 +890,11 @@ export default function App() {
 
   /** Apply an effect preset to a specific clip (from a drop) or to the current selection (from a click). */
   const applyAssetPreset = useCallback(
-    (item: AssetItem, targetClipId?: string) => {
+    (
+      item: AssetItem,
+      targetClipId?: string,
+      override?: { family: EffectFamily; params: ParamValues; preset?: string }
+    ) => {
       // Translate the preset's tag + glyph + id into a rich effect patch.
       // The `tag` field carries the pack identity (LUT, MAGIC, GLITCH, ATMOS, RAMP, AI, ...)
       // and lets us layer CSS filters + overlays for real-time visible changes.

@@ -45,6 +45,9 @@ type Props = {
   onDeleteSelected: () => void;
   onApplyEffectPreset: (effectId: string, targetClipId: string) => void;
   onUpdateAppliedEffect?: (clipId: string, effectId: string, patch: Partial<AppliedEffect>) => void;
+  selectedEffect?: { clipId: string; effectId: string } | null;
+  onSelectEffect?: (clipId: string | null, effectId: string | null) => void;
+  onDeleteAppliedEffect?: (clipId: string, effectId: string) => void;
   rampOpen?: boolean;
   onToggleRamp?: () => void;
 };

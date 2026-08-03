@@ -922,7 +922,7 @@ function AssetCard({
           hovered={localHovered}
           animateClass={localHovered ? cardStyles.animateClass : undefined}
           style={{
-            filter: [preview.filter, cardStyles.filter].filter(Boolean).join(" ") || undefined,
+            filter: composeFilters([preview.filter, cardStyles.filter]) || undefined,
             transform: preview.transform,
             transformOrigin: "center center",
           }}

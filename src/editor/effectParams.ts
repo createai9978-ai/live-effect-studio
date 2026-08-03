@@ -269,19 +269,25 @@ export function paramsToVisual(family: EffectFamily, v: ParamValues): VisualResu
 
   switch (family) {
     case "ai-motion": {
+      // Frame-synthesis is simulated on the CPU/GPU-less path. It must never
+      // fall back to a whole-frame blur (that read as broken footage), so the
+      // motion cue is a very small directional softening plus detail recovery.
       const mb = n(v.motionBlur) / 100;
       const sharp = n(v.sharpen) / 100;
       const mult = v.interpolation === "8×" ? 1.3 : v.interpolation === "4×" ? 1.15 : v.interpolation === "2×" ? 1.05 : 1;
       f.push(`contrast(${(1 + sharp * 0.22).toFixed(3)})`, `saturate(${(1 + sharp * 0.15).toFixed(3)})`);
-      if (mb > 0.02) f.push(`blur(${(mb * 1.6).toFixed(2)}px)`);
-      if (v.smoothing === "Frame Blend" && mb > 0) f.push(`opacity(${(1 - mb * 0.08).toFixed(3)})`);
-      transform = `scale(${(1 + (n(v.stabilize) / 100) * 0.05 * mult).toFixed(3)})`;
+      if (mb > 0.35) f.push(`blur(${(Math.min(mb, 1) * 0.6).toFixed(2)}px)`);
+      transform = `scale(${(1 + (n(v.stabilize) / 100) * 0.03 * mult).toFixed(3)})`;
       break;
     }
     case "ai-mask": {
+      // Background separation is expressed through a depth vignette rather than
+      // a global blur, so the subject/edges stay perfectly sharp.
       const bg = n(v.bgBlur) / 100;
-      f.push(`contrast(${(1 + (n(v.depth) / 100) * 0.25).toFixed(3)})`, `saturate(${(1 + (n(v.maskStrength) / 100) * 0.2).toFixed(3)})`);
-      if (bg > 0.02) f.push(`blur(${(bg * 1.2).toFixed(2)}px)`);
+      f.push(
+        `contrast(${(1 + (n(v.depth) / 100) * 0.25).toFixed(3)})`,
+        `saturate(${(1 + (n(v.maskStrength) / 100) * 0.2).toFixed(3)})`
+      );
       overlay = `radial-gradient(ellipse at 50% 48%, transparent ${(30 + n(v.feather) * 0.25).toFixed(0)}%, rgba(0,0,0,${(0.15 + bg * 0.5).toFixed(2)}) 100%)`;
       overlayBlend = "multiply";
       overlayOpacity = 0.35 + (n(v.maskStrength) / 100) * 0.5;

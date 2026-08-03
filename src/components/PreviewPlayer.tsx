@@ -80,6 +80,7 @@ export default function PreviewPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [webglSupported, setWebglSupported] = useState(true);
+  const [gpuFrameReady, setGpuFrameReady] = useState(false);
   const [activeEffects, setActiveEffects] = useState<EffectParams[]>([]);
 
   // topmost audible video clip under the playhead (respects mute/solo)

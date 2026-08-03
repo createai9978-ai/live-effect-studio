@@ -604,7 +604,7 @@ const axOverlays = makeUnique({
   ],
 });
 
-const advancedAll = [...axAi, ...axTransitions, ...axGlitch, ...axOverlays];
+const advancedAll = dedupe([...axAi, ...axTransitions, ...axGlitch, ...axOverlays]);
 
 /* ================= EFFECTS TREE ================= */
 

@@ -486,12 +486,18 @@ export default function PreviewPlayer({
                   }}
                 />
               )}
-              {/* WebGL effect processing canvas — overlays processed video */}
+              {/*
+                GPU effect canvas. It is only revealed once the pipeline has
+                actually produced a frame — otherwise the empty/stale drawing
+                buffer covered the video and looked like a corrupted frame.
+                object-contain matches the <video> letterboxing exactly, so the
+                processed frame can never be stretched or edge-smeared.
+              */}
               <canvas
                 ref={canvasRef}
                 className={cn(
-                  "pointer-events-none absolute inset-0 transition-opacity",
-                  webglSupported && activeEffects.length > 0 ? "opacity-100" : "opacity-0"
+                  "pointer-events-none absolute inset-0 h-full w-full object-contain transition-opacity duration-200",
+                  gpuFrameReady && webglSupported && activeEffects.length > 0 ? "opacity-100" : "opacity-0"
                 )}
                 style={{ mixBlendMode: "normal" }}
               />

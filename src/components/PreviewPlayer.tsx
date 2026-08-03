@@ -3,6 +3,7 @@ import { Asset, Clip, toTimecode } from "../editor/types";
 import { videoProcessor, EffectParams } from "../editor/VideoProcessor";
 import { cn } from "../utils/cn";
 import { findAssetItem, previewStyleFor } from "../editor/assetLibrary";
+import { composeFilters } from "../editor/effectParams";
 
 type Props = {
   assets: Asset[];

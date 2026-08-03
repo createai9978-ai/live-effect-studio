@@ -408,3 +408,96 @@ export function deleteCustomPreset(id: string): CustomPreset[] {
   }
   return next;
 }
+
+/* ------------------------------------------------------------------ *
+ * Filter composition
+ *
+ * Stacking raw CSS filter strings ("blur(3px) blur(4px) contrast(1.4) …")
+ * multiplies destructively and produces the washed-out, edge-smeared
+ * "blasted" frame. composeFilters merges duplicate functions with the right
+ * math per function and clamps every channel to a safe broadcast range so a
+ * heavy effect stack degrades gracefully instead of destroying the image.
+ * ------------------------------------------------------------------ */
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+export function composeFilters(parts: (string | undefined | null | false)[]): string {
+  let blur = 0;
+  let brightness = 1;
+  let contrast = 1;
+  let saturate = 1;
+  let opacity = 1;
+  let hue = 0;
+  let grayscale = 0;
+  let sepia = 0;
+  let invert = 0;
+  const passthrough: string[] = [];
+  let used = false;
+
+  const re = /([a-z-]+)\(([^)]*)\)/gi;
+
+  for (const raw of parts) {
+    if (!raw || typeof raw !== "string") continue;
+    const s = raw.trim();
+    if (!s || s === "none") continue;
+    let m: RegExpExecArray | null;
+    re.lastIndex = 0;
+    while ((m = re.exec(s))) {
+      const fn = m[1].toLowerCase();
+      const argRaw = m[2].trim();
+      const numeric = parseFloat(argRaw);
+      const isPercent = argRaw.endsWith("%");
+      const unitless = isNaN(numeric) ? 0 : isPercent ? numeric / 100 : numeric;
+      used = true;
+      switch (fn) {
+        case "blur":
+          blur += isNaN(numeric) ? 0 : numeric;
+          break;
+        case "brightness":
+          brightness *= unitless;
+          break;
+        case "contrast":
+          contrast *= unitless;
+          break;
+        case "saturate":
+          saturate *= unitless;
+          break;
+        case "opacity":
+          opacity *= unitless;
+          break;
+        case "hue-rotate":
+          hue += isNaN(numeric) ? 0 : numeric;
+          break;
+        case "grayscale":
+          grayscale = Math.max(grayscale, unitless);
+          break;
+        case "sepia":
+          sepia = Math.max(sepia, unitless);
+          break;
+        case "invert":
+          invert = Math.max(invert, unitless);
+          break;
+        default:
+          passthrough.push(`${fn}(${argRaw})`);
+      }
+    }
+  }
+
+  if (!used) return "";
+
+  const out: string[] = [];
+  // Colour first, optics last — matches how an NLE orders its render stack.
+  if (Math.abs(contrast - 1) > 0.001) out.push(`contrast(${clamp(contrast, 0.35, 2.2).toFixed(3)})`);
+  if (Math.abs(brightness - 1) > 0.001) out.push(`brightness(${clamp(brightness, 0.4, 1.8).toFixed(3)})`);
+  if (Math.abs(saturate - 1) > 0.001) out.push(`saturate(${clamp(saturate, 0, 2.6).toFixed(3)})`);
+  if (Math.abs(hue) > 0.1) out.push(`hue-rotate(${clamp(hue, -180, 180).toFixed(1)}deg)`);
+  if (sepia > 0.001) out.push(`sepia(${clamp(sepia, 0, 1).toFixed(3)})`);
+  if (grayscale > 0.001) out.push(`grayscale(${clamp(grayscale, 0, 1).toFixed(3)})`);
+  if (invert > 0.001) out.push(`invert(${clamp(invert, 0, 1).toFixed(3)})`);
+  for (const p of passthrough) out.push(p);
+  // Blur is the main cause of edge breakdown — hard-capped and applied once.
+  if (blur > 0.05) out.push(`blur(${clamp(blur, 0, 4).toFixed(2)}px)`);
+  if (opacity < 0.999) out.push(`opacity(${clamp(opacity, 0.15, 1).toFixed(3)})`);
+
+  return out.join(" ");
+}

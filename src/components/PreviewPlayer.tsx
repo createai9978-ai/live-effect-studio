@@ -418,7 +418,12 @@ export default function PreviewPlayer({
                   }
                 });
 
-                const combinedFilter = [gradeFilter, mergedEffects.filter, cinematicStyles.filter, ...stackedFilters].filter(Boolean).join(" ");
+                const combinedFilter = composeFilters([
+                  gradeFilter,
+                  mergedEffects.filter,
+                  cinematicStyles.filter,
+                  ...stackedFilters,
+                ]);
 
                 return active.asset.url ? (
                   <video

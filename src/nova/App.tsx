@@ -27,6 +27,7 @@ import {
   defaultValues,
   familyFor,
   paramsToVisual,
+  composeFilters,
 } from "../editor/effectParams";
 import { previewClipFor } from "../editor/previewVideos";
 import {

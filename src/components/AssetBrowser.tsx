@@ -731,7 +731,18 @@ function BrowserContent({
             {currentCatLabel(activeCat)}
           </span>
           <span className="text-zinc-700">·</span>
-          <span>{filtered.length} unique preset{filtered.length === 1 ? "" : "s"}</span>
+          <span>
+            {filtered.length === items.length ? (
+              <>
+                {items.length} unique preset{items.length === 1 ? "" : "s"}
+              </>
+            ) : (
+              <>
+                Showing <span className="text-zinc-200">{filtered.length}</span> of {items.length} presets
+                <span className="ml-1 text-zinc-600">(filtered)</span>
+              </>
+            )}
+          </span>
         </div>
       )}
       {filtered.length === 0 ? (

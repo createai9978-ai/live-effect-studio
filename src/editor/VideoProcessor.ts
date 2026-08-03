@@ -36,56 +36,82 @@ export class VideoProcessor {
   private program: WebGLProgram | null = null;
   private video: HTMLVideoElement | null = null;
   private texture: WebGLTexture | null = null;
+  private buffer: WebGLBuffer | null = null;
   private effects: EffectParams[] = [];
   private animationId: number | null = null;
   private onFrameReady: ((canvas: HTMLCanvasElement) => void) | null = null;
+  /** Called once when the GPU pipeline fails at runtime so the UI can fall back. */
+  private onFailure: (() => void) | null = null;
+  private failed = false;
 
   constructor() {}
+
+  /** True when a usable GL context + linked program exist. */
+  get ready(): boolean {
+    return !!(this.gl && this.program && !this.failed);
+  }
+
+  setFailureHandler(cb: (() => void) | null) {
+    this.onFailure = cb;
+  }
+
+  private fail(reason: string): false {
+    if (!this.failed) {
+      this.failed = true;
+      console.warn(`[VideoProcessor] GPU pipeline unavailable — falling back to CSS: ${reason}`);
+      this.stop();
+      this.onFailure?.();
+    }
+    return false;
+  }
 
   /** Initialize WebGL context and shader program */
   init(canvas: HTMLCanvasElement, video: HTMLVideoElement): boolean {
     this.canvas = canvas;
     this.video = video;
-    const gl = canvas.getContext("webgl", { premultipliedAlpha: false, preserveDrawingBuffer: true });
-    if (!gl) {
-      console.warn("WebGL not supported, falling back to CSS filters");
-      return false;
+    this.failed = false;
+
+    let gl: WebGLRenderingContext | null = null;
+    try {
+      gl = (canvas.getContext("webgl", { premultipliedAlpha: false, preserveDrawingBuffer: true }) ??
+        canvas.getContext("experimental-webgl", { premultipliedAlpha: false })) as WebGLRenderingContext | null;
+    } catch {
+      gl = null;
     }
+    if (!gl) return this.fail("no WebGL context");
     this.gl = gl;
 
-    // Create shader program
     const vertexShader = this.createShader(gl.VERTEX_SHADER, VERTEX_SHADER_SOURCE);
     const fragmentShader = this.createShader(gl.FRAGMENT_SHADER, FRAGMENT_SHADER_SOURCE);
-    if (!vertexShader || !fragmentShader) return false;
+    if (!vertexShader || !fragmentShader) return this.fail("shader compile failed");
 
     this.program = gl.createProgram();
-    if (!this.program) return false;
+    if (!this.program) return this.fail("program allocation failed");
 
     gl.attachShader(this.program, vertexShader);
     gl.attachShader(this.program, fragmentShader);
     gl.linkProgram(this.program);
 
     if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
-      console.error("Shader program failed to link");
-      return false;
+      return this.fail(gl.getProgramInfoLog(this.program) ?? "link error");
     }
 
-    // Create video texture
+    // Video texture — clamped + linear so no edge smear / wrap artefacts appear.
     this.texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    // Browsers upload video frames bottom-up; flip so the frame is never mirrored.
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
 
-    // Set up vertex buffer
     const vertices = new Float32Array([
-      -1, -1,   1, -1,
-      -1,  1,   -1,  1,
-       1, -1,   1,  1,
+      -1, -1, 1, -1, -1, 1,
+      -1, 1, 1, -1, 1, 1,
     ]);
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    this.buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
     return true;
@@ -106,82 +132,103 @@ export class VideoProcessor {
 
   /** Set active effects array */
   setEffects(effects: EffectParams[]) {
-    this.effects = effects;
+    this.effects = effects.filter((e) => e && e.type !== "none" && EFFECT_TYPE_MAP[e.type] !== undefined);
   }
 
   /** Start rendering loop */
   start(onFrameReady: (canvas: HTMLCanvasElement) => void) {
+    if (!this.ready) return;
     this.onFrameReady = onFrameReady;
-    this.render();
+    if (this.animationId === null) this.render();
   }
 
   /** Stop rendering loop */
   stop() {
-    if (this.animationId) {
+    if (this.animationId !== null) {
       cancelAnimationFrame(this.animationId);
       this.animationId = null;
     }
   }
 
+  /** Release GL resources (called when the active clip changes / unmounts). */
+  dispose() {
+    this.stop();
+    const gl = this.gl;
+    if (gl) {
+      if (this.texture) gl.deleteTexture(this.texture);
+      if (this.buffer) gl.deleteBuffer(this.buffer);
+      if (this.program) gl.deleteProgram(this.program);
+    }
+    this.gl = null;
+    this.program = null;
+    this.texture = null;
+    this.buffer = null;
+    this.video = null;
+    this.canvas = null;
+    this.onFrameReady = null;
+  }
+
   private render = () => {
-    if (!this.gl || !this.canvas || !this.video || !this.program) {
+    if (this.failed) return;
+    const gl = this.gl;
+    const video = this.video;
+    const canvas = this.canvas;
+    if (!gl || !canvas || !video || !this.program) {
       this.animationId = requestAnimationFrame(this.render);
       return;
     }
 
-    const gl = this.gl;
-
-    // Update video texture
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video);
-
-    // Resize canvas to match video
-    if (this.video.videoWidth && this.video.videoHeight) {
-      if (this.canvas.width !== this.video.videoWidth ||
-          this.canvas.height !== this.video.videoHeight) {
-        this.canvas.width = this.video.videoWidth;
-        this.canvas.height = this.video.videoHeight;
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-      }
+    // Never upload an undecoded frame — that is what produced torn / blasted output.
+    if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+      this.animationId = requestAnimationFrame(this.render);
+      return;
     }
 
-    // Use shader program
+    // Keep the drawing buffer at the source resolution so the frame is never stretched.
+    if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+    }
+    gl.viewport(0, 0, canvas.width, canvas.height);
+
     gl.useProgram(this.program);
 
-    // Set up vertex attribute
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    try {
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+    } catch {
+      this.fail("frame upload rejected (cross-origin or decoding)");
+      return;
+    }
+    const samplerLocation = gl.getUniformLocation(this.program, "u_video");
+    gl.uniform1i(samplerLocation, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     const positionLocation = gl.getAttribLocation(this.program, "a_position");
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    // Set uniforms
-    const timeLocation = gl.getUniformLocation(this.program, "u_time");
-    gl.uniform1f(timeLocation, performance.now() / 1000);
+    const effect = this.effects[0];
+    gl.uniform1f(gl.getUniformLocation(this.program, "u_time"), performance.now() / 1000);
+    gl.uniform1f(
+      gl.getUniformLocation(this.program, "u_intensity"),
+      Math.max(0, Math.min(1, effect?.intensity ?? 0.5))
+    );
+    gl.uniform1i(gl.getUniformLocation(this.program, "u_effectType"), EFFECT_TYPE_MAP[effect?.type ?? "none"] ?? 0);
+    gl.uniform3fv(gl.getUniformLocation(this.program, "u_color"), effect?.color ?? [1, 1, 1]);
+    gl.uniform2f(gl.getUniformLocation(this.program, "u_resolution"), canvas.width, canvas.height);
 
-    const intensityLocation = gl.getUniformLocation(this.program, "u_intensity");
-    const typeLocation = gl.getUniformLocation(this.program, "u_effectType");
-    const colorLocation = gl.getUniformLocation(this.program, "u_color");
-    const resolutionLocation = gl.getUniformLocation(this.program, "u_resolution");
-
-    // Render each effect in sequence (simplified - real impl would use multiple passes)
-    gl.uniform1f(intensityLocation, this.effects[0]?.intensity ?? 0.5);
-    gl.uniform1i(typeLocation, EFFECT_TYPE_MAP[this.effects[0]?.type ?? "none"] ?? 0);
-
-    if (this.effects[0]?.color) {
-      gl.uniform3fv(colorLocation, this.effects[0].color);
-    } else {
-      gl.uniform3fv(colorLocation, [1, 1, 1]);
-    }
-
-    gl.uniform2f(resolutionLocation, this.canvas.width, this.canvas.height);
-
-    // Draw
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    // Callback with processed frame
-    if (this.onFrameReady) {
-      this.onFrameReady(this.canvas);
+    if (gl.getError() !== gl.NO_ERROR) {
+      this.fail("GL draw error");
+      return;
     }
 
+    this.onFrameReady?.(canvas);
     this.animationId = requestAnimationFrame(this.render);
   };
 }

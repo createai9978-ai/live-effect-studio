@@ -27,6 +27,7 @@ import {
   defaultValues,
   familyFor,
   paramsToVisual,
+  composeFilters,
 } from "../editor/effectParams";
 import { previewClipFor } from "../editor/previewVideos";
 import {
@@ -1064,7 +1065,7 @@ export default function App() {
       const finalPatch: Partial<ClipEffects> = {
         ...patch,
         presetLabel: item.name,
-        filter: [patch.filter, visual.filter].filter(Boolean).join(" "),
+        filter: composeFilters([patch.filter, visual.filter]),
         overlay: visual.overlay ?? patch.overlay,
         overlayBlend: visual.overlayBlend ?? patch.overlayBlend,
         overlayOpacity: visual.overlayOpacity ?? patch.overlayOpacity,

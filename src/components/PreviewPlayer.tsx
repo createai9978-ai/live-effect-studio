@@ -3,6 +3,7 @@ import { Asset, Clip, toTimecode } from "../editor/types";
 import { videoProcessor, EffectParams } from "../editor/VideoProcessor";
 import { cn } from "../utils/cn";
 import { findAssetItem, previewStyleFor } from "../editor/assetLibrary";
+import { composeFilters } from "../editor/effectParams";
 
 type Props = {
   assets: Asset[];
@@ -79,6 +80,7 @@ export default function PreviewPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [webglSupported, setWebglSupported] = useState(true);
+  const [gpuFrameReady, setGpuFrameReady] = useState(false);
   const [activeEffects, setActiveEffects] = useState<EffectParams[]>([]);
 
   // topmost audible video clip under the playhead (respects mute/solo)
@@ -235,10 +237,21 @@ export default function PreviewPlayer({
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
+    setGpuFrameReady(false);
     if (!video || !canvas || !video.readyState) return;
     const supported = videoProcessor.init(canvas, video);
     setWebglSupported(supported);
-    return () => videoProcessor.stop();
+    // If the GPU path dies at runtime (context loss, tainted frame, driver bug)
+    // we hide the canvas and keep the CSS-filter path as the visible result
+    // instead of leaving an unintended blur/glitch frame on screen.
+    videoProcessor.setFailureHandler(() => {
+      setWebglSupported(false);
+      setGpuFrameReady(false);
+    });
+    return () => {
+      videoProcessor.setFailureHandler(null);
+      videoProcessor.stop();
+    };
   }, [active?.clip.id]);
 
   // Update effects when active clip's preset changes
@@ -250,15 +263,24 @@ export default function PreviewPlayer({
 
   // Apply effects to processor
   useEffect(() => {
-    if (!webglSupported || activeEffects.length === 0) return;
+    if (!webglSupported) return;
     videoProcessor.setEffects(activeEffects);
+    if (activeEffects.length === 0) setGpuFrameReady(false);
   }, [activeEffects, webglSupported]);
 
   // Start/stop processing based on playback
   useEffect(() => {
-    if (!webglSupported || activeEffects.length === 0) return;
-    if (playing) videoProcessor.start(() => {});
-    else videoProcessor.stop();
+    if (!webglSupported || activeEffects.length === 0) {
+      videoProcessor.stop();
+      setGpuFrameReady(false);
+      return;
+    }
+    if (playing) {
+      videoProcessor.start(() => setGpuFrameReady(true));
+    } else {
+      videoProcessor.stop();
+      setGpuFrameReady(false);
+    }
     return () => videoProcessor.stop();
   }, [playing, webglSupported, activeEffects.length]);
 
@@ -417,7 +439,12 @@ export default function PreviewPlayer({
                   }
                 });
 
-                const combinedFilter = [gradeFilter, mergedEffects.filter, cinematicStyles.filter, ...stackedFilters].filter(Boolean).join(" ");
+                const combinedFilter = composeFilters([
+                  gradeFilter,
+                  mergedEffects.filter,
+                  cinematicStyles.filter,
+                  ...stackedFilters,
+                ]);
 
                 return active.asset.url ? (
                   <video
@@ -480,12 +507,18 @@ export default function PreviewPlayer({
                   }}
                 />
               )}
-              {/* WebGL effect processing canvas — overlays processed video */}
+              {/*
+                GPU effect canvas. It is only revealed once the pipeline has
+                actually produced a frame — otherwise the empty/stale drawing
+                buffer covered the video and looked like a corrupted frame.
+                object-contain matches the <video> letterboxing exactly, so the
+                processed frame can never be stretched or edge-smeared.
+              */}
               <canvas
                 ref={canvasRef}
                 className={cn(
-                  "pointer-events-none absolute inset-0 transition-opacity",
-                  webglSupported && activeEffects.length > 0 ? "opacity-100" : "opacity-0"
+                  "pointer-events-none absolute inset-0 h-full w-full object-contain transition-opacity duration-200",
+                  gpuFrameReady && webglSupported && activeEffects.length > 0 ? "opacity-100" : "opacity-0"
                 )}
                 style={{ mixBlendMode: "normal" }}
               />

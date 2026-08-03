@@ -269,19 +269,25 @@ export function paramsToVisual(family: EffectFamily, v: ParamValues): VisualResu
 
   switch (family) {
     case "ai-motion": {
+      // Frame-synthesis is simulated on the CPU/GPU-less path. It must never
+      // fall back to a whole-frame blur (that read as broken footage), so the
+      // motion cue is a very small directional softening plus detail recovery.
       const mb = n(v.motionBlur) / 100;
       const sharp = n(v.sharpen) / 100;
       const mult = v.interpolation === "8×" ? 1.3 : v.interpolation === "4×" ? 1.15 : v.interpolation === "2×" ? 1.05 : 1;
       f.push(`contrast(${(1 + sharp * 0.22).toFixed(3)})`, `saturate(${(1 + sharp * 0.15).toFixed(3)})`);
-      if (mb > 0.02) f.push(`blur(${(mb * 1.6).toFixed(2)}px)`);
-      if (v.smoothing === "Frame Blend" && mb > 0) f.push(`opacity(${(1 - mb * 0.08).toFixed(3)})`);
-      transform = `scale(${(1 + (n(v.stabilize) / 100) * 0.05 * mult).toFixed(3)})`;
+      if (mb > 0.35) f.push(`blur(${(Math.min(mb, 1) * 0.6).toFixed(2)}px)`);
+      transform = `scale(${(1 + (n(v.stabilize) / 100) * 0.03 * mult).toFixed(3)})`;
       break;
     }
     case "ai-mask": {
+      // Background separation is expressed through a depth vignette rather than
+      // a global blur, so the subject/edges stay perfectly sharp.
       const bg = n(v.bgBlur) / 100;
-      f.push(`contrast(${(1 + (n(v.depth) / 100) * 0.25).toFixed(3)})`, `saturate(${(1 + (n(v.maskStrength) / 100) * 0.2).toFixed(3)})`);
-      if (bg > 0.02) f.push(`blur(${(bg * 1.2).toFixed(2)}px)`);
+      f.push(
+        `contrast(${(1 + (n(v.depth) / 100) * 0.25).toFixed(3)})`,
+        `saturate(${(1 + (n(v.maskStrength) / 100) * 0.2).toFixed(3)})`
+      );
       overlay = `radial-gradient(ellipse at 50% 48%, transparent ${(30 + n(v.feather) * 0.25).toFixed(0)}%, rgba(0,0,0,${(0.15 + bg * 0.5).toFixed(2)}) 100%)`;
       overlayBlend = "multiply";
       overlayOpacity = 0.35 + (n(v.maskStrength) / 100) * 0.5;
@@ -407,4 +413,97 @@ export function deleteCustomPreset(id: string): CustomPreset[] {
     /* ignore */
   }
   return next;
+}
+
+/* ------------------------------------------------------------------ *
+ * Filter composition
+ *
+ * Stacking raw CSS filter strings ("blur(3px) blur(4px) contrast(1.4) …")
+ * multiplies destructively and produces the washed-out, edge-smeared
+ * "blasted" frame. composeFilters merges duplicate functions with the right
+ * math per function and clamps every channel to a safe broadcast range so a
+ * heavy effect stack degrades gracefully instead of destroying the image.
+ * ------------------------------------------------------------------ */
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+export function composeFilters(parts: (string | undefined | null | false)[]): string {
+  let blur = 0;
+  let brightness = 1;
+  let contrast = 1;
+  let saturate = 1;
+  let opacity = 1;
+  let hue = 0;
+  let grayscale = 0;
+  let sepia = 0;
+  let invert = 0;
+  const passthrough: string[] = [];
+  let used = false;
+
+  const re = /([a-z-]+)\(([^)]*)\)/gi;
+
+  for (const raw of parts) {
+    if (!raw || typeof raw !== "string") continue;
+    const s = raw.trim();
+    if (!s || s === "none") continue;
+    let m: RegExpExecArray | null;
+    re.lastIndex = 0;
+    while ((m = re.exec(s))) {
+      const fn = m[1].toLowerCase();
+      const argRaw = m[2].trim();
+      const numeric = parseFloat(argRaw);
+      const isPercent = argRaw.endsWith("%");
+      const unitless = isNaN(numeric) ? 0 : isPercent ? numeric / 100 : numeric;
+      used = true;
+      switch (fn) {
+        case "blur":
+          blur += isNaN(numeric) ? 0 : numeric;
+          break;
+        case "brightness":
+          brightness *= unitless;
+          break;
+        case "contrast":
+          contrast *= unitless;
+          break;
+        case "saturate":
+          saturate *= unitless;
+          break;
+        case "opacity":
+          opacity *= unitless;
+          break;
+        case "hue-rotate":
+          hue += isNaN(numeric) ? 0 : numeric;
+          break;
+        case "grayscale":
+          grayscale = Math.max(grayscale, unitless);
+          break;
+        case "sepia":
+          sepia = Math.max(sepia, unitless);
+          break;
+        case "invert":
+          invert = Math.max(invert, unitless);
+          break;
+        default:
+          passthrough.push(`${fn}(${argRaw})`);
+      }
+    }
+  }
+
+  if (!used) return "";
+
+  const out: string[] = [];
+  // Colour first, optics last — matches how an NLE orders its render stack.
+  if (Math.abs(contrast - 1) > 0.001) out.push(`contrast(${clamp(contrast, 0.35, 2.2).toFixed(3)})`);
+  if (Math.abs(brightness - 1) > 0.001) out.push(`brightness(${clamp(brightness, 0.4, 1.8).toFixed(3)})`);
+  if (Math.abs(saturate - 1) > 0.001) out.push(`saturate(${clamp(saturate, 0, 2.6).toFixed(3)})`);
+  if (Math.abs(hue) > 0.1) out.push(`hue-rotate(${clamp(hue, -180, 180).toFixed(1)}deg)`);
+  if (sepia > 0.001) out.push(`sepia(${clamp(sepia, 0, 1).toFixed(3)})`);
+  if (grayscale > 0.001) out.push(`grayscale(${clamp(grayscale, 0, 1).toFixed(3)})`);
+  if (invert > 0.001) out.push(`invert(${clamp(invert, 0, 1).toFixed(3)})`);
+  for (const p of passthrough) out.push(p);
+  // Blur is the main cause of edge breakdown — hard-capped and applied once.
+  if (blur > 0.05) out.push(`blur(${clamp(blur, 0, 4).toFixed(2)}px)`);
+  if (opacity < 0.999) out.push(`opacity(${clamp(opacity, 0.15, 1).toFixed(3)})`);
+
+  return out.join(" ");
 }

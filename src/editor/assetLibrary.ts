@@ -294,7 +294,6 @@ const subTags = ["cinematic", "vlog", "gaming", "music", "travel", "wedding"] as
 
 type SetSpec = {
   prefix: string;
-  count: number;
   names: string[];
   glyph: ThumbGlyph;
   gradient: [string, string];
@@ -303,139 +302,237 @@ type SetSpec = {
   ai?: boolean;
 };
 
+/**
+ * Build a preset set. Every entry is generated from an explicit, unique name —
+ * there is no numeric cloning, so the array length always equals the number of
+ * distinct presets the grid will render.
+ */
+const GLOBAL_IDS = new Set<string>();
+const GLOBAL_NAMES = new Set<string>();
+
 function makeSet(spec: SetSpec): AssetItem[] {
-  return Array.from({ length: spec.count }).map((_, i) => {
-    const base = spec.names[i % spec.names.length];
-    const variant = Math.floor(i / spec.names.length) + 1;
-    const name = variant > 1 ? `${base} #${variant}` : base;
+  const out: AssetItem[] = [];
+  spec.names.forEach((name, i) => {
+    const key = name.trim().toLowerCase();
+    const id = `${spec.prefix}-${i}`;
+    // Strict global de-duplication: a preset name/id may only exist once in the whole library.
+    if (GLOBAL_NAMES.has(key) || GLOBAL_IDS.has(id)) return;
+    GLOBAL_NAMES.add(key);
+    GLOBAL_IDS.add(id);
     const pool = spec.tags ?? subTags;
-    return item(`${spec.prefix}-${i}`, name, spec.glyph, grad(spec.gradient[0], spec.gradient[1]), {
-      tag: spec.tag,
-      isNew: i % 7 === 0,
-      isPro: i % 3 === 1,
-      isExclusive: i % 9 === 0,
-      isAiPro: spec.ai || undefined,
-      tags: [pool[i % pool.length]],
-      preview: presetStills[i % presetStills.length],
-    });
+    out.push(
+      item(id, name, spec.glyph, grad(spec.gradient[0], spec.gradient[1]), {
+        tag: spec.tag,
+        isNew: i % 7 === 0,
+        isPro: i % 3 === 1,
+        isExclusive: i % 9 === 0,
+        isAiPro: spec.ai || undefined,
+        tags: [pool[i % pool.length]],
+        preview: presetStills[i % presetStills.length],
+      })
+    );
   });
+  return out;
 }
 
-/** Every name is written out explicitly — one card per name, guaranteed unique. */
-function makeUnique(spec: Omit<SetSpec, "count">): AssetItem[] {
-  return makeSet({ ...spec, count: spec.names.length });
+/** Alias kept for readability at the call sites. */
+const makeUnique = makeSet;
+
+/** Strict de-duplication by id (and by name) across a merged pool. */
+function dedupe(items: AssetItem[]): AssetItem[] {
+  const ids = new Set<string>();
+  const names = new Set<string>();
+  const out: AssetItem[] = [];
+  for (const i of items) {
+    const nk = i.name.trim().toLowerCase();
+    if (ids.has(i.id) || names.has(nk)) continue;
+    ids.add(i.id);
+    names.add(nk);
+    out.push(i);
+  }
+  return out;
 }
 
 /* ---------- Filmora-style production suite ---------- */
 
 const fCinematic = makeSet({
-  prefix: "flm-cine", count: 32, glyph: "star", tag: "LUT",
+  prefix: "flm-cine", glyph: "star", tag: "LUT",
   gradient: ["#0b1120", "#1e3a8a"],
   tags: ["cinematic", "wedding", "travel"],
   names: [
     "Teal & Orange Blockbuster", "Moody Noir Contrast", "Golden Hour Warmth",
     "Bleach Bypass Drama", "Kodak 2383 Print", "Nordic Cold Grade",
-    "Anamorphic Night Grade", "Desaturated Steel",
+    "Anamorphic Night Grade", "Desaturated Steel", "Amber Desert Dusk",
+    "Cyan Shadow Lift", "Filmic Log Rollout", "Crimson Thriller Grade",
+    "Muted Documentary", "Portra 400 Skin", "Emerald Forest Tone",
+    "High Key Wedding", "Low Key Chiaroscuro", "Bronze Metal Grade",
+    "Slate Blue Midnight", "Sepia Memory Fade", "Neon Rain Grade",
+    "Pastel Romance Wash", "Hard Contrast Punch", "Silver Halide Mono",
+    "Cine Green Matrix", "Warm Vintage Super 8", "Cold Clinical White",
+    "Sunburn Highlight Roll", "Velvet Purple Dusk", "Coastal Haze Grade",
+    "Autumn Rust Palette", "Blockbuster Night Chase",
   ],
 });
 
 const fSplitScreen = makeSet({
-  prefix: "flm-split", count: 24, glyph: "grid", tag: "SPLIT",
+  prefix: "flm-split", glyph: "grid", tag: "SPLIT",
   gradient: ["#164e63", "#0ea5e9"],
   tags: ["corporate", "vlog", "gaming"],
   names: [
     "2-Up Vertical Split", "3-Way Reaction Grid", "4-Panel Quad View",
     "Picture-in-Picture Corner", "Diagonal Cinemascope Split", "Sliding Compare Wipe",
+    "Center Focus Triptych", "Mirrored Duo Frame", "Stacked Horizontal Bands",
+    "Circular Inset Bubble", "6-Cell Mosaic Wall", "Offset Magazine Layout",
+    "Tilted Card Stack", "Vertical Story Trio", "Zoom Call Gallery",
+    "Before & After Slider", "Corner Pip Reaction", "Split Beat Grid",
+    "Dual Interview Frame", "Ken Burns Collage", "Polaroid Scatter Grid",
+    "Wide Banner Split", "Nine-Up Contact Sheet", "Cinematic Letterbox Duo",
   ],
 });
 
 const fMotionElements = makeSet({
-  prefix: "flm-motion", count: 30, glyph: "sparkle", tag: "ELEMENT",
+  prefix: "flm-motion", glyph: "sparkle", tag: "ELEMENT",
   gradient: ["#7c2d12", "#f59e0b"],
   names: [
     "Animated Lower Third", "Callout Arrow Pop", "Progress Bar Wipe",
     "Location Pin Reveal", "Subscribe Bounce Badge", "Neon Frame Element",
-    "Counter Odometer", "Logo Sting Reveal",
+    "Counter Odometer", "Logo Sting Reveal", "Speech Bubble Pop",
+    "Hand Drawn Circle Mark", "Price Tag Slide", "Chapter Marker Bar",
+    "Social Handle Bug", "Timer Countdown Ring", "Rating Star Burst",
+    "Ticker Tape Crawl", "Map Route Trace", "Sound Wave Bars",
+    "Emoji Reaction Float", "Sticker Frame Border", "Ribbon Banner Unroll",
+    "Highlight Marker Swipe", "Data Chart Grow", "Loading Spinner Wipe",
+    "Quote Card Fade", "Notification Toast Slide", "Cursor Click Ripple",
+    "Confetti Element Burst", "Badge Shine Sweep", "End Card Grid Pop",
   ],
 });
 
 const fSpeedRamp = makeSet({
-  prefix: "flm-ramp", count: 26, glyph: "trend", tag: "RAMP",
+  prefix: "flm-ramp", glyph: "trend", tag: "RAMP",
   gradient: ["#064e3b", "#10b981"],
   names: [
     "Velocity Shift Ramp", "Bullet Time Freeze", "Exponential Deceleration",
     "Beat Drop Sync Ramp", "Smooth Slow-Mo Curve", "Time Warp Curve",
+    "Snap Speed Punch", "Reverse Kick Back", "Hold & Release Ramp",
+    "Double Speed Dash", "Stutter Step Retime", "Ease-In Landing",
+    "Ease-Out Takeoff", "Freeze Frame Hold", "Rolling Boomerang Loop",
+    "Impact Slam Ramp", "Slow Rise Build", "Rapid Cut Accelerate",
+    "Half Speed Drift", "Triple Time Sprint", "Pendulum Ping-Pong",
+    "Whip Speed Handoff", "Micro Jitter Retime", "Cinematic Ramp Down",
+    "Chase Sequence Boost", "Breath Pause Ramp",
   ],
 });
 
 const fAiPortrait = makeSet({
-  prefix: "flm-ai", count: 24, glyph: "beauty", tag: "AI", ai: true,
+  prefix: "flm-ai", glyph: "beauty", tag: "AI", ai: true,
   gradient: ["#831843", "#f472b6"],
   tags: ["wedding", "vlog", "cinematic"],
   names: [
     "AI Skin Retouch", "Smart Portrait Cutout", "Relight Studio Key",
     "Auto Motion Blur", "AI Object Tracker", "Depth Blur Bokeh",
+    "Teeth Brighten Pass", "Eye Sparkle Enhance", "Auto Face Slim",
+    "Blemish Cleanup", "Hair Edge Refine", "Skin Tone Balance",
+    "Portrait Rim Light", "Soft Beauty Diffusion", "Under-Eye Recovery",
+    "Auto Head Reframe", "Makeup Tone Match", "Studio Backdrop Swap",
+    "Face Contour Sculpt", "Catchlight Injection", "Neck Shadow Fix",
+    "Natural Glow Balance", "Portrait Depth Fog", "Auto Colour Skin Match",
   ],
 });
 
-const filmoraAll = [
+const filmoraAll = dedupe([
   ...fCinematic, ...fSplitScreen, ...fMotionElements, ...fSpeedRamp, ...fAiPortrait,
-];
+]);
 
 /* ---------- CapCut-style trending suite ---------- */
 
 const ccTransitions = makeSet({
-  prefix: "cc-trans", count: 32, glyph: "wipe", tag: "TRANSITION",
+  prefix: "cc-trans", glyph: "wipe", tag: "TRANSITION",
   gradient: ["#831843", "#fb7185"],
   names: [
     "Whip Pan Sweep", "Zoom Punch Cut", "Spin Blur Drift",
     "Flash Bang Cut", "Glitch Slice Jump", "Liquid Warp Melt",
-    "Shutter Slide", "3D Cube Flip",
+    "Shutter Slide", "3D Cube Flip", "Card Deck Shuffle",
+    "Bounce Drop In", "Elastic Squash Cut", "Roll Credits Scroll",
+    "Camera Roll Tilt", "Blur Dip To White", "Ink Splash Reveal",
+    "Zoom Through Eye", "Clap Snap Cut", "Slide Door Open",
+    "Diagonal Streak Wipe", "Vertical Scroll Feed", "Colour Flash Pop",
+    "Mask Circle Grow", "Handheld Jolt Cut", "Skew Shear Pass",
+    "Pixel Melt Down", "Split Curtain Pull", "Wave Ripple Jump",
+    "Overhead Swipe Away", "Pop Bubble Burst", "Rotate Corner Peel",
+    "Beat Snap Blink", "Chroma Streak Handoff",
   ],
 });
 
 const ccCaptions = makeSet({
-  prefix: "cc-text", count: 28, glyph: "text", tag: "TEXT",
+  prefix: "cc-text", glyph: "text", tag: "TEXT",
   gradient: ["#1e1b4b", "#6366f1"],
   names: [
     "Auto Caption Karaoke", "Word-by-Word Pop", "Bold Highlight Sub",
     "Typewriter Caption", "Neon Outline Title", "Bounce Emoji Caption",
-    "Podcast Wave Caption", "Shake Impact Title",
+    "Podcast Wave Caption", "Shake Impact Title", "Handwritten Scribble Text",
+    "3D Extrude Headline", "Gradient Fill Sub", "Sticker Box Caption",
+    "Chrome Metal Title", "Blur Focus Reveal Text", "Marquee Scroll Line",
+    "Speech Bubble Sub", "Glitch Type Caption", "Counter Number Roll",
+    "Vertical Stack Kicker", "Lyric Beat Highlight", "Fade Whisper Text",
+    "Bubble Pop Keyword", "Split Colour Word", "Outline Trace Draw",
+    "Retro Terminal Caption", "Rainbow Cycle Text", "Drop Shadow Punch",
+    "Minimal Serif Lower Third",
   ],
 });
 
 const ccBody = makeSet({
-  prefix: "cc-body", count: 24, glyph: "portrait", tag: "BODY",
+  prefix: "cc-body", glyph: "portrait", tag: "BODY",
   gradient: ["#4a044e", "#d946ef"],
   tags: ["music", "vlog", "gaming"],
   names: [
     "Body Glow Outline", "Silhouette Trail Echo", "Clone Motion Trail",
     "Neon Skeleton Track", "Aura Pulse Wrap", "Freeze Frame Cutout",
+    "Shadow Twin Step", "Particle Body Dissolve", "Electric Edge Arc",
+    "Fire Aura Wrap", "Ice Frost Silhouette", "Rainbow Motion Echo",
+    "Ghost Fade Duplicate", "Sticker Pop Cutout", "Outline Comic Ink",
+    "Halo Ring Orbit", "Body Zoom Isolation", "Smoke Trail Follow",
+    "Star Sparkle Contour", "Chrome Body Shine", "Pixel Dissolve Body",
+    "Wireframe Scan Pass", "Spotlight Subject Lock", "Shockwave Impact Ring",
   ],
 });
 
 const ccAesthetic = makeSet({
-  prefix: "cc-aes", count: 30, glyph: "film", tag: "FILTER",
+  prefix: "cc-aes", glyph: "film", tag: "FILTER",
   gradient: ["#312e81", "#22d3ee"],
   names: [
     "Clean Girl Soft Glow", "Y2K Camcorder", "Tokyo Neon Night",
     "Film Grain Vintage", "Pastel Dream Fade", "HDR Punch Pop",
-    "Cold Blue Aesthetic", "Sunset Peach Fade",
+    "Cold Blue Aesthetic", "Sunset Peach Fade", "Matte Mocha Tone",
+    "Grunge Green Wash", "Milky Film Haze", "Cherry Blossom Pink",
+    "Moody Rainy Day", "Beach Golden Pop", "Indie Fade Contrast",
+    "Kodak Summer Warmth", "Monochrome Street", "Retro Poster Print",
+    "Cotton Candy Sky", "Cyber Violet Wash", "Soft Focus Diary",
+    "Overexposed Film Burn", "Deep Teal Skate", "Sepia Journal Tone",
+    "Frosted Glass Bloom", "Vintage Magazine Scan", "Dark Academia Tone",
+    "Sunkissed Skin Filter", "Denim Blue Wash", "Faded VHS Pastel",
   ],
 });
 
 const ccViral = makeSet({
-  prefix: "cc-viral", count: 26, glyph: "trend", tag: "VIRAL",
+  prefix: "cc-viral", glyph: "trend", tag: "VIRAL",
   gradient: ["#7f1d1d", "#f97316"],
   names: [
     "Velocity Edit Beat Sync", "Shake On Bass Hit", "Vlog Snap Zoom",
     "Trending Photo Slideshow", "Anime Impact Frame", "Retro Bounce Loop",
+    "Transition Pack Combo", "Slow Zoom Suspense", "Rapid Cut Montage",
+    "Drop Shadow Bounce", "Mirror Flip Beat", "Strobe Flash Sync",
+    "Punch-In Reaction", "Text Beat Slam", "Zoom Shake Combo",
+    "Chorus Speed Burst", "Freeze Pose Drop", "Colour Pop Highlight",
+    "Handheld Chaos Cam", "Split Beat Bounce", "Countdown Hype Intro",
+    "Cinematic B-Roll Flow", "Meme Zoom Stack", "Loop Seamless Rewind",
+    "Motion Tile Echo", "Trend Outro Card",
   ],
 });
 
-const capcutAll = [
+const capcutAll = dedupe([
   ...ccTransitions, ...ccCaptions, ...ccBody, ...ccAesthetic, ...ccViral,
-];
+]);
+
 
 /* ---------- Advanced FX Lab (Premiere / Filmora / CapCut pro tier) ---------- */
 
@@ -512,7 +609,7 @@ const axOverlays = makeUnique({
   ],
 });
 
-const advancedAll = [...axAi, ...axTransitions, ...axGlitch, ...axOverlays];
+const advancedAll = dedupe([...axAi, ...axTransitions, ...axGlitch, ...axOverlays]);
 
 /* ================= EFFECTS TREE ================= */
 

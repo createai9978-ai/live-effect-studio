@@ -307,16 +307,21 @@ type SetSpec = {
  * there is no numeric cloning, so the array length always equals the number of
  * distinct presets the grid will render.
  */
+const GLOBAL_IDS = new Set<string>();
+const GLOBAL_NAMES = new Set<string>();
+
 function makeSet(spec: SetSpec): AssetItem[] {
-  const seenName = new Set<string>();
   const out: AssetItem[] = [];
   spec.names.forEach((name, i) => {
     const key = name.trim().toLowerCase();
-    if (seenName.has(key)) return;
-    seenName.add(key);
+    const id = `${spec.prefix}-${i}`;
+    // Strict global de-duplication: a preset name/id may only exist once in the whole library.
+    if (GLOBAL_NAMES.has(key) || GLOBAL_IDS.has(id)) return;
+    GLOBAL_NAMES.add(key);
+    GLOBAL_IDS.add(id);
     const pool = spec.tags ?? subTags;
     out.push(
-      item(`${spec.prefix}-${i}`, name, spec.glyph, grad(spec.gradient[0], spec.gradient[1]), {
+      item(id, name, spec.glyph, grad(spec.gradient[0], spec.gradient[1]), {
         tag: spec.tag,
         isNew: i % 7 === 0,
         isPro: i % 3 === 1,

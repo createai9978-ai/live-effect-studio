@@ -236,10 +236,21 @@ export default function PreviewPlayer({
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
+    setGpuFrameReady(false);
     if (!video || !canvas || !video.readyState) return;
     const supported = videoProcessor.init(canvas, video);
     setWebglSupported(supported);
-    return () => videoProcessor.stop();
+    // If the GPU path dies at runtime (context loss, tainted frame, driver bug)
+    // we hide the canvas and keep the CSS-filter path as the visible result
+    // instead of leaving an unintended blur/glitch frame on screen.
+    videoProcessor.setFailureHandler(() => {
+      setWebglSupported(false);
+      setGpuFrameReady(false);
+    });
+    return () => {
+      videoProcessor.setFailureHandler(null);
+      videoProcessor.stop();
+    };
   }, [active?.clip.id]);
 
   // Update effects when active clip's preset changes
@@ -251,15 +262,24 @@ export default function PreviewPlayer({
 
   // Apply effects to processor
   useEffect(() => {
-    if (!webglSupported || activeEffects.length === 0) return;
+    if (!webglSupported) return;
     videoProcessor.setEffects(activeEffects);
+    if (activeEffects.length === 0) setGpuFrameReady(false);
   }, [activeEffects, webglSupported]);
 
   // Start/stop processing based on playback
   useEffect(() => {
-    if (!webglSupported || activeEffects.length === 0) return;
-    if (playing) videoProcessor.start(() => {});
-    else videoProcessor.stop();
+    if (!webglSupported || activeEffects.length === 0) {
+      videoProcessor.stop();
+      setGpuFrameReady(false);
+      return;
+    }
+    if (playing) {
+      videoProcessor.start(() => setGpuFrameReady(true));
+    } else {
+      videoProcessor.stop();
+      setGpuFrameReady(false);
+    }
     return () => videoProcessor.stop();
   }, [playing, webglSupported, activeEffects.length]);
 

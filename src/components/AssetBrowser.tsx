@@ -3,6 +3,7 @@ import { cn } from "../utils/cn";
 import {
   AUDIO_LIB,
   AssetItem,
+import { composeFilters } from "../editor/effectParams";
   AssetTab,
   ContentTag,
   EFFECTS_TREE,

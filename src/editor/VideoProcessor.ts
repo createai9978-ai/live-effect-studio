@@ -17,7 +17,20 @@ export type EffectType =
   | "halation"
   | "vignette"
   | "blur"
-  | "sharpen";
+  | "sharpen"
+  | "procedural"
+  | "rotoscope"
+  | "depthMap"
+  | "bodyTrack"
+  | "motionVectors"
+  | "motionTrail"
+  | "glitchWarp"
+  | "transitionWarp"
+  | "opticalOverlay"
+  | "splitLayout"
+  | "textMotion"
+  | "colorGrade"
+  | "speedWarp";
 
 export type EffectParams = {
   type: EffectType;
@@ -28,6 +41,10 @@ export type EffectParams = {
   lut?: string;            // LUT data URL
   speed?: number;          // Playback speed multiplier
   offset?: number;         // Time offset for speed ramp
+  seed?: number;
+  motion?: number;
+  warp?: number;
+  trail?: number;
 };
 
 export class VideoProcessor {
@@ -218,6 +235,10 @@ export class VideoProcessor {
     gl.uniform1i(gl.getUniformLocation(this.program, "u_effectType"), EFFECT_TYPE_MAP[effect?.type ?? "none"] ?? 0);
     gl.uniform3fv(gl.getUniformLocation(this.program, "u_color"), effect?.color ?? [1, 1, 1]);
     gl.uniform2f(gl.getUniformLocation(this.program, "u_resolution"), canvas.width, canvas.height);
+    gl.uniform1f(gl.getUniformLocation(this.program, "u_seed"), effect?.seed ?? 0);
+    gl.uniform1f(gl.getUniformLocation(this.program, "u_motion"), effect?.motion ?? 0);
+    gl.uniform1f(gl.getUniformLocation(this.program, "u_warp"), effect?.warp ?? 0);
+    gl.uniform1f(gl.getUniformLocation(this.program, "u_trail"), effect?.trail ?? 0);
 
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -249,6 +270,19 @@ const EFFECT_TYPE_MAP: Record<EffectType, number> = {
   vignette: 11,
   blur: 12,
   sharpen: 13,
+  procedural: 14,
+  rotoscope: 15,
+  depthMap: 16,
+  bodyTrack: 17,
+  motionVectors: 18,
+  motionTrail: 19,
+  glitchWarp: 20,
+  transitionWarp: 21,
+  opticalOverlay: 22,
+  splitLayout: 23,
+  textMotion: 24,
+  colorGrade: 25,
+  speedWarp: 26,
 };
 
 /** Vertex shader - pass-through */
@@ -271,6 +305,10 @@ const FRAGMENT_SHADER_SOURCE = `
   uniform int u_effectType;
   uniform vec3 u_color;
   uniform vec2 u_resolution;
+  uniform float u_seed;
+  uniform float u_motion;
+  uniform float u_warp;
+  uniform float u_trail;
 
   // Pseudo-random noise
   float random(vec2 st) {
@@ -329,6 +367,17 @@ const FRAGMENT_SHADER_SOURCE = `
     return color * mix(0.5, 1.0, vig);
   }
 
+  vec2 safeUV(vec2 uv) { return clamp(uv, vec2(0.002), vec2(0.998)); }
+
+  vec3 blur5(vec2 uv, vec2 direction) {
+    vec3 c = texture2D(u_video, safeUV(uv)).rgb * 0.34;
+    c += texture2D(u_video, safeUV(uv + direction)).rgb * 0.22;
+    c += texture2D(u_video, safeUV(uv - direction)).rgb * 0.22;
+    c += texture2D(u_video, safeUV(uv + direction * 2.0)).rgb * 0.11;
+    c += texture2D(u_video, safeUV(uv - direction * 2.0)).rgb * 0.11;
+    return c;
+  }
+
   void main() {
     vec2 uv = v_uv;
     vec3 color = texture2D(u_video, uv).rgb;
@@ -358,6 +407,59 @@ const FRAGMENT_SHADER_SOURCE = `
     } else if (u_effectType == 11) {
       // Vignette
       color = vignette(color, uv);
+    } else if (u_effectType == 14) {
+      float wave = sin((uv.y * (7.0 + u_seed * 19.0) + u_time * (0.4 + u_motion * 2.0)) * 6.2831);
+      vec2 p = safeUV(uv + vec2(wave * u_warp * 0.012, 0.0));
+      color = mix(color, texture2D(u_video, p).rgb, u_intensity);
+    } else if (u_effectType == 15) {
+      vec2 px = 1.0 / u_resolution;
+      vec3 gx = texture2D(u_video, safeUV(uv + vec2(px.x * 2.0, 0.0))).rgb - texture2D(u_video, safeUV(uv - vec2(px.x * 2.0, 0.0))).rgb;
+      vec3 gy = texture2D(u_video, safeUV(uv + vec2(0.0, px.y * 2.0))).rgb - texture2D(u_video, safeUV(uv - vec2(0.0, px.y * 2.0))).rgb;
+      float edge = smoothstep(0.08, 0.34, length(gx) + length(gy));
+      color = mix(color * 0.72, color + u_color * edge * 0.8, u_intensity);
+    } else if (u_effectType == 16) {
+      float d = distance(uv, vec2(0.5 + sin(u_time * 0.35 + u_seed * 6.0) * 0.04, 0.48));
+      vec3 background = blur5(uv, vec2(1.5 / u_resolution.x, 1.5 / u_resolution.y) * (1.0 + u_warp * 3.0));
+      color = mix(background, color, smoothstep(0.5, 0.22 + u_trail * 0.12, d));
+    } else if (u_effectType == 17) {
+      vec2 center = vec2(0.5 + sin(u_time * (0.7 + u_motion) + u_seed * 9.0) * 0.12, 0.5 + cos(u_time * 0.6 + u_seed * 5.0) * 0.05);
+      float ring = smoothstep(0.025, 0.0, abs(distance(uv, center) - (0.19 + u_warp * 0.08)));
+      color += u_color * ring * u_intensity;
+    } else if (u_effectType == 18 || u_effectType == 19) {
+      vec2 vector = vec2(sin(u_time * (1.0 + u_motion * 3.0) + u_seed * 12.0), cos(u_time * 0.8 + u_seed * 7.0));
+      vector *= (0.002 + u_warp * 0.018);
+      vec3 trail = blur5(uv, vector);
+      color = mix(color, trail, u_intensity * (0.35 + u_trail * 0.55));
+    } else if (u_effectType == 20) {
+      float band = step(0.72, random(vec2(floor(uv.y * (12.0 + u_seed * 40.0)), floor(u_time * (8.0 + u_motion * 16.0)))));
+      float shift = band * (u_warp * 0.07 + 0.004);
+      color.r = texture2D(u_video, safeUV(uv + vec2(shift, 0.0))).r;
+      color.b = texture2D(u_video, safeUV(uv - vec2(shift, 0.0))).b;
+    } else if (u_effectType == 21) {
+      float phase = 0.5 + 0.5 * sin(u_time * (0.7 + u_motion * 2.4) + u_seed * 6.2831);
+      vec2 centered = uv - 0.5;
+      vec2 p = safeUV(centered * (1.0 - phase * u_warp * 0.28) + 0.5 + vec2((phase - 0.5) * u_warp * 0.08, 0.0));
+      color = mix(color, blur5(p, vec2(u_warp * 0.012, 0.0)), u_intensity);
+    } else if (u_effectType == 22) {
+      vec2 lightPos = vec2(0.2 + 0.6 * fract(u_seed + u_time * 0.035 * (1.0 + u_motion)), 0.25 + u_seed * 0.35);
+      float flare = pow(max(0.0, 1.0 - distance(uv, lightPos)), 8.0) + smoothstep(0.012, 0.0, abs(uv.y - lightPos.y)) * 0.22;
+      color += u_color * flare * u_intensity;
+    } else if (u_effectType == 23) {
+      float cols = 2.0 + floor(u_seed * 3.0);
+      vec2 tile = fract(uv * vec2(cols, 2.0));
+      vec2 source = safeUV(tile * 0.5 + vec2(floor(uv.x * cols) / cols * 0.18, floor(uv.y * 2.0) * 0.16));
+      color = mix(color, texture2D(u_video, source).rgb, u_intensity);
+    } else if (u_effectType == 24) {
+      float scan = smoothstep(0.025, 0.0, abs(uv.y - (0.72 + sin(u_time * 1.4 + u_seed * 8.0) * 0.035)));
+      float bars = step(0.48, fract(uv.x * (8.0 + floor(u_seed * 12.0)) + u_time * u_motion));
+      color += u_color * scan * bars * u_intensity;
+    } else if (u_effectType == 25) {
+      float luma = dot(color, vec3(0.299, 0.587, 0.114));
+      vec3 tint = mix(vec3(luma), color * u_color * 1.35, 0.62 + u_seed * 0.25);
+      color = mix(color, tint, u_intensity);
+    } else if (u_effectType == 26) {
+      vec2 dir = normalize(uv - vec2(0.5) + vec2(0.0001));
+      color = mix(color, blur5(uv, dir * (0.002 + u_motion * 0.012)), u_intensity * 0.72);
     }
 
     gl_FragColor = vec4(color, 1.0);

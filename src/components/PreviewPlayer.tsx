@@ -4,6 +4,7 @@ import { videoProcessor, EffectParams } from "../editor/VideoProcessor";
 import { cn } from "../utils/cn";
 import { findAssetItem, previewStyleFor } from "../editor/assetLibrary";
 import { composeFilters } from "../editor/effectParams";
+import { appliedEffectToGpu, compileRenderProgram } from "../editor/effectRuntime";
 
 type Props = {
   assets: Asset[];
@@ -254,12 +255,29 @@ export default function PreviewPlayer({
     };
   }, [active?.clip.id]);
 
-  // Update effects when active clip's preset changes
+  // Compile every playhead-active timeline instance into its own GPU program.
+  // AI programs remain disabled until their explicit local-analysis state is ready.
   useEffect(() => {
     if (!active) { setActiveEffects([]); return; }
-    const effect = presetToEffect(mergedEffects?.presetLabel || active.clip.effects.presetLabel);
-    setActiveEffects(effect ? [effect] : []);
-  }, [active?.clip.effects.presetLabel, active?.clip.id, mergedEffects?.presetLabel]);
+    const stack = (active.clip.appliedEffects ?? []).flatMap((effect) => {
+      const start = active.clip.start + effect.startOffset;
+      if (time < start || time >= start + effect.duration) return [];
+      const asset = effect.sourceItemId ? findAssetItem(effect.sourceItemId) : null;
+      const compiled = appliedEffectToGpu(effect, asset);
+      return compiled ? [compiled] : [];
+    });
+    if (hoveredEffectId) {
+      const item = findAssetItem(hoveredEffectId);
+      if (item) {
+        const program = item.renderProgram ?? compileRenderProgram(item);
+        if (program.engine === "gpu") stack.push({ type: program.type, intensity: program.intensity, color: program.color, seed: program.seed, motion: program.motion, warp: program.warp, trail: program.trail });
+      }
+    }
+    // Legacy clip-level presets remain supported, but no longer replace timeline programs.
+    const legacy = presetToEffect(mergedEffects?.presetLabel || active.clip.effects.presetLabel);
+    if (stack.length === 0 && legacy) stack.push(legacy);
+    setActiveEffects(stack);
+  }, [active, hoveredEffectId, mergedEffects?.presetLabel, time]);
 
   // Apply effects to processor
   useEffect(() => {
@@ -275,12 +293,7 @@ export default function PreviewPlayer({
       setGpuFrameReady(false);
       return;
     }
-    if (playing) {
-      videoProcessor.start(() => setGpuFrameReady(true));
-    } else {
-      videoProcessor.stop();
-      setGpuFrameReady(false);
-    }
+    videoProcessor.start(() => setGpuFrameReady(true));
     return () => videoProcessor.stop();
   }, [playing, webglSupported, activeEffects.length]);
 
@@ -465,6 +478,15 @@ export default function PreviewPlayer({
                       const rate = Math.max(0.1, mergedEffects.speed / 100);
                       v.playbackRate = rate;
                       v.currentTime = Math.max(0, active.clip.offset + (time - active.clip.start) * rate);
+                      const canvas = canvasRef.current;
+                      if (canvas) {
+                        const supported = videoProcessor.init(canvas, v);
+                        setWebglSupported(supported);
+                        videoProcessor.setFailureHandler(() => {
+                          setWebglSupported(false);
+                          setGpuFrameReady(false);
+                        });
+                      }
                       if (playing) v.play().catch(() => {});
                     }}
                   />
@@ -573,6 +595,19 @@ export default function PreviewPlayer({
                   </span>
                 </div>
               )}
+              {active.clip.appliedEffects?.some((effect) => effect.processingState === "queued" || effect.processingState === "analyzing") && (() => {
+                const processing = active.clip.appliedEffects?.find((effect) => effect.processingState === "queued" || effect.processingState === "analyzing");
+                if (!processing) return null;
+                return (
+                  <div className="pointer-events-none absolute bottom-3 right-3 w-[min(280px,52%)] rounded-md border border-cyan-400/35 bg-black/75 px-3 py-2 backdrop-blur">
+                    <div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-widest text-cyan-100">
+                      <span>Local AI analysis</span><span>{processing.processingProgress ?? 0}%</span>
+                    </div>
+                    <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-cyan-400 transition-[width] duration-150" style={{ width: `${processing.processingProgress ?? 0}%` }} /></div>
+                    <div className="mt-1 truncate text-[9px] text-zinc-400">{processing.processingMessage}</div>
+                  </div>
+                );
+              })()}
             </>
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-center">

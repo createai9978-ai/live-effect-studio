@@ -33,6 +33,9 @@ type Props = {
   onDelete?: () => void;
   favorited?: boolean;
   onToggleFavorite?: () => void;
+  processingState?: "queued" | "analyzing" | "ready" | "failed";
+  processingProgress?: number;
+  processingMessage?: string;
 };
 
 /**
@@ -60,6 +63,9 @@ export default function EffectControlPanel({
   onDelete,
   favorited,
   onToggleFavorite,
+  processingState,
+  processingProgress = 0,
+  processingMessage,
 }: Props) {
   const schema = schemaFor(family);
   const [customs, setCustoms] = useState<CustomPreset[]>([]);
@@ -311,6 +317,17 @@ export default function EffectControlPanel({
 
             {/* Params */}
             <div className="space-y-4 p-4">
+              {(processingState === "queued" || processingState === "analyzing") && (
+                <div className="rounded-lg border border-cyan-400/25 bg-cyan-400/[0.05] p-3">
+                  <div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-widest text-cyan-100">
+                    <span>Local AI analysis</span><span>{processingProgress}%</span>
+                  </div>
+                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.08]">
+                    <div className="h-full bg-cyan-400 transition-[width] duration-150" style={{ width: `${processingProgress}%` }} />
+                  </div>
+                  <div className="mt-1.5 text-[9.5px] text-zinc-500">{processingMessage ?? "Preparing model"}</div>
+                </div>
+              )}
               {schema.params.map((p) =>
                 p.type === "slider" ? (
                   <SliderControl

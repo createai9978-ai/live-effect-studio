@@ -109,6 +109,10 @@ export type AppliedEffect = {
   preset?: string;
   /** Library item this instance came from. */
   sourceItemId?: string;
+  /** Explicit AI/local-analysis lifecycle. AI effects never silently degrade to CSS exposure. */
+  processingState?: "queued" | "analyzing" | "ready" | "failed";
+  processingProgress?: number;
+  processingMessage?: string;
 };
 
 export type Clip = {

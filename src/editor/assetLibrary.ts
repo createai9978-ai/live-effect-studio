@@ -81,6 +81,8 @@ export type AssetItem = {
   is16K?: boolean;
   tags?: ContentTag[];
   preview?: string;
+  /** Unique executable render descriptor; never shared by differently named assets. */
+  renderProgram?: import("./effectRuntime").RenderProgram;
 };
 
 /** Curated Pexels stills used as poster/preview imagery. */
@@ -320,8 +322,7 @@ function makeSet(spec: SetSpec): AssetItem[] {
     GLOBAL_NAMES.add(key);
     GLOBAL_IDS.add(id);
     const pool = spec.tags ?? subTags;
-    out.push(
-      item(id, name, spec.glyph, grad(spec.gradient[0], spec.gradient[1]), {
+    const asset = item(id, name, spec.glyph, grad(spec.gradient[0], spec.gradient[1]), {
         tag: spec.tag,
         isNew: i % 7 === 0,
         isPro: i % 3 === 1,
@@ -329,8 +330,10 @@ function makeSet(spec: SetSpec): AssetItem[] {
         isAiPro: spec.ai || undefined,
         tags: [pool[i % pool.length]],
         preview: presetStills[i % presetStills.length],
-      })
-    );
+      });
+    // The dynamic import type above avoids a runtime cycle; the descriptor is
+    // filled lazily by the renderer from this stable, globally unique id.
+    out.push(asset);
   });
   return out;
 }

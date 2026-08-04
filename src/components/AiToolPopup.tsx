@@ -13,8 +13,7 @@ type Props = {
 
 /**
  * Rich popup that opens when a user clicks an AI Effect card.
- * Shows a large before/after preview, presets, and per-tool sliders
- * whose values recompute the CSS filter in real time.
+ * Configures the local analysis pass before the unique GPU program is applied.
  */
 export default function AiToolPopup({
   item,
@@ -317,8 +316,7 @@ export default function AiToolPopup({
               </div>
 
               <div className="rounded-lg border border-cyan-400/25 bg-cyan-400/[0.06] px-3 py-2 text-[10px] leading-relaxed text-cyan-200">
-                Adjust the split handle above to compare the effect against the original frame.
-                Sliders and presets update the preview in real time.
+                Applying starts local subject, depth, or motion-vector analysis. The timeline shows live progress and enables the GPU pass only when analysis completes.
               </div>
             </div>
 

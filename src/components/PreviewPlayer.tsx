@@ -478,6 +478,15 @@ export default function PreviewPlayer({
                       const rate = Math.max(0.1, mergedEffects.speed / 100);
                       v.playbackRate = rate;
                       v.currentTime = Math.max(0, active.clip.offset + (time - active.clip.start) * rate);
+                      const canvas = canvasRef.current;
+                      if (canvas) {
+                        const supported = videoProcessor.init(canvas, v);
+                        setWebglSupported(supported);
+                        videoProcessor.setFailureHandler(() => {
+                          setWebglSupported(false);
+                          setGpuFrameReady(false);
+                        });
+                      }
                       if (playing) v.play().catch(() => {});
                     }}
                   />

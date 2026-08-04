@@ -1091,10 +1091,12 @@ export default function App() {
       const finalPatch: Partial<ClipEffects> = {
         ...patch,
         presetLabel: item.name,
-        filter: composeFilters([patch.filter, visual.filter]),
-        overlay: visual.overlay ?? patch.overlay,
-        overlayBlend: visual.overlayBlend ?? patch.overlayBlend,
-        overlayOpacity: visual.overlayOpacity ?? patch.overlayOpacity,
+        // Library presets are rendered by their unique GPU program. CSS is
+        // reserved for manual clip corrections, never used as an FX fallback.
+        filter: undefined,
+        overlay: undefined,
+        overlayBlend: undefined,
+        overlayOpacity: undefined,
       };
 
       const target = targetClipId ?? selected[0] ?? clips[0]?.id;

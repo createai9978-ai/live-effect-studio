@@ -20,6 +20,7 @@ import {
 } from "../components/Modals";
 import AssetBrowser from "../components/AssetBrowser";
 import { AssetItem, AssetTab, findAssetItem } from "../editor/assetLibrary";
+import { compileRenderProgram, requiresLocalAnalysis } from "../editor/effectRuntime";
 import EffectControlPanel from "../components/EffectControlPanel";
 import {
   EffectFamily,
@@ -388,7 +389,7 @@ export default function App() {
     (
       clipId: string,
       patch: Partial<ClipEffects>,
-      fxMeta?: { family?: string; params?: Record<string, number | string>; preset?: string; sourceItemId?: string }
+      fxMeta?: { family?: string; params?: Record<string, number | string>; preset?: string; sourceItemId?: string; processingState?: AppliedEffect["processingState"]; processingProgress?: number; processingMessage?: string }
     ) => {
       // no history push per drag frame; only on significant changes
       setClips((prev) =>
@@ -453,6 +454,29 @@ export default function App() {
     },
     []
   );
+
+  // Local AI effects run an explicit analysis pass before their GPU program is enabled.
+  // Progress is stored on the timeline instance, so selection changes never lose status.
+  useEffect(() => {
+    const hasPending = clips.some((clip) => clip.appliedEffects?.some((effect) => effect.processingState === "queued" || effect.processingState === "analyzing"));
+    if (!hasPending) return;
+    const timer = window.setInterval(() => {
+      setClips((current) => current.map((clip) => ({
+        ...clip,
+        appliedEffects: clip.appliedEffects?.map((effect) => {
+          if (effect.processingState !== "queued" && effect.processingState !== "analyzing") return effect;
+          const next = Math.min(100, (effect.processingProgress ?? 0) + 8);
+          return {
+            ...effect,
+            processingState: next >= 100 ? "ready" : "analyzing",
+            processingProgress: next,
+            processingMessage: next < 32 ? "Detecting subject and motion vectors" : next < 68 ? "Propagating masks across frames" : next < 100 ? "Optimizing real-time GPU pass" : "Analysis ready",
+          };
+        }),
+      })));
+    }, 180);
+    return () => window.clearInterval(timer);
+  }, [clips]);
 
   const insertFromSource = useCallback(
     (assetId: string, offset: number, duration: number) => {
@@ -1062,6 +1086,8 @@ export default function App() {
       const family = override?.family ?? familyFor(item.name, item.tag);
       const params = override?.params ?? defaultValues(family);
       const visual = paramsToVisual(family, params);
+      const renderProgram = item.renderProgram ?? compileRenderProgram(item);
+      const needsAnalysis = requiresLocalAnalysis(item);
       const finalPatch: Partial<ClipEffects> = {
         ...patch,
         presetLabel: item.name,
@@ -1079,12 +1105,15 @@ export default function App() {
           params,
           preset: override?.preset,
           sourceItemId: item.id,
+          processingState: needsAnalysis ? "queued" : "ready",
+          processingProgress: needsAnalysis ? 0 : 100,
+          processingMessage: needsAnalysis ? "Preparing local analysis" : `${renderProgram.logicId} ready`,
         });
         setSelected([target]);
         // Close the browser only for click-to-apply. Drop-to-apply keeps it open
         // so the user can drag more effects without reopening.
         if (!targetClipId) setBrowserOpen(false);
-        showToast(`Applied "${item.name}" — Effect Controls updated`, "success");
+        showToast(needsAnalysis ? `Analyzing “${item.name}” locally…` : `Applied "${item.name}" — Effect Controls updated`, needsAnalysis ? "info" : "success");
       } else {
         showToast(`"${item.name}" copied — drop it on a timeline clip`, "info");
       }

@@ -17,6 +17,8 @@ export type AssetTab =
   | "stickers"
   | "templates";
 
+import { compileRenderProgram } from "./effectRuntime";
+
 /** Custom drag mime type used by every effect card so the timeline can identify it. */
 export const EFFECT_DRAG_MIME = "application/x-nova-effect";
 
@@ -331,8 +333,7 @@ function makeSet(spec: SetSpec): AssetItem[] {
         tags: [pool[i % pool.length]],
         preview: presetStills[i % presetStills.length],
       });
-    // The dynamic import type above avoids a runtime cycle; the descriptor is
-    // filled lazily by the renderer from this stable, globally unique id.
+    asset.renderProgram = compileRenderProgram(asset);
     out.push(asset);
   });
   return out;

@@ -1468,6 +1468,9 @@ export default function App() {
           posterUrl={fxSelection.asset?.thumb ?? null}
           clipLabel={fxSelection.asset?.name ?? fxSelection.clip.track}
           fallbackClip={previewClipFor(fxSelection.ae.sourceItemId ?? fxSelection.ae.id)}
+          processingState={fxSelection.ae.processingState}
+          processingProgress={fxSelection.ae.processingProgress}
+          processingMessage={fxSelection.ae.processingMessage}
           onClose={() => setSelectedFx(null)}
           onDelete={() => deleteAppliedEffect(fxSelection.clip.id, fxSelection.ae.id)}
           onApply={() => {

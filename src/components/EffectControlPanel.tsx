@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CustomPreset,
   EffectFamily,
   ParamValues,
   deleteCustomPreset,
   loadCustomPresets,
-  paramsToVisual,
   saveCustomPreset,
   schemaFor,
 } from "../editor/effectParams";

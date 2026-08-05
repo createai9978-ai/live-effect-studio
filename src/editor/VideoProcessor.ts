@@ -455,8 +455,10 @@ const FRAGMENT_SHADER_SOURCE = `
   }
 
   void main() {
-    vec2 uv = v_uv;
-    vec3 color = texture2D(u_video, uv).rgb;
+    // Sample through the preset's own animated transform, with shutter blur.
+    vec2 uv = motionXform(v_uv, 0.0);
+    vec3 color = motionSample(v_uv);
+
 
     if (u_effectType == 1) {
       // Film grain

@@ -1502,6 +1502,20 @@ function ReferenceMonitor({
               </button>
             </div>
 
+            {onApplyAll && (
+              <button
+                onClick={() => onApplyAll(item)}
+                title="Apply this look to every clip on the timeline in one click"
+                className="flex w-full items-center justify-center gap-1.5 rounded-md border border-cyan-400/40 bg-cyan-500/10 px-2 py-1.5 text-[10.5px] font-medium text-cyan-100 transition hover:bg-cyan-500/20"
+              >
+                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 6h18M3 12h18M3 18h18" />
+                </svg>
+                Apply to Entire Timeline
+              </button>
+            )}
+
+
             <div className="rounded-lg border border-white/[0.06] bg-black/30 p-2">
               <div className="mb-1 text-[8.5px] font-semibold uppercase tracking-widest text-zinc-500">
                 Parameters

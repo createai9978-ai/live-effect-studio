@@ -1135,6 +1135,26 @@ export default function App() {
     [applyAssetPreset]
   );
 
+  /**
+   * One-click global grade: apply a single preset to every visual clip on the
+   * timeline so the whole sequence shares one look (Filmora-style master grade).
+   */
+  const applyPresetToTimeline = useCallback(
+    (item: AssetItem) => {
+      const targets = clips.filter((c) => videoTracks.includes(c.track));
+      if (!targets.length) {
+        showToast("Add clips to the timeline first", "error");
+        return;
+      }
+      pushHistory();
+      for (const c of targets) applyAssetPreset(item, c.id, undefined, { silent: true, keepBrowserOpen: true });
+      setBrowserOpen(false);
+      showToast(`“${item.name}” applied to all ${targets.length} clips`, "success");
+    },
+    [clips, videoTracks, pushHistory, applyAssetPreset, showToast]
+  );
+
+
   /* ---------- timeline FX instance selection + Effect Control Panel ---------- */
   const [selectedFx, setSelectedFx] = useState<{ clipId: string; effectId: string } | null>(null);
 

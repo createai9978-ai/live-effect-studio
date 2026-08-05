@@ -34,6 +34,9 @@ type Props = {
   initialTab?: AssetTab;
   onClose: () => void;
   onApplyEffect: (item: AssetItem) => void;
+  /** Apply the preset as a global grade across every timeline clip. */
+  onApplyEffectToTimeline?: (item: AssetItem) => void;
+
   hasProjectMedia: boolean;
   onOpenImport: () => void;
   /** URL (or data-URL) of the currently selected clip's frame — powers live thumbnail previews. */
@@ -49,6 +52,8 @@ export default function AssetBrowser({
   initialTab = "effects",
   onClose,
   onApplyEffect,
+  onApplyEffectToTimeline,
+
   hasProjectMedia,
   onOpenImport,
   previewFrameUrl,

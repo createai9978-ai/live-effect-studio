@@ -1466,6 +1466,8 @@ export default function App() {
         initialTab={browserTab}
         onClose={() => setBrowserOpen(false)}
         onApplyEffect={applyAssetPreset}
+        onApplyEffectToTimeline={applyPresetToTimeline}
+
         hasProjectMedia={assets.length > 0}
         onOpenImport={openImport}
         previewFrameUrl={selectedAsset?.thumb ?? assets.find((a) => a.thumb)?.thumb ?? null}

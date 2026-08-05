@@ -293,3 +293,8 @@ export function motionSignatureFor(key: string, flavor: MotionFlavor = "cinemati
 }
 
 export type { MotionFlavor };
+
+/** Look up the label + control points for a curve id (used by the UI readout). */
+export function curveMeta(id: EasingId): MotionCurve {
+  return CURVE_BY_ID.get(id) ?? MOTION_CURVES[0];
+}

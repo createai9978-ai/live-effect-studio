@@ -425,6 +425,8 @@ export default function AssetBrowser({
               onPin={() => setPinnedPreviewId(hovered)}
               onUnpin={() => setPinnedPreviewId(null)}
               onApply={handleCardActivate}
+              onApplyAll={onApplyEffectToTimeline}
+
               favorited={hovered ? favorites.has(hovered) : (pinnedPreviewId ? favorites.has(pinnedPreviewId) : false)}
               onToggleFavorite={() => {
                 const id = hovered ?? pinnedPreviewId;

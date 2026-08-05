@@ -32,12 +32,16 @@ export type HistorySnapshot = {
 export type Asset = {
   id: string;
   name: string;
-  kind: "video" | "audio";
+  kind: "video" | "audio" | "image";
   url: string;
   duration: number;
   thumb?: string;
   size: number;
 };
+
+/** Default timeline duration (seconds) given to a still image. */
+export const IMAGE_CLIP_DURATION = 5;
+
 
 export type ClipEffects = {
   posX: number;      // pixels, applied to preview

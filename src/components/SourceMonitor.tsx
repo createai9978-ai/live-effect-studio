@@ -104,7 +104,10 @@ export default function SourceMonitor({ asset, onInsert }: Props) {
               }}
               onEnded={() => setPlaying(false)}
             />
+          ) : asset.kind === "image" ? (
+            <img src={asset.url} alt={asset.name} className="h-full w-full object-contain" />
           ) : (
+
             <div className="flex h-full flex-col items-center justify-center gap-2 px-4">
               <div className="flex h-16 w-full items-end gap-px">
                 {waveformBars(asset.id, 64).map((v, i) => (

@@ -320,7 +320,7 @@ export default function App() {
     setAssets((prev) => [...prev, ...ok]);
     if (ok.length) setSourceAssetId((cur) => cur ?? ok[0].id);
     setImporting(false);
-    if (ok.length) showToast(`Imported ${ok.length} clip${ok.length > 1 ? "s" : ""}`, "success");
+    if (ok.length) showToast(`Imported ${ok.length} item${ok.length > 1 ? "s" : ""}`, "success");
   }, [showToast]);
 
   const openImport = useCallback(() => fileInputRef.current?.click(), []);
@@ -358,7 +358,9 @@ export default function App() {
     (assetId: string, track: TrackId, dropTime: number, offset = 0, durationOverride?: number) => {
       const asset = assets.find((a) => a.id === assetId);
       if (!asset) return;
-      if (videoTracks.includes(track) && asset.kind !== "video") return;
+      if (videoTracks.includes(track) && asset.kind === "audio") return;
+      if (audioTracks.includes(track) && asset.kind !== "audio") return;
+
       if (trackStates[track]?.locked) return;
 
       pushHistory();
@@ -381,7 +383,7 @@ export default function App() {
       setClips((prev) => [...prev, clip]);
       setSelected([clip.id]);
     },
-    [assets, clips, snapTime, trackStates, videoTracks, pushHistory]
+    [assets, clips, snapTime, trackStates, videoTracks, audioTracks, pushHistory]
   );
 
   const updateClipEffects = useCallback(
@@ -481,7 +483,7 @@ export default function App() {
     (assetId: string, offset: number, duration: number) => {
       const asset = assets.find((a) => a.id === assetId);
       if (!asset) return;
-      const track: TrackId = asset.kind === "video" ? videoTracks[videoTracks.length - 1] : audioTracks[0];
+      const track: TrackId = asset.kind === "audio" ? audioTracks[0] : videoTracks[videoTracks.length - 1];
       addClipToTrack(assetId, track, timeRef.current, offset, duration);
     },
     [assets, addClipToTrack, videoTracks, audioTracks]
@@ -926,8 +928,10 @@ export default function App() {
     (
       item: AssetItem,
       targetClipId?: string,
-      override?: { family: EffectFamily; params: ParamValues; preset?: string }
+      override?: { family: EffectFamily; params: ParamValues; preset?: string },
+      opts?: { silent?: boolean; keepBrowserOpen?: boolean }
     ) => {
+
       // Translate the preset's tag + glyph + id into a rich effect patch.
       // The `tag` field carries the pack identity (LUT, MAGIC, GLITCH, ATMOS, RAMP, AI, ...)
       // and lets us layer CSS filters + overlays for real-time visible changes.
@@ -1111,11 +1115,13 @@ export default function App() {
         setSelected([target]);
         // Close the browser only for click-to-apply. Drop-to-apply keeps it open
         // so the user can drag more effects without reopening.
-        if (!targetClipId) setBrowserOpen(false);
-        showToast(needsAnalysis ? `Analyzing “${item.name}” locally…` : `Applied "${item.name}" — Effect Controls updated`, needsAnalysis ? "info" : "success");
-      } else {
+        if (!targetClipId && !opts?.keepBrowserOpen) setBrowserOpen(false);
+        if (!opts?.silent)
+          showToast(needsAnalysis ? `Analyzing “${item.name}” locally…` : `Applied "${item.name}" — Effect Controls updated`, needsAnalysis ? "info" : "success");
+      } else if (!opts?.silent) {
         showToast(`"${item.name}" copied — drop it on a timeline clip`, "info");
       }
+
     },
     [selected, clips, pushHistory, updateClipEffects, showToast]
   );
@@ -1128,6 +1134,26 @@ export default function App() {
     },
     [applyAssetPreset]
   );
+
+  /**
+   * One-click global grade: apply a single preset to every visual clip on the
+   * timeline so the whole sequence shares one look (Filmora-style master grade).
+   */
+  const applyPresetToTimeline = useCallback(
+    (item: AssetItem) => {
+      const targets = clips.filter((c) => videoTracks.includes(c.track));
+      if (!targets.length) {
+        showToast("Add clips to the timeline first", "error");
+        return;
+      }
+      pushHistory();
+      for (const c of targets) applyAssetPreset(item, c.id, undefined, { silent: true, keepBrowserOpen: true });
+      setBrowserOpen(false);
+      showToast(`“${item.name}” applied to all ${targets.length} clips`, "success");
+    },
+    [clips, videoTracks, pushHistory, applyAssetPreset, showToast]
+  );
+
 
   /* ---------- timeline FX instance selection + Effect Control Panel ---------- */
   const [selectedFx, setSelectedFx] = useState<{ clipId: string; effectId: string } | null>(null);
@@ -1265,7 +1291,7 @@ export default function App() {
       <input
         ref={fileInputRef}
         type="file"
-        accept="video/*,audio/*"
+        accept="video/*,audio/*,image/*"
         multiple
         className="hidden"
         onChange={(e) => {
@@ -1440,6 +1466,8 @@ export default function App() {
         initialTab={browserTab}
         onClose={() => setBrowserOpen(false)}
         onApplyEffect={applyAssetPreset}
+        onApplyEffectToTimeline={applyPresetToTimeline}
+
         hasProjectMedia={assets.length > 0}
         onOpenImport={openImport}
         previewFrameUrl={selectedAsset?.thumb ?? assets.find((a) => a.thumb)?.thumb ?? null}

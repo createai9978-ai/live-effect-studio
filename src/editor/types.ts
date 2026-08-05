@@ -32,12 +32,16 @@ export type HistorySnapshot = {
 export type Asset = {
   id: string;
   name: string;
-  kind: "video" | "audio";
+  kind: "video" | "audio" | "image";
   url: string;
   duration: number;
   thumb?: string;
   size: number;
 };
+
+/** Default timeline duration (seconds) given to a still image. */
+export const IMAGE_CLIP_DURATION = 5;
+
 
 export type ClipEffects = {
   posX: number;      // pixels, applied to preview
@@ -245,17 +249,24 @@ export function waveformBars(seedStr: string, bars: number): number[] {
   return out;
 }
 
-/** Read duration (and a thumbnail for video) from a user file. */
+/** Read duration (and a thumbnail for video/image) from a user file. */
 export function probeFile(file: File): Promise<Asset | null> {
   const isVideo = file.type.startsWith("video");
   const isAudio = file.type.startsWith("audio");
-  if (!isVideo && !isAudio) return Promise.resolve(null);
+  const isImage = file.type.startsWith("image");
+  if (!isVideo && !isAudio && !isImage) return Promise.resolve(null);
   const url = URL.createObjectURL(file);
 
   return new Promise((resolve) => {
     const base = { id: uid(), name: file.name, url, size: file.size };
 
+    if (isImage) {
+      resolve({ ...base, kind: "image", duration: IMAGE_CLIP_DURATION, thumb: url });
+      return;
+    }
+
     if (isAudio) {
+
       const a = new Audio();
       a.preload = "metadata";
       const done = () =>

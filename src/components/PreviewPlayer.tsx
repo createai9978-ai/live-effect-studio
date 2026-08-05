@@ -94,9 +94,10 @@ export default function PreviewPlayer({
         (c) => c.track === track && time >= c.start && time < c.start + c.duration
       );
       if (clip) {
-        const asset = assets.find((a) => a.id === clip.assetId && a.kind === "video");
+        const asset = assets.find((a) => a.id === clip.assetId && a.kind !== "audio");
         if (asset) return { clip, asset };
       }
+
     }
     return null;
   }, [clips, assets, time, audibleTracks]);
@@ -329,11 +330,12 @@ export default function PreviewPlayer({
                   ...stackedFilters,
                 ]);
 
-                return active.asset.url ? (
+                return active.asset.kind === "video" && active.asset.url ? (
                   <video
                     key={active.clip.id}
                     ref={videoRef}
                     src={active.asset.url}
+
                     playsInline
                     preload="auto"
                     className="h-full w-full object-contain transition-transform duration-75"
@@ -363,7 +365,7 @@ export default function PreviewPlayer({
                 ) : (
                   <img
                     key={active.clip.id}
-                    src={active.asset.thumb}
+                    src={active.asset.kind === "image" ? active.asset.url : active.asset.thumb}
                     alt={active.asset.name}
                     className="h-full w-full object-contain transition-transform duration-75"
                     style={{
@@ -456,15 +458,36 @@ export default function PreviewPlayer({
                   </span>
                 )}
               </div>
-              {/* Live preset chip — shows the currently-applied effect's name */}
-              {mergedEffects.presetLabel && (
-                <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md border border-violet-400/40 bg-black/60 px-2 py-1 backdrop-blur">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-400 shadow-[0_0_6px] shadow-violet-400/80" />
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-violet-100">
-                    {hoveredEffectId ? "PREVIEW" : "FX"} · {mergedEffects.presetLabel}
-                  </span>
-                </div>
-              )}
+              {/* Live preset chip — hovered library preset wins over the applied one */}
+              {(() => {
+                const hoveredItem = hoveredEffectId ? findAssetItem(hoveredEffectId) : null;
+                const label = hoveredItem?.name ?? mergedEffects.presetLabel;
+                if (!label) return null;
+                return (
+                  <div
+                    className={cn(
+                      "pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md border bg-black/60 px-2 py-1 backdrop-blur transition-colors duration-200",
+                      hoveredItem ? "border-cyan-400/50" : "border-violet-400/40"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 animate-pulse rounded-full shadow-[0_0_6px]",
+                        hoveredItem ? "bg-cyan-300 shadow-cyan-300/80" : "bg-violet-400 shadow-violet-400/80"
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "font-mono text-[9px] uppercase tracking-widest",
+                        hoveredItem ? "text-cyan-100" : "text-violet-100"
+                      )}
+                    >
+                      {hoveredItem ? "PREVIEW" : "FX"} · {label}
+                    </span>
+                  </div>
+                );
+              })()}
+
               {active.clip.appliedEffects?.some((effect) => effect.processingState === "queued" || effect.processingState === "analyzing") && (() => {
                 const processing = active.clip.appliedEffects?.find((effect) => effect.processingState === "queued" || effect.processingState === "analyzing");
                 if (!processing) return null;

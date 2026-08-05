@@ -280,20 +280,6 @@ const item = (
    CapCut-style trending/social suite. Generated procedurally so every
    category ships a full, industry-scale count of presets.
    ============================================================== */
-
-const presetStills = [
-  PREVIEW_IMAGES.environmentalOrbit,
-  PREVIEW_IMAGES.straightRush,
-  PREVIEW_IMAGES.leftOrbit,
-  PREVIEW_IMAGES.pullBack,
-  PREVIEW_IMAGES.nolanPushIn,
-  PREVIEW_IMAGES.overheadShot,
-  PREVIEW_IMAGES.characterLiftOff,
-  PREVIEW_IMAGES.fpvSmooth,
-  PREVIEW_IMAGES.firstPerson,
-  PREVIEW_IMAGES.fpvDynamic,
-];
-
 const subTags = ["cinematic", "vlog", "gaming", "music", "travel", "wedding"] as ContentTag[];
 
 type SetSpec = {

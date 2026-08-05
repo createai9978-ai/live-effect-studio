@@ -329,7 +329,37 @@ export default function EffectControlPanel({
               )}
             </div>
 
+            {/* Motion signature — the preset's unique keyframe/easing/shutter recipe */}
+            {effect?.motionSig && (
+              <div className="border-b border-white/[0.05] p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Motion Signature</span>
+                  <span className="font-mono text-[9px] text-zinc-600">{Math.round(effect.motionSig.shutter)}° shutter</span>
+                </div>
+                <div className="rounded-lg border border-white/[0.06] bg-black/30 p-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <svg viewBox="0 0 100 60" className="h-12 w-20 shrink-0 rounded bg-black/50 ring-1 ring-white/[0.06]">
+                      <path
+                        d={`M 4 54 C ${4 + effect.motionSig.bezierPreview[0] * 92} ${54 - effect.motionSig.bezierPreview[1] * 48}, ${4 + effect.motionSig.bezierPreview[2] * 92} ${54 - effect.motionSig.bezierPreview[3] * 48}, 96 6`}
+                        fill="none"
+                        stroke="#a78bfa"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="truncate text-[11px] font-medium text-zinc-200">{effect.motionSig.curveLabel}</div>
+                      <div className="truncate font-mono text-[9px] text-zinc-500">{effect.motionSig.trajectory}</div>
+                      <div className="font-mono text-[9px] text-zinc-600">
+                        {effect.motionSig.period.toFixed(2)}s cycle · {effect.motionSig.pingPong ? "ping-pong" : "loop"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Params */}
+
             <div className="space-y-4 p-4">
               {(processingState === "queued" || processingState === "analyzing") && (
                 <div className="rounded-lg border border-cyan-400/25 bg-cyan-400/[0.05] p-3">

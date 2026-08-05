@@ -63,6 +63,17 @@ export function compileRenderProgram(item: Pick<AssetItem, "id" | "name" | "tag"
   else if (/lut|grade|filter|tone|kodak|portra|noir|warmth|aesthetic/.test(text)) type = "colorGrade";
   else if (/speed|ramp|velocity|freeze|hyperlapse/.test(text)) type = "speedWarp";
 
+  const flavor: MotionFlavor =
+    type === "glitchWarp" || type === "speedWarp"
+      ? "glitch"
+      : type === "transitionWarp" || type === "motionTrail" || type === "motionVectors" || type === "textMotion" || type === "splitLayout"
+      ? "kinetic"
+      : type === "rotoscope" || type === "depthMap" || type === "bodyTrack" || type === "voiceSync"
+      ? "ai"
+      : type === "opticalOverlay"
+      ? "atmosphere"
+      : "cinematic";
+
   return {
     logicId: `nova-fx/${type}/${h.toString(16)}`,
     engine,
@@ -73,8 +84,10 @@ export function compileRenderProgram(item: Pick<AssetItem, "id" | "name" | "tag"
     warp: 0.08 + unit(h, 16) * 0.72,
     trail: unit(h, 24) * 0.9,
     color: [0.35 + unit(h, 0) * 0.65, 0.35 + unit(h, 8) * 0.65, 0.35 + unit(h, 16) * 0.65],
+    motionSig: motionSignatureFor(`${item.id}:${item.name}:${type}`, flavor),
   };
 }
+
 
 function value(params: AppliedEffect["params"], key: string, fallback: number) {
   const candidate = params?.[key];

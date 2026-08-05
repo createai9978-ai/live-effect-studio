@@ -1,4 +1,5 @@
 import type { AssetItem } from "./assetLibrary";
+import { motionSignatureFor, type MotionFlavor, type MotionSignature } from "./motionEngine";
 import type { AppliedEffect } from "./types";
 import type { EffectParams, EffectType } from "./VideoProcessor";
 
@@ -14,7 +15,10 @@ export type RenderProgram = {
   warp: number;
   trail: number;
   color: [number, number, number];
+  /** Unique keyframe/easing/motion-blur signature for this preset. */
+  motionSig: MotionSignature;
 };
+
 
 function hash(value: string) {
   let h = 2166136261;

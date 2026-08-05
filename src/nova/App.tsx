@@ -20,7 +20,7 @@ import {
 } from "../components/Modals";
 import AssetBrowser from "../components/AssetBrowser";
 import { AssetItem, AssetTab, findAssetItem } from "../editor/assetLibrary";
-import { compileRenderProgram, requiresLocalAnalysis } from "../editor/effectRuntime";
+import { appliedEffectToGpu, compileRenderProgram, requiresLocalAnalysis } from "../editor/effectRuntime";
 import EffectControlPanel from "../components/EffectControlPanel";
 import {
   EffectFamily,
@@ -1468,6 +1468,7 @@ export default function App() {
           processingState={fxSelection.ae.processingState}
           processingProgress={fxSelection.ae.processingProgress}
           processingMessage={fxSelection.ae.processingMessage}
+          effect={appliedEffectToGpu(fxSelection.ae, fxSelection.ae.sourceItemId ? findAssetItem(fxSelection.ae.sourceItemId) : null)}
           onClose={() => setSelectedFx(null)}
           onDelete={() => deleteAppliedEffect(fxSelection.clip.id, fxSelection.ae.id)}
           onApply={() => {

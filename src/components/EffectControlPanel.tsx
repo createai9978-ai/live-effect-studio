@@ -10,6 +10,7 @@ import {
   schemaFor,
 } from "../editor/effectParams";
 import { cn } from "../utils/cn";
+import { VideoProcessor, type EffectParams } from "../editor/VideoProcessor";
 
 type Props = {
   open: boolean;
@@ -36,6 +37,7 @@ type Props = {
   processingState?: "queued" | "analyzing" | "ready" | "failed";
   processingProgress?: number;
   processingMessage?: string;
+  effect?: EffectParams | null;
 };
 
 /**
@@ -66,6 +68,7 @@ export default function EffectControlPanel({
   processingState,
   processingProgress = 0,
   processingMessage,
+  effect,
 }: Props) {
   const schema = schemaFor(family);
   const [customs, setCustoms] = useState<CustomPreset[]>([]);
@@ -73,6 +76,9 @@ export default function EffectControlPanel({
   const [showSave, setShowSave] = useState(false);
   const [bypass, setBypass] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const processorRef = useRef<VideoProcessor | null>(null);
+  const [gpuReady, setGpuReady] = useState(false);
 
   useEffect(() => setCustoms(loadCustomPresets()), [open]);
 
@@ -83,13 +89,34 @@ export default function EffectControlPanel({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  const visual = useMemo(() => paramsToVisual(family, values), [family, values]);
   const src = videoSrc || fallbackClip || null;
   const familyCustoms = customs.filter((c) => c.family === family);
 
   if (!open) return null;
 
   const set = (key: string, v: number | string) => onChange({ ...values, [key]: v });
+
+  const startGpuPreview = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    processorRef.current?.dispose();
+    processorRef.current = null;
+    setGpuReady(false);
+    if (!video || !canvas || !effect || bypass || video.readyState < 2) return;
+    const processor = new VideoProcessor();
+    if (!processor.init(canvas, video)) return;
+    processor.setEffects([effect]);
+    processor.start(() => setGpuReady(true));
+    processorRef.current = processor;
+  };
+
+  useEffect(() => {
+    startGpuPreview();
+    return () => {
+      processorRef.current?.dispose();
+      processorRef.current = null;
+    };
+  }, [effect, bypass, src]);
 
   return (
     <div
@@ -158,17 +185,8 @@ export default function EffectControlPanel({
                   loop
                   playsInline
                   preload="auto"
-                  className="h-full w-full object-cover transition-[filter,transform] duration-150 ease-out"
-                  style={
-                    bypass
-                      ? undefined
-                      : {
-                          filter: visual.filter,
-                          transform: visual.transform || undefined,
-                          transformOrigin: "center center",
-                          willChange: "filter, transform",
-                        }
-                  }
+                  className="h-full w-full object-cover"
+                  onLoadedData={startGpuPreview}
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-[11px] text-zinc-600">
@@ -176,16 +194,13 @@ export default function EffectControlPanel({
                 </div>
               )}
 
-              {!bypass && visual.overlay && (
-                <div
-                  className="pointer-events-none absolute inset-0 transition-opacity duration-150"
-                  style={{
-                    backgroundImage: visual.overlay,
-                    mixBlendMode: (visual.overlayBlend as React.CSSProperties["mixBlendMode"]) ?? "screen",
-                    opacity: visual.overlayOpacity ?? 0.8,
-                  }}
-                />
-              )}
+              <canvas
+                ref={canvasRef}
+                className={cn(
+                  "pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-150",
+                  !bypass && gpuReady ? "opacity-100" : "opacity-0"
+                )}
+              />
 
               <span className="pointer-events-none absolute left-2.5 top-2.5 rounded-md bg-black/70 px-2 py-1 font-mono text-[9px] tracking-widest text-zinc-300">
                 {clipLabel ? `PROGRAM · ${clipLabel.toUpperCase()}` : "PROGRAM PREVIEW"}

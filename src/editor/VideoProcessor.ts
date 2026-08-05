@@ -82,7 +82,7 @@ export class VideoProcessor {
   private fail(reason: string): false {
     if (!this.failed) {
       this.failed = true;
-      console.warn(`[VideoProcessor] GPU pipeline unavailable — falling back to CSS: ${reason}`);
+      console.warn(`[VideoProcessor] GPU pipeline unavailable; showing the unprocessed source: ${reason}`);
       this.stop();
       this.onFailure?.();
     }

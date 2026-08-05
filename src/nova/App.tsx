@@ -928,8 +928,10 @@ export default function App() {
     (
       item: AssetItem,
       targetClipId?: string,
-      override?: { family: EffectFamily; params: ParamValues; preset?: string }
+      override?: { family: EffectFamily; params: ParamValues; preset?: string },
+      opts?: { silent?: boolean; keepBrowserOpen?: boolean }
     ) => {
+
       // Translate the preset's tag + glyph + id into a rich effect patch.
       // The `tag` field carries the pack identity (LUT, MAGIC, GLITCH, ATMOS, RAMP, AI, ...)
       // and lets us layer CSS filters + overlays for real-time visible changes.

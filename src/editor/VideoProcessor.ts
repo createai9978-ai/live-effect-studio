@@ -30,7 +30,8 @@ export type EffectType =
   | "splitLayout"
   | "textMotion"
   | "colorGrade"
-  | "speedWarp";
+  | "speedWarp"
+  | "voiceSync";
 
 export type EffectParams = {
   type: EffectType;
@@ -45,6 +46,7 @@ export type EffectParams = {
   motion?: number;
   warp?: number;
   trail?: number;
+  audio?: number;
 };
 
 export class VideoProcessor {
@@ -60,6 +62,7 @@ export class VideoProcessor {
   /** Called once when the GPU pipeline fails at runtime so the UI can fall back. */
   private onFailure: (() => void) | null = null;
   private failed = false;
+  private audioLevel = 0;
 
   constructor() {}
 
@@ -72,10 +75,14 @@ export class VideoProcessor {
     this.onFailure = cb;
   }
 
+  setAudioLevel(level: number) {
+    this.audioLevel = Math.max(0, Math.min(1, level));
+  }
+
   private fail(reason: string): false {
     if (!this.failed) {
       this.failed = true;
-      console.warn(`[VideoProcessor] GPU pipeline unavailable — falling back to CSS: ${reason}`);
+      console.warn(`[VideoProcessor] GPU pipeline unavailable; showing the unprocessed source: ${reason}`);
       this.stop();
       this.onFailure?.();
     }
@@ -239,6 +246,7 @@ export class VideoProcessor {
     gl.uniform1f(gl.getUniformLocation(this.program, "u_motion"), effect?.motion ?? 0);
     gl.uniform1f(gl.getUniformLocation(this.program, "u_warp"), effect?.warp ?? 0);
     gl.uniform1f(gl.getUniformLocation(this.program, "u_trail"), effect?.trail ?? 0);
+    gl.uniform1f(gl.getUniformLocation(this.program, "u_audio"), this.audioLevel * (effect?.audio ?? 1));
 
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -283,6 +291,7 @@ const EFFECT_TYPE_MAP: Record<EffectType, number> = {
   textMotion: 24,
   colorGrade: 25,
   speedWarp: 26,
+  voiceSync: 27,
 };
 
 /** Vertex shader - pass-through */
@@ -309,6 +318,7 @@ const FRAGMENT_SHADER_SOURCE = `
   uniform float u_motion;
   uniform float u_warp;
   uniform float u_trail;
+  uniform float u_audio;
 
   // Pseudo-random noise
   float random(vec2 st) {
@@ -415,14 +425,24 @@ const FRAGMENT_SHADER_SOURCE = `
       vec2 px = 1.0 / u_resolution;
       vec3 gx = texture2D(u_video, safeUV(uv + vec2(px.x * 2.0, 0.0))).rgb - texture2D(u_video, safeUV(uv - vec2(px.x * 2.0, 0.0))).rgb;
       vec3 gy = texture2D(u_video, safeUV(uv + vec2(0.0, px.y * 2.0))).rgb - texture2D(u_video, safeUV(uv - vec2(0.0, px.y * 2.0))).rgb;
-      float edge = smoothstep(0.08, 0.34, length(gx) + length(gy));
-      color = mix(color * 0.72, color + u_color * edge * 0.8, u_intensity);
+      float edge = smoothstep(0.06 + u_trail * 0.08, 0.3, length(gx) + length(gy));
+      float luma = dot(color, vec3(0.299, 0.587, 0.114));
+      float keyed = smoothstep(0.15 + u_warp * 0.12, 0.82, luma + edge * 0.45);
+      vec3 matte = mix(vec3(0.025), color, keyed);
+      color = mix(color, matte + u_color * edge * 0.7, u_intensity);
     } else if (u_effectType == 16) {
-      float d = distance(uv, vec2(0.5 + sin(u_time * 0.35 + u_seed * 6.0) * 0.04, 0.48));
+      vec2 subject = vec2(0.5 + sin(u_time * 0.35 + u_seed * 6.0) * 0.04, 0.48);
+      float d = distance(uv, subject);
+      float depth = smoothstep(0.58, 0.12 + u_trail * 0.08, d);
       vec3 background = blur5(uv, vec2(1.5 / u_resolution.x, 1.5 / u_resolution.y) * (1.0 + u_warp * 3.0));
-      color = mix(background, color, smoothstep(0.5, 0.22 + u_trail * 0.12, d));
+      vec2 parallaxUV = safeUV(uv + (uv - subject) * u_warp * 0.025 * (1.0 - depth));
+      background = mix(background, texture2D(u_video, parallaxUV).rgb, 0.35);
+      color = mix(background, color, depth);
     } else if (u_effectType == 17) {
       vec2 center = vec2(0.5 + sin(u_time * (0.7 + u_motion) + u_seed * 9.0) * 0.12, 0.5 + cos(u_time * 0.6 + u_seed * 5.0) * 0.05);
+      vec2 delta = center - vec2(0.5);
+      vec2 trackedUV = safeUV(uv - delta * (0.25 + u_warp * 0.55));
+      color = mix(color, texture2D(u_video, trackedUV).rgb, u_intensity * 0.72);
       float ring = smoothstep(0.025, 0.0, abs(distance(uv, center) - (0.19 + u_warp * 0.08)));
       color += u_color * ring * u_intensity;
     } else if (u_effectType == 18 || u_effectType == 19) {
@@ -460,6 +480,13 @@ const FRAGMENT_SHADER_SOURCE = `
     } else if (u_effectType == 26) {
       vec2 dir = normalize(uv - vec2(0.5) + vec2(0.0001));
       color = mix(color, blur5(uv, dir * (0.002 + u_motion * 0.012)), u_intensity * 0.72);
+    } else if (u_effectType == 27) {
+      float beat = max(u_audio, 0.08 + 0.08 * sin(u_time * (4.0 + u_motion * 8.0)));
+      vec2 centered = uv - vec2(0.5);
+      vec2 pulseUV = safeUV(centered / (1.0 + beat * (0.04 + u_warp * 0.1)) + vec2(0.5));
+      vec3 pulse = texture2D(u_video, pulseUV).rgb;
+      float ring = smoothstep(0.03, 0.0, abs(length(centered) - (0.18 + beat * 0.32)));
+      color = mix(color, pulse, u_intensity * 0.8) + u_color * ring * beat * u_intensity;
     }
 
     gl_FragColor = vec4(color, 1.0);

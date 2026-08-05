@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Asset, Clip, toTimecode } from "../editor/types";
 import { videoProcessor, EffectParams } from "../editor/VideoProcessor";
 import { cn } from "../utils/cn";
-import { findAssetItem, previewStyleFor } from "../editor/assetLibrary";
+import { findAssetItem } from "../editor/assetLibrary";
 import { composeFilters } from "../editor/effectParams";
 import { appliedEffectToGpu, compileRenderProgram } from "../editor/effectRuntime";
 
@@ -18,6 +18,7 @@ type Props = {
   onSeek: (t: number) => void;
   onOpenImport: () => void;
   hoveredEffectId?: string | null;
+  audioLevel?: number;
 };
 
 /** Map preset labels to WebGL effect parameters */
@@ -77,6 +78,7 @@ export default function PreviewPlayer({
   onSeek,
   onOpenImport,
   hoveredEffectId,
+  audioLevel = 0,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -99,140 +101,7 @@ export default function PreviewPlayer({
     return null;
   }, [clips, assets, time, audibleTracks]);
 
-  // Resolve custom styles for a hovered effect
-  const hoveredPatch = useMemo(() => {
-    if (!hoveredEffectId) return null;
-    const item = findAssetItem(hoveredEffectId);
-    if (!item) return null;
-
-    if (item.tag === "LUT") {
-      const luts: Record<string, any> = {
-        "lut-midnight-cyber": { filter: "contrast(1.35) saturate(1.4) brightness(0.88) hue-rotate(-14deg)", overlay: "linear-gradient(180deg, rgba(124,58,237,0.18), rgba(34,211,238,0.14))", overlayBlend: "screen", overlayOpacity: 0.9 },
-        "lut-teal-orange-car": { filter: "contrast(1.2) saturate(1.35) brightness(1.02) sepia(0.12) hue-rotate(-6deg)" },
-        "lut-high-contrast-matte": { filter: "contrast(1.5) saturate(0.7) brightness(0.98)" },
-        "lut-music-video": { filter: "contrast(1.3) saturate(1.55) brightness(1.05)", overlay: "linear-gradient(135deg, rgba(244,63,94,0.16), transparent 60%)", overlayBlend: "screen", overlayOpacity: 0.9 },
-        "lut-warm-vintage": { filter: "sepia(0.35) contrast(1.1) saturate(0.9) brightness(1.02)" },
-        "lut-blockbuster": { filter: "contrast(1.28) saturate(1.25) brightness(0.95)", overlay: "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.35) 100%)", overlayBlend: "multiply", overlayOpacity: 1 },
-        "lut-nordic-cool": { filter: "contrast(1.1) saturate(0.85) brightness(1.05) hue-rotate(-4deg)" },
-        "lut-golden-commercial": { filter: "contrast(1.15) saturate(1.3) brightness(1.08) sepia(0.15)" },
-        "lut-noir-street": { filter: "grayscale(1) contrast(1.4) brightness(0.95)" },
-        "lut-fashion-bleach": { filter: "contrast(1.25) saturate(0.55) brightness(1.1)" },
-      };
-      return luts[item.id] ?? { filter: "contrast(1.15) saturate(1.15)", presetLabel: item.name };
-    }
-    if (item.tag === "MAGIC") {
-      const magic: Record<string, any> = {
-        "dl-anamorphic-halation": { filter: "brightness(1.06) saturate(1.2)", overlay: "radial-gradient(ellipse at 70% 40%, rgba(56,189,248,0.5), transparent 45%), linear-gradient(90deg, transparent 20%, rgba(56,189,248,0.35) 50%, transparent 80%)", overlayBlend: "screen", overlayOpacity: 0.85 },
-        "dl-lens-streak": { overlay: "linear-gradient(90deg, transparent 30%, rgba(224,242,254,0.55) 50%, transparent 70%)", overlayBlend: "screen", overlayOpacity: 0.75 },
-        "dl-reactive-flare": { overlay: "radial-gradient(circle at 65% 35%, rgba(255,240,180,0.85), transparent 35%)", overlayBlend: "screen", overlayOpacity: 0.9, filter: "brightness(1.05)" },
-        "dl-neon-halation": { filter: "saturate(1.4) brightness(1.05)", overlay: "radial-gradient(ellipse at 30% 50%, rgba(236,72,153,0.35), transparent 45%), radial-gradient(ellipse at 75% 60%, rgba(34,211,238,0.3), transparent 50%)", overlayBlend: "screen", overlayOpacity: 0.9 },
-        "dl-golden-diffusion": { filter: "brightness(1.08) saturate(1.1) blur(0.4px)", overlay: "radial-gradient(ellipse at center, rgba(251,191,36,0.2), transparent 70%)", overlayBlend: "screen", overlayOpacity: 0.85 },
-        "dl-halogen-warm": { filter: "sepia(0.18) brightness(1.05) saturate(1.15)", overlay: "radial-gradient(ellipse at 20% 70%, rgba(251,191,36,0.32), transparent 55%)", overlayBlend: "screen", overlayOpacity: 0.85 },
-        "dl-window-god-rays": { overlay: "linear-gradient(-60deg, transparent 40%, rgba(254,243,199,0.4) 55%, transparent 70%)", overlayBlend: "screen", overlayOpacity: 0.9, filter: "brightness(1.05)" },
-        "dl-magic-sparkle": { overlay: "radial-gradient(circle at 25% 30%, rgba(255,255,255,0.6) 0 1px, transparent 2px), radial-gradient(circle at 70% 45%, rgba(255,255,255,0.6) 0 1px, transparent 2px), radial-gradient(circle at 80% 75%, rgba(255,255,255,0.6) 0 1px, transparent 2px)", overlayBlend: "screen", overlayOpacity: 0.9 },
-      };
-      return magic[item.id] ?? { overlay: "radial-gradient(ellipse at 60% 40%, rgba(255,240,200,0.4), transparent 50%)", overlayBlend: "screen", overlayOpacity: 0.85, presetLabel: item.name };
-    }
-    if (item.tag === "GLITCH") {
-      const shakePresets: Record<string, any> = {
-        "gl-rgb-motion": { filter: "saturate(1.4) contrast(1.15) hue-rotate(6deg)", posX: 4, posY: -3 },
-        "gl-chromatic-speed": { filter: "saturate(1.5) contrast(1.2) hue-rotate(-8deg)", posX: -5, posY: 2 },
-        "gl-datamosh-burst": { filter: "contrast(1.3) saturate(1.35) hue-rotate(12deg)", overlay: "repeating-linear-gradient(0deg, rgba(220,38,38,0.12) 0 2px, transparent 2px 4px)", overlayBlend: "screen", overlayOpacity: 0.9 },
-        "gl-signal-jitter": { filter: "saturate(1.3) contrast(1.2)", posX: 3 },
-        "gl-pixel-shatter": { filter: "contrast(1.4) saturate(1.5)", overlay: "repeating-linear-gradient(90deg, rgba(168,85,247,0.15) 0 1px, transparent 1px 3px)", overlayBlend: "screen", overlayOpacity: 0.9 },
-        "gl-tape-warp": { filter: "contrast(1.15) saturate(1.25) hue-rotate(-6deg)", overlay: "repeating-linear-gradient(0deg, rgba(0,0,0,0.2) 0 1px, transparent 1px 4px)", overlayBlend: "multiply", overlayOpacity: 0.85 },
-        "gl-vhs-bar": { filter: "contrast(1.2) saturate(1.35)", overlay: "linear-gradient(180deg, transparent 40%, rgba(34,197,94,0.35) 48%, transparent 56%)", overlayBlend: "screen", overlayOpacity: 0.9 },
-      };
-      return shakePresets[item.id] ?? { filter: "saturate(1.3) hue-rotate(8deg)", posX: 3, presetLabel: item.name };
-    }
-    if (item.tag === "ATMOS") {
-      const atmos: Record<string, any> = {
-        "atm-cyberpunk-shift": { filter: "contrast(1.15) saturate(1.3)", overlay: "linear-gradient(135deg, rgba(236,72,153,0.32), rgba(124,58,237,0.24), rgba(34,211,238,0.28))", overlayBlend: "screen", overlayOpacity: 0.85 },
-        "atm-sunset-wash": { filter: "saturate(1.15) brightness(1.05)", overlay: "linear-gradient(180deg, rgba(245,158,11,0.3), rgba(244,114,182,0.22))", overlayBlend: "soft-light", overlayOpacity: 0.9 },
-        "atm-teal-mist": { filter: "contrast(1.05) saturate(0.9)", overlay: "linear-gradient(180deg, rgba(14,116,144,0.35), rgba(226,232,240,0.15))", overlayBlend: "screen", overlayOpacity: 0.9 },
-        "atm-magenta-drift": { overlay: "linear-gradient(135deg, rgba(236,72,153,0.35), rgba(253,242,248,0.15))", overlayBlend: "screen", overlayOpacity: 0.85, filter: "saturate(1.2)" },
-        "atm-blue-hour": { filter: "hue-rotate(-6deg) saturate(1.15)", overlay: "linear-gradient(180deg, rgba(15,23,42,0.35), rgba(56,189,248,0.25))", overlayBlend: "screen", overlayOpacity: 0.85 },
-        "atm-warm-window": { overlay: "radial-gradient(ellipse at 15% 60%, rgba(251,191,36,0.45), transparent 55%)", overlayBlend: "screen", overlayOpacity: 0.9, filter: "saturate(1.1)" },
-        "atm-pastel-dream": { filter: "saturate(0.95) brightness(1.08)", overlay: "linear-gradient(135deg, rgba(253,164,175,0.3), rgba(165,243,252,0.25))", overlayBlend: "screen", overlayOpacity: 0.9 },
-        "atm-red-hallway": { filter: "saturate(1.35) contrast(1.15)", overlay: "radial-gradient(ellipse at center, rgba(220,38,38,0.3), rgba(127,29,29,0.2))", overlayBlend: "multiply", overlayOpacity: 0.9 },
-      };
-      return atmos[item.id] ?? { overlay: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(34,211,238,0.2))", overlayBlend: "screen", overlayOpacity: 0.9, presetLabel: item.name };
-    }
-    if (item.tag === "RAMP" || item.tag === "STYLE" || item.tag === "MOTION") {
-      const ramp: Record<string, any> = {
-        "sr-bass-drop": { speed: 200, filter: "contrast(1.15) saturate(1.25)" },
-        "sr-slowmo-freeze": { speed: 30, filter: "contrast(1.1)" },
-        "sr-punch-in-ramp": { speed: 180, scale: 118 },
-        "sr-time-warp": { speed: 65, scale: 108, rotation: -3 },
-        "sr-bpm-cut": { speed: 140 },
-        "sr-ease-in-out": { speed: 85 },
-        "sr-hyperlapse": { speed: 320 },
-        "trending-drone-ascend": { scale: 115, rotation: 2 },
-        "trending-fpv-smooth": { scale: 110, rotation: -3 },
-        "trending-snap-zoom-out": { scale: 85 },
-        "style-crane-lift": { scale: 118, posY: -20 },
-        "style-explosion-pull": { scale: 75, filter: "contrast(1.25) saturate(1.3)" },
-        "style-time-lapse": { speed: 300, filter: "brightness(1.05) saturate(1.2)" },
-      };
-      return ramp[item.id] ?? { speed: 150, presetLabel: item.name };
-    }
-    if (item.tag === "FILM") {
-      const filmMap: Record<string, any> = {
-        "vf-film-16k-grain": { filter: "contrast(1.08) saturate(0.95) brightness(1.02)", overlay: "repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04) 0 1px, transparent 1px 2px)", overlayBlend: "overlay", overlayOpacity: 0.9 },
-        "vf-anamorphic-pro": { overlay: "linear-gradient(90deg, transparent 30%, rgba(56,189,248,0.5) 50%, transparent 70%)", overlayBlend: "screen", overlayOpacity: 0.85, filter: "brightness(1.05) saturate(1.15)" },
-        "vf-ultra-light-leaks": { overlay: "linear-gradient(135deg, rgba(245,158,11,0.5), transparent 60%)", overlayBlend: "screen", overlayOpacity: 0.9 },
-        "vf-optical-blur-trans": { filter: "blur(0.6px) brightness(1.05)" },
-        "vf-chroma-gradient": { overlay: "linear-gradient(135deg, rgba(34,211,238,0.28), rgba(244,63,94,0.24), rgba(249,115,22,0.22))", overlayBlend: "screen", overlayOpacity: 0.9 },
-        "vf-shutter-30": { filter: "contrast(1.15) brightness(0.95)" },
-        "vf-lens-breathing": { scale: 105, filter: "brightness(1.02)" },
-        "vf-cin-print-3perf": { filter: "sepia(0.15) contrast(1.1) saturate(1.05)" },
-        "vf-vignette-natural": { overlay: "radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%)", overlayBlend: "multiply", overlayOpacity: 1 },
-        "vf-lens-dirt": { overlay: "radial-gradient(circle at 30% 40%, rgba(251,191,36,0.15), transparent 12%), radial-gradient(circle at 65% 60%, rgba(251,191,36,0.12), transparent 15%)", overlayBlend: "screen", overlayOpacity: 0.85 },
-      };
-      return filmMap[item.id] ?? { filter: "contrast(1.1) saturate(1.05)", presetLabel: item.name };
-    }
-    if (item.isAiPro || item.tag === "AI" || item.tag === "AI_AUDIO") {
-      const ai: Record<string, any> = {
-        "smart-panda-16k": { filter: "contrast(1.12) saturate(1.15) brightness(1.03)" },
-        "smart-neural-cutout": { filter: "contrast(1.05)", overlay: "radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.35))", overlayBlend: "multiply", overlayOpacity: 1 },
-        "smart-portrait-glow": { filter: "brightness(1.08) saturate(1.15) blur(0.4px) contrast(0.98)" },
-        "smart-cyberpunk-glitch": { filter: "saturate(1.5) contrast(1.25) hue-rotate(-14deg)", overlay: "linear-gradient(135deg, rgba(236,72,153,0.2), rgba(34,211,238,0.2))", overlayBlend: "screen", overlayOpacity: 0.9 },
-        "smart-body-morph": { scale: 108, filter: "contrast(1.05)" },
-        "smart-color-match": { filter: "contrast(1.2) saturate(1.25) brightness(1.02) sepia(0.08)" },
-        "smart-face-relight": { filter: "brightness(1.12) contrast(1.05)", overlay: "radial-gradient(ellipse at 50% 40%, rgba(251,191,36,0.28), transparent 55%)", overlayBlend: "screen", overlayOpacity: 0.85 },
-        "smart-scene-upscale": { filter: "contrast(1.15) saturate(1.15) brightness(1.05)" },
-        "smart-sky-replace": { overlay: "linear-gradient(180deg, rgba(56,189,248,0.45), transparent 45%)", overlayBlend: "screen", overlayOpacity: 0.9 },
-        "smart-lip-sync": { filter: "contrast(1.05) saturate(1.1)" },
-        "smart-object-remove": { filter: "contrast(1.05)" },
-        "smart-audio-separation": { filter: "saturate(1.1) brightness(1.05)", overlay: "linear-gradient(90deg, rgba(6,182,212,0.1), transparent)", overlayBlend: "screen", overlayOpacity: 0.5 },
-      };
-      const p = ai[item.id];
-      if (p) return p;
-    }
-
-    // fallback
-    const preview = previewStyleFor(item.glyph);
-    const patch: any = {};
-    if (preview.filter) patch.filter = preview.filter;
-    if (preview.overlay) {
-      patch.overlay = preview.overlay;
-      patch.overlayBlend = preview.overlayMix;
-      patch.overlayOpacity = preview.overlayOpacity;
-    }
-    patch.presetLabel = item.name;
-    return patch;
-  }, [hoveredEffectId]);
-
-  const mergedEffects = useMemo(() => {
-    if (!active) return null;
-    if (hoveredPatch) {
-      return {
-        ...active.clip.effects,
-        ...hoveredPatch,
-      };
-    }
-    return active.clip.effects;
-  }, [active, hoveredPatch]);
+  const mergedEffects = useMemo(() => active?.clip.effects ?? null, [active]);
 
   // Initialize WebGL processor when video is ready
   useEffect(() => {
@@ -282,9 +151,10 @@ export default function PreviewPlayer({
   // Apply effects to processor
   useEffect(() => {
     if (!webglSupported) return;
+    videoProcessor.setAudioLevel(audioLevel);
     videoProcessor.setEffects(activeEffects);
     if (activeEffects.length === 0) setGpuFrameReady(false);
-  }, [activeEffects, webglSupported]);
+  }, [activeEffects, webglSupported, audioLevel]);
 
   // Start/stop processing based on playback
   useEffect(() => {

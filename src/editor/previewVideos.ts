@@ -25,7 +25,15 @@ function hash(id: string) {
 }
 
 export function previewClipFor(id: string): string {
-  return CLIPS[hash(id) % CLIPS.length];
+  const clip = CLIPS[hash(id) % CLIPS.length];
+  // Media fragments give every preset a unique URL and opening frame even when
+  // the compact source pool reuses the same efficiently cached video file.
+  return `${clip}#t=${previewOffsetFor(id).toFixed(3)}`;
+}
+
+/** A deterministic in-clip offset makes every preset card begin on a distinct frame. */
+export function previewOffsetFor(id: string): number {
+  return 0.35 + (hash(`${id}:offset`) % 5200) / 1000;
 }
 
 export const PREVIEW_CLIPS = CLIPS;

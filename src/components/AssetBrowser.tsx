@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { composeFilters } from "../editor/effectParams";
 import { cn } from "../utils/cn";
 import {
   AUDIO_LIB,
@@ -26,7 +25,8 @@ import {
 } from "../editor/assetLibrary";
 import AiToolPopup from "./AiToolPopup";
 import LivePreviewVideo from "./LivePreviewVideo";
-import { previewClipFor } from "../editor/previewVideos";
+import { previewClipFor, previewOffsetFor } from "../editor/previewVideos";
+import { compileRenderProgram } from "../editor/effectRuntime";
 
 
 type Props = {
@@ -865,6 +865,20 @@ function AssetCard({
   }, [item.name, item.tag]);
 
   const preview = previewStyleFor(item.glyph);
+  const renderProgram = useMemo(() => item.renderProgram ?? compileRenderProgram(item), [item]);
+  const previewEffect = useMemo(
+    () => ({
+      type: renderProgram.type,
+      intensity: renderProgram.intensity,
+      color: renderProgram.color,
+      seed: renderProgram.seed,
+      motion: renderProgram.motion,
+      warp: renderProgram.warp,
+      trail: renderProgram.trail,
+      audio: renderProgram.type === "voiceSync" ? 0.8 : 0,
+    }),
+    [renderProgram]
+  );
 
 
   return (
@@ -920,10 +934,12 @@ function AssetCard({
         */}
         <LivePreviewVideo
           src={previewClipFor(item.id)}
+          startOffset={previewOffsetFor(item.id)}
           hovered={localHovered}
-          animateClass={localHovered ? cardStyles.animateClass : undefined}
+          effect={previewEffect}
+          animateClass={localHovered && renderProgram.type === "procedural" ? cardStyles.animateClass : undefined}
           style={{
-            filter: composeFilters([preview.filter, cardStyles.filter]) || undefined,
+            filter: undefined,
             transform: preview.transform,
             transformOrigin: "center center",
           }}
@@ -1008,8 +1024,11 @@ function AssetCard({
         )}
       </div>
       <div className="flex items-center gap-1 px-2 py-1.5">
-        <div className="min-w-0 flex-1 truncate text-[10.5px] font-medium text-zinc-200">
-          {item.name}
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[10.5px] font-medium text-zinc-200">{item.name}</div>
+          <div className="mt-0.5 truncate font-mono text-[7.5px] text-zinc-600">
+            {renderProgram.logicId}
+          </div>
         </div>
         <button
           onClick={(e) => {

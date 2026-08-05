@@ -20,15 +20,13 @@ import {
 } from "../components/Modals";
 import AssetBrowser from "../components/AssetBrowser";
 import { AssetItem, AssetTab, findAssetItem } from "../editor/assetLibrary";
-import { compileRenderProgram, requiresLocalAnalysis } from "../editor/effectRuntime";
+import { appliedEffectToGpu, compileRenderProgram, requiresLocalAnalysis } from "../editor/effectRuntime";
 import EffectControlPanel from "../components/EffectControlPanel";
 import {
   EffectFamily,
   ParamValues,
   defaultValues,
   familyFor,
-  paramsToVisual,
-  composeFilters,
 } from "../editor/effectParams";
 import { previewClipFor } from "../editor/previewVideos";
 import {
@@ -204,6 +202,7 @@ export default function App() {
   const [browserOpen, setBrowserOpen] = useState(false);
   const [browserTab, setBrowserTab] = useState<AssetTab>("effects");
   const [hoveredEffectId, setHoveredEffectId] = useState<string | null>(null);
+  const [audioReactiveLevel, setAudioReactiveLevel] = useState(0);
   const openAssetBrowser = useCallback((t: AssetTab = "effects") => {
     setBrowserTab(t);
     setBrowserOpen(true);
@@ -1085,11 +1084,9 @@ export default function App() {
       // the compiled CSS from the live parameters replaces the static preset look.
       const family = override?.family ?? familyFor(item.name, item.tag);
       const params = override?.params ?? defaultValues(family);
-      const visual = paramsToVisual(family, params);
       const renderProgram = item.renderProgram ?? compileRenderProgram(item);
       const needsAnalysis = requiresLocalAnalysis(item);
       const finalPatch: Partial<ClipEffects> = {
-        ...patch,
         presetLabel: item.name,
         // Library presets are rendered by their unique GPU program. CSS is
         // reserved for manual clip corrections, never used as an FX fallback.
@@ -1148,15 +1145,11 @@ export default function App() {
   const updateFxParams = useCallback(
     (next: ParamValues, presetName?: string) => {
       if (!selectedFx || !fxSelection) return;
-      const visual = paramsToVisual(fxSelection.family, next);
       updateAppliedEffect(selectedFx.clipId, selectedFx.effectId, {
         params: next,
         preset: presetName ?? fxSelection.ae.preset,
         family: fxSelection.family,
-        filter: visual.filter,
-        overlay: visual.overlay,
-        overlayBlend: visual.overlayBlend,
-        intensity: Math.round((visual.overlayOpacity ?? 1) * 100),
+        intensity: fxSelection.ae.intensity,
       });
     },
     [selectedFx, fxSelection, updateAppliedEffect]
@@ -1322,6 +1315,7 @@ export default function App() {
           onSeek={seek}
           onOpenImport={openImport}
           hoveredEffectId={hoveredEffectId}
+          audioLevel={audioReactiveLevel}
         />
         {workspace === "color" && panels.lumetri && (
           <div key="ws-color" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
@@ -1401,7 +1395,7 @@ export default function App() {
         {panels.audioMeters && <AudioMeters playing={playing} hasAudio={clips.length > 0} />}
       </div>
 
-      <AudioEngine assets={assets} clips={clips} time={time} playing={playing} audibleTracks={audibleTracks} />
+      <AudioEngine assets={assets} clips={clips} time={time} playing={playing} audibleTracks={audibleTracks} onLevel={setAudioReactiveLevel} />
 
       {/* ===== Modals ===== */}
       {modal?.kind === "confirmNew" && (
@@ -1473,6 +1467,7 @@ export default function App() {
           processingState={fxSelection.ae.processingState}
           processingProgress={fxSelection.ae.processingProgress}
           processingMessage={fxSelection.ae.processingMessage}
+          effect={appliedEffectToGpu(fxSelection.ae, fxSelection.ae.sourceItemId ? findAssetItem(fxSelection.ae.sourceItemId) : null)}
           onClose={() => setSelectedFx(null)}
           onDelete={() => deleteAppliedEffect(fxSelection.clip.id, fxSelection.ae.id)}
           onApply={() => {

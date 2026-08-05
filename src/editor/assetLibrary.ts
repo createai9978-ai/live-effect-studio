@@ -331,7 +331,8 @@ function makeSet(spec: SetSpec): AssetItem[] {
         isExclusive: i % 9 === 0,
         isAiPro: spec.ai || undefined,
         tags: [pool[i % pool.length]],
-        preview: presetStills[i % presetStills.length],
+        // Generated presets use live video + a seeded shader, never recycled still thumbnails.
+        preview: undefined,
       });
     asset.renderProgram = compileRenderProgram(asset);
     out.push(asset);

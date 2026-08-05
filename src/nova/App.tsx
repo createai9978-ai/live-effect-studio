@@ -1150,7 +1150,7 @@ export default function App() {
         params: next,
         preset: presetName ?? fxSelection.ae.preset,
         family: fxSelection.family,
-        intensity: Math.round((visual.overlayOpacity ?? 1) * 100),
+        intensity: fxSelection.ae.intensity,
       });
     },
     [selectedFx, fxSelection, updateAppliedEffect]

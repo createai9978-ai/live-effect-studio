@@ -18,6 +18,7 @@ type Props = {
   onSeek: (t: number) => void;
   onOpenImport: () => void;
   hoveredEffectId?: string | null;
+  audioLevel?: number;
 };
 
 /** Map preset labels to WebGL effect parameters */
@@ -77,6 +78,7 @@ export default function PreviewPlayer({
   onSeek,
   onOpenImport,
   hoveredEffectId,
+  audioLevel = 0,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -223,16 +225,7 @@ export default function PreviewPlayer({
     return patch;
   }, [hoveredEffectId]);
 
-  const mergedEffects = useMemo(() => {
-    if (!active) return null;
-    if (hoveredPatch) {
-      return {
-        ...active.clip.effects,
-        ...hoveredPatch,
-      };
-    }
-    return active.clip.effects;
-  }, [active, hoveredPatch]);
+  const mergedEffects = useMemo(() => active?.clip.effects ?? null, [active]);
 
   // Initialize WebGL processor when video is ready
   useEffect(() => {
@@ -282,9 +275,10 @@ export default function PreviewPlayer({
   // Apply effects to processor
   useEffect(() => {
     if (!webglSupported) return;
+    videoProcessor.setAudioLevel(audioLevel);
     videoProcessor.setEffects(activeEffects);
     if (activeEffects.length === 0) setGpuFrameReady(false);
-  }, [activeEffects, webglSupported]);
+  }, [activeEffects, webglSupported, audioLevel]);
 
   // Start/stop processing based on playback
   useEffect(() => {

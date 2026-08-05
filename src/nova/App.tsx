@@ -204,6 +204,7 @@ export default function App() {
   const [browserOpen, setBrowserOpen] = useState(false);
   const [browserTab, setBrowserTab] = useState<AssetTab>("effects");
   const [hoveredEffectId, setHoveredEffectId] = useState<string | null>(null);
+  const [audioReactiveLevel, setAudioReactiveLevel] = useState(0);
   const openAssetBrowser = useCallback((t: AssetTab = "effects") => {
     setBrowserTab(t);
     setBrowserOpen(true);
@@ -1089,7 +1090,6 @@ export default function App() {
       const renderProgram = item.renderProgram ?? compileRenderProgram(item);
       const needsAnalysis = requiresLocalAnalysis(item);
       const finalPatch: Partial<ClipEffects> = {
-        ...patch,
         presetLabel: item.name,
         // Library presets are rendered by their unique GPU program. CSS is
         // reserved for manual clip corrections, never used as an FX fallback.
@@ -1153,9 +1153,6 @@ export default function App() {
         params: next,
         preset: presetName ?? fxSelection.ae.preset,
         family: fxSelection.family,
-        filter: visual.filter,
-        overlay: visual.overlay,
-        overlayBlend: visual.overlayBlend,
         intensity: Math.round((visual.overlayOpacity ?? 1) * 100),
       });
     },
@@ -1322,6 +1319,7 @@ export default function App() {
           onSeek={seek}
           onOpenImport={openImport}
           hoveredEffectId={hoveredEffectId}
+          audioLevel={audioReactiveLevel}
         />
         {workspace === "color" && panels.lumetri && (
           <div key="ws-color" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
@@ -1401,7 +1399,7 @@ export default function App() {
         {panels.audioMeters && <AudioMeters playing={playing} hasAudio={clips.length > 0} />}
       </div>
 
-      <AudioEngine assets={assets} clips={clips} time={time} playing={playing} audibleTracks={audibleTracks} />
+      <AudioEngine assets={assets} clips={clips} time={time} playing={playing} audibleTracks={audibleTracks} onLevel={setAudioReactiveLevel} />
 
       {/* ===== Modals ===== */}
       {modal?.kind === "confirmNew" && (

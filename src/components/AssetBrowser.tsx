@@ -26,7 +26,8 @@ import {
 } from "../editor/assetLibrary";
 import AiToolPopup from "./AiToolPopup";
 import LivePreviewVideo from "./LivePreviewVideo";
-import { previewClipFor } from "../editor/previewVideos";
+import { previewClipFor, previewOffsetFor } from "../editor/previewVideos";
+import { compileRenderProgram } from "../editor/effectRuntime";
 
 
 type Props = {
@@ -865,6 +866,7 @@ function AssetCard({
   }, [item.name, item.tag]);
 
   const preview = previewStyleFor(item.glyph);
+  const renderProgram = useMemo(() => item.renderProgram ?? compileRenderProgram(item), [item]);
 
 
   return (
@@ -920,10 +922,21 @@ function AssetCard({
         */}
         <LivePreviewVideo
           src={previewClipFor(item.id)}
+          startOffset={previewOffsetFor(item.id)}
           hovered={localHovered}
-          animateClass={localHovered ? cardStyles.animateClass : undefined}
+          effect={{
+            type: renderProgram.type,
+            intensity: renderProgram.intensity,
+            color: renderProgram.color,
+            seed: renderProgram.seed,
+            motion: renderProgram.motion,
+            warp: renderProgram.warp,
+            trail: renderProgram.trail,
+            audio: renderProgram.type === "voiceSync" ? 0.8 : 0,
+          }}
+          animateClass={localHovered && renderProgram.type === "procedural" ? cardStyles.animateClass : undefined}
           style={{
-            filter: composeFilters([preview.filter, cardStyles.filter]) || undefined,
+            filter: undefined,
             transform: preview.transform,
             transformOrigin: "center center",
           }}

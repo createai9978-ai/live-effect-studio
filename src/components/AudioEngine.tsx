@@ -8,12 +8,14 @@ export default function AudioEngine({
   time,
   playing,
   audibleTracks,
+  onLevel,
 }: {
   assets: Asset[];
   clips: Clip[];
   time: number;
   playing: boolean;
   audibleTracks: Record<string, boolean>;
+  onLevel?: (level: number) => void;
 }) {
   const active = clips.filter(
     (c) =>
@@ -29,7 +31,7 @@ export default function AudioEngine({
         const asset = assets.find((a) => a.id === clip.assetId);
         if (!asset) return null;
         return (
-          <SyncedAudio key={clip.id} clip={clip} url={asset.url} time={time} playing={playing} />
+            <SyncedAudio key={clip.id} clip={clip} url={asset.url} time={time} playing={playing} onLevel={onLevel} />
         );
       })}
     </div>
@@ -41,13 +43,16 @@ function SyncedAudio({
   url,
   time,
   playing,
+  onLevel,
 }: {
   clip: Clip;
   url: string;
   time: number;
   playing: boolean;
+  onLevel?: (level: number) => void;
 }) {
   const ref = useRef<HTMLAudioElement>(null);
+  const analysisRef = useRef<{ context: AudioContext; analyser: AnalyserNode; raf: number } | null>(null);
 
   // play / pause
   useEffect(() => {
@@ -70,6 +75,36 @@ function SyncedAudio({
       }
     }
   }, [time, playing, clip.start, clip.offset]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !onLevel || !playing) return;
+    const AudioContextCtor = window.AudioContext;
+    const context = new AudioContextCtor();
+    const analyser = context.createAnalyser();
+    analyser.fftSize = 256;
+    const source = context.createMediaElementSource(el);
+    source.connect(analyser);
+    analyser.connect(context.destination);
+    const bins = new Uint8Array(analyser.frequencyBinCount);
+    let raf = 0;
+    const sample = () => {
+      analyser.getByteFrequencyData(bins);
+      const energy = bins.reduce((sum, value) => sum + value, 0) / Math.max(1, bins.length * 255);
+      onLevel(Math.min(1, energy * 2.8));
+      raf = requestAnimationFrame(sample);
+    };
+    sample();
+    analysisRef.current = { context, analyser, raf };
+    return () => {
+      cancelAnimationFrame(raf);
+      source.disconnect();
+      analyser.disconnect();
+      void context.close();
+      analysisRef.current = null;
+      onLevel(0);
+    };
+  }, [playing, onLevel]);
 
   return (
     <audio

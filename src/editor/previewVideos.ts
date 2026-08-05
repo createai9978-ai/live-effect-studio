@@ -28,4 +28,9 @@ export function previewClipFor(id: string): string {
   return CLIPS[hash(id) % CLIPS.length];
 }
 
+/** A deterministic in-clip offset makes every preset card begin on a distinct frame. */
+export function previewOffsetFor(id: string): number {
+  return 0.35 + (hash(`${id}:offset`) % 5200) / 1000;
+}
+
 export const PREVIEW_CLIPS = CLIPS;

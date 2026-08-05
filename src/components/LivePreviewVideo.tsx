@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "../utils/cn";
+import { VideoProcessor, type EffectParams } from "../editor/VideoProcessor";
 
 /**
  * LivePreviewVideo — an always-on, muted, seamlessly looping video preview
@@ -18,17 +19,24 @@ export default function LivePreviewVideo({
   className,
   style,
   animateClass,
+  effect,
+  startOffset = 0,
 }: {
   src: string;
   hovered: boolean;
   className?: string;
   style?: React.CSSProperties;
   animateClass?: string;
+  effect?: EffectParams;
+  startOffset?: number;
 }) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [inView, setInView] = useState(false);
   const [ready, setReady] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const processorRef = useRef<VideoProcessor | null>(null);
+  const [effectReady, setEffectReady] = useState(false);
 
   // Mount / unmount playback based on viewport visibility.
   useEffect(() => {
@@ -58,6 +66,26 @@ export default function LivePreviewVideo({
     }
   }, [inView, hovered]);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!hovered || !effect || !video || !canvas || video.readyState < 2) {
+      processorRef.current?.dispose();
+      processorRef.current = null;
+      setEffectReady(false);
+      return;
+    }
+    const processor = new VideoProcessor();
+    if (!processor.init(canvas, video)) return;
+    processor.setEffects([effect]);
+    processor.start(() => setEffectReady(true));
+    processorRef.current = processor;
+    return () => {
+      processor.dispose();
+      processorRef.current = null;
+    };
+  }, [hovered, effect]);
+
   return (
     <div ref={hostRef} className="absolute inset-0 overflow-hidden">
       {inView && (
@@ -75,6 +103,9 @@ export default function LivePreviewVideo({
           aria-hidden="true"
           onLoadedData={(e) => {
             e.currentTarget.playbackRate = hovered ? 1 : 0.75;
+            if (Number.isFinite(e.currentTarget.duration) && e.currentTarget.duration > startOffset) {
+              e.currentTarget.currentTime = startOffset;
+            }
             setReady(true);
           }}
           className={cn(
@@ -88,6 +119,13 @@ export default function LivePreviewVideo({
           style={style}
         />
       )}
+      <canvas
+        ref={canvasRef}
+        className={cn(
+          "pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-150",
+          hovered && effectReady ? "opacity-100" : "opacity-0"
+        )}
+      />
       {/* Neutral loading surface — deliberately colourless so no tint can bleed through */}
       {!ready && (
         <div className="absolute inset-0 animate-pulse bg-[linear-gradient(110deg,#111218_0%,#191b24_45%,#111218_90%)]" />

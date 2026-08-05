@@ -44,7 +44,10 @@ export function compileRenderProgram(item: Pick<AssetItem, "id" | "name" | "tag"
   } else if (/body|pose|skeleton|face landmark|gaze|tracker|tracking|reframe/.test(text)) {
     type = "bodyTrack";
     engine = "local-ai";
-  } else if (/interpolat|frame blend|slow-mo|time remap|lip sync|voice|beat detect/.test(text)) {
+  } else if (/voice-to-fx|voice emotion|speech-driven|audio reactive/.test(text)) {
+    type = "voiceSync";
+    engine = "local-ai";
+  } else if (/interpolat|frame blend|slow-mo|time remap|lip sync|beat detect/.test(text)) {
     type = "motionVectors";
     engine = "local-ai";
   } else if (/trail|echo|clone|ghost/.test(text)) type = "motionTrail";
@@ -87,6 +90,7 @@ export function appliedEffectToGpu(effect: AppliedEffect, item: AssetItem | null
     motion: Math.max(0, Math.min(1, value(effect.params, "stabilize", value(effect.params, "speed", program.motion * 100)) / 100)),
     warp: Math.max(0, Math.min(1, value(effect.params, "depth", value(effect.params, "rgbSplit", program.warp * 100)) / 100)),
     trail: Math.max(0, Math.min(1, value(effect.params, "motionBlur", value(effect.params, "feather", program.trail * 100)) / 100)),
+    audio: Math.max(0, Math.min(1, value(effect.params, "audioSensitivity", 72) / 100)),
   };
 }
 

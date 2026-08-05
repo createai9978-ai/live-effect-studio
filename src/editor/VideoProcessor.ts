@@ -3,6 +3,9 @@
  * Provides GPU-accelerated real-time effects for the preview player.
  */
 
+import { sampleMotionWithVelocity, type MotionSignature } from "./motionEngine";
+
+
 export type EffectType =
   | "none"
   | "filmGrain"
@@ -47,7 +50,10 @@ export type EffectParams = {
   warp?: number;
   trail?: number;
   audio?: number;
+  /** Unique eased keyframe animation + shutter-angle motion blur for this preset. */
+  motionSig?: MotionSignature;
 };
+
 
 export class VideoProcessor {
   private gl: WebGLRenderingContext | null = null;
@@ -248,6 +254,27 @@ export class VideoProcessor {
     gl.uniform1f(gl.getUniformLocation(this.program, "u_trail"), effect?.trail ?? 0);
     gl.uniform1f(gl.getUniformLocation(this.program, "u_audio"), this.audioLevel * (effect?.audio ?? 1));
 
+    // ---- Keyframed motion + shutter-angle motion blur -------------------
+    const sig = effect?.motionSig;
+    if (sig) {
+      const m = sampleMotionWithVelocity(sig, performance.now() / 1000, 60);
+      gl.uniform2f(gl.getUniformLocation(this.program, "u_mOffset"), m.tx, m.ty);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mScale"), m.scale);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mRot"), m.rot);
+      // Velocity is in UV/frame; scaling by the shutter gives the smear length.
+      gl.uniform2f(gl.getUniformLocation(this.program, "u_mVel"), m.vx, m.vy);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mZoomVel"), m.vScale);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_shutter"), m.shutter);
+    } else {
+      gl.uniform2f(gl.getUniformLocation(this.program, "u_mOffset"), 0, 0);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mScale"), 1);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mRot"), 0);
+      gl.uniform2f(gl.getUniformLocation(this.program, "u_mVel"), 0, 0);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mZoomVel"), 0);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_shutter"), 0);
+    }
+
+
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -319,6 +346,13 @@ const FRAGMENT_SHADER_SOURCE = `
   uniform float u_warp;
   uniform float u_trail;
   uniform float u_audio;
+  uniform vec2 u_mOffset;
+  uniform float u_mScale;
+  uniform float u_mRot;
+  uniform vec2 u_mVel;
+  uniform float u_mZoomVel;
+  uniform float u_shutter;
+
 
   // Pseudo-random noise
   float random(vec2 st) {
@@ -379,6 +413,38 @@ const FRAGMENT_SHADER_SOURCE = `
 
   vec2 safeUV(vec2 uv) { return clamp(uv, vec2(0.002), vec2(0.998)); }
 
+  // Animated affine transform (eased keyframes are solved on the CPU and
+  // delivered as u_mOffset / u_mScale / u_mRot for this exact frame).
+  vec2 motionXform(vec2 uv, float back) {
+    vec2 c = uv - 0.5;
+    float s = sin(-u_mRot);
+    float co = cos(-u_mRot);
+    c = vec2(c.x * co - c.y * s, c.x * s + c.y * co);
+    float sc = max(0.2, u_mScale - u_mZoomVel * back);
+    c /= sc;
+    c -= u_mOffset - u_mVel * back;
+    return c + 0.5;
+  }
+
+  // Cinematic motion blur: accumulate 11 taps across the shutter interval so
+  // fast eased sections smear and held sections stay razor sharp.
+  vec3 motionSample(vec2 uv) {
+    float speed = length(u_mVel) + abs(u_mZoomVel) * 0.6;
+    if (u_shutter < 0.001 || speed < 0.00008) {
+      return texture2D(u_video, safeUV(motionXform(uv, 0.0))).rgb;
+    }
+    vec3 acc = vec3(0.0);
+    float wsum = 0.0;
+    for (int i = 0; i < 11; i++) {
+      float f = float(i) / 10.0;                 // 0..1 across the open shutter
+      float w = 1.0 - 0.55 * f;                  // weight the newest sample most
+      acc += texture2D(u_video, safeUV(motionXform(uv, f * u_shutter * 1.6))).rgb * w;
+      wsum += w;
+    }
+    return acc / wsum;
+  }
+
+
   vec3 blur5(vec2 uv, vec2 direction) {
     vec3 c = texture2D(u_video, safeUV(uv)).rgb * 0.34;
     c += texture2D(u_video, safeUV(uv + direction)).rgb * 0.22;
@@ -389,8 +455,10 @@ const FRAGMENT_SHADER_SOURCE = `
   }
 
   void main() {
-    vec2 uv = v_uv;
-    vec3 color = texture2D(u_video, uv).rgb;
+    // Sample through the preset's own animated transform, with shutter blur.
+    vec2 uv = motionXform(v_uv, 0.0);
+    vec3 color = motionSample(v_uv);
+
 
     if (u_effectType == 1) {
       // Film grain

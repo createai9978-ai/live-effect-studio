@@ -59,11 +59,11 @@ export default function AssetBrowser({
   const [tab, setTab] = useState<AssetTab>(initialTab);
   const [query, setQuery] = useState("");
   const [globalQuery, setGlobalQuery] = useState("");
-  const [activeCat, setActiveCat] = useState<string>("advanced-fx-lab");
+  const [activeCat, setActiveCat] = useState<string>("cinema-grade");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    "advanced-fx-lab": true,
-    "pro-studio-suite": true,
-    "trending-social-suite": true,
+    "cinema-grade": true,
+    "motion-lab": true,
+    "neural-fx": true,
   });
   const [hovered, setHovered] = useState<string | null>(null);
 

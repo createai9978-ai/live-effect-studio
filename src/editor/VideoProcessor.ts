@@ -47,7 +47,10 @@ export type EffectParams = {
   warp?: number;
   trail?: number;
   audio?: number;
+  /** Unique eased keyframe animation + shutter-angle motion blur for this preset. */
+  motionSig?: MotionSignature;
 };
+
 
 export class VideoProcessor {
   private gl: WebGLRenderingContext | null = null;

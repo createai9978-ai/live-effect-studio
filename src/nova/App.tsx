@@ -1115,11 +1115,13 @@ export default function App() {
         setSelected([target]);
         // Close the browser only for click-to-apply. Drop-to-apply keeps it open
         // so the user can drag more effects without reopening.
-        if (!targetClipId) setBrowserOpen(false);
-        showToast(needsAnalysis ? `Analyzing “${item.name}” locally…` : `Applied "${item.name}" — Effect Controls updated`, needsAnalysis ? "info" : "success");
-      } else {
+        if (!targetClipId && !opts?.keepBrowserOpen) setBrowserOpen(false);
+        if (!opts?.silent)
+          showToast(needsAnalysis ? `Analyzing “${item.name}” locally…` : `Applied "${item.name}" — Effect Controls updated`, needsAnalysis ? "info" : "success");
+      } else if (!opts?.silent) {
         showToast(`"${item.name}" copied — drop it on a timeline clip`, "info");
       }
+
     },
     [selected, clips, pushHistory, updateClipEffects, showToast]
   );

@@ -37,6 +37,7 @@ export default function LivePreviewVideo({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const processorRef = useRef<VideoProcessor | null>(null);
   const [effectReady, setEffectReady] = useState(false);
+  const [decodeEpoch, setDecodeEpoch] = useState(0);
 
   // Mount / unmount playback based on viewport visibility.
   useEffect(() => {
@@ -84,7 +85,7 @@ export default function LivePreviewVideo({
       processor.dispose();
       processorRef.current = null;
     };
-  }, [hovered, effect]);
+  }, [hovered, effect, decodeEpoch]);
 
   return (
     <div ref={hostRef} className="absolute inset-0 overflow-hidden">
@@ -94,6 +95,7 @@ export default function LivePreviewVideo({
           src={src}
           autoPlay
           muted
+          crossOrigin="anonymous"
           loop
           playsInline
           preload="auto"
@@ -107,6 +109,7 @@ export default function LivePreviewVideo({
               e.currentTarget.currentTime = startOffset;
             }
             setReady(true);
+            setDecodeEpoch((epoch) => epoch + 1);
           }}
           className={cn(
             "absolute inset-0 h-full w-full object-cover",

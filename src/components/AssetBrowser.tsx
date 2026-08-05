@@ -1024,8 +1024,11 @@ function AssetCard({
         )}
       </div>
       <div className="flex items-center gap-1 px-2 py-1.5">
-        <div className="min-w-0 flex-1 truncate text-[10.5px] font-medium text-zinc-200">
-          {item.name}
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[10.5px] font-medium text-zinc-200">{item.name}</div>
+          <div className="mt-0.5 truncate font-mono text-[7.5px] text-zinc-600">
+            {renderProgram.logicId}
+          </div>
         </div>
         <button
           onClick={(e) => {

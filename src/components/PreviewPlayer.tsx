@@ -94,9 +94,10 @@ export default function PreviewPlayer({
         (c) => c.track === track && time >= c.start && time < c.start + c.duration
       );
       if (clip) {
-        const asset = assets.find((a) => a.id === clip.assetId && a.kind === "video");
+        const asset = assets.find((a) => a.id === clip.assetId && a.kind !== "audio");
         if (asset) return { clip, asset };
       }
+
     }
     return null;
   }, [clips, assets, time, audibleTracks]);
@@ -329,11 +330,12 @@ export default function PreviewPlayer({
                   ...stackedFilters,
                 ]);
 
-                return active.asset.url ? (
+                return active.asset.kind === "video" && active.asset.url ? (
                   <video
                     key={active.clip.id}
                     ref={videoRef}
                     src={active.asset.url}
+
                     playsInline
                     preload="auto"
                     className="h-full w-full object-contain transition-transform duration-75"

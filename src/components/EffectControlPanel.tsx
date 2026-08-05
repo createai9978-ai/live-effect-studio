@@ -356,7 +356,8 @@ export default function EffectControlPanel({
                   </div>
                 </div>
               </div>
-            )}
+            ); })()}
+
 
             {/* Params */}
 

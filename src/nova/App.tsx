@@ -358,7 +358,9 @@ export default function App() {
     (assetId: string, track: TrackId, dropTime: number, offset = 0, durationOverride?: number) => {
       const asset = assets.find((a) => a.id === assetId);
       if (!asset) return;
-      if (videoTracks.includes(track) && asset.kind !== "video") return;
+      if (videoTracks.includes(track) && asset.kind === "audio") return;
+      if (audioTracks.includes(track) && asset.kind !== "audio") return;
+
       if (trackStates[track]?.locked) return;
 
       pushHistory();

@@ -3,6 +3,9 @@
  * Provides GPU-accelerated real-time effects for the preview player.
  */
 
+import { sampleMotionWithVelocity, type MotionSignature } from "./motionEngine";
+
+
 export type EffectType =
   | "none"
   | "filmGrain"

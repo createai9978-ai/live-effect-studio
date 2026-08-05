@@ -254,6 +254,27 @@ export class VideoProcessor {
     gl.uniform1f(gl.getUniformLocation(this.program, "u_trail"), effect?.trail ?? 0);
     gl.uniform1f(gl.getUniformLocation(this.program, "u_audio"), this.audioLevel * (effect?.audio ?? 1));
 
+    // ---- Keyframed motion + shutter-angle motion blur -------------------
+    const sig = effect?.motionSig;
+    if (sig) {
+      const m = sampleMotionWithVelocity(sig, performance.now() / 1000, 60);
+      gl.uniform2f(gl.getUniformLocation(this.program, "u_mOffset"), m.tx, m.ty);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mScale"), m.scale);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mRot"), m.rot);
+      // Velocity is in UV/frame; scaling by the shutter gives the smear length.
+      gl.uniform2f(gl.getUniformLocation(this.program, "u_mVel"), m.vx, m.vy);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mZoomVel"), m.vScale);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_shutter"), m.shutter);
+    } else {
+      gl.uniform2f(gl.getUniformLocation(this.program, "u_mOffset"), 0, 0);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mScale"), 1);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mRot"), 0);
+      gl.uniform2f(gl.getUniformLocation(this.program, "u_mVel"), 0, 0);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_mZoomVel"), 0);
+      gl.uniform1f(gl.getUniformLocation(this.program, "u_shutter"), 0);
+    }
+
+
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);

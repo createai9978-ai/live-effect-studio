@@ -360,316 +360,223 @@ function dedupe(items: AssetItem[]): AssetItem[] {
 
 /* ---------- Filmora-style production suite ---------- */
 
-const fCinematic = makeSet({
-  prefix: "flm-cine", glyph: "star", tag: "LUT",
-  gradient: ["#0b1120", "#1e3a8a"],
-  tags: ["cinematic", "wedding", "travel"],
+/* ==========================================================================
+   NOVA 2026 Signature Library — fully rebuilt. Every legacy preset was retired
+   and replaced with a modern, production-grade catalog: three suites, twelve
+   sub-collections, all driven by unique seeded render programs.
+   ========================================================================== */
+
+/* ---------- Suite A — Cinema Grade ---------- */
+
+const cgSignature = makeSet({
+  prefix: "cg-sig", glyph: "star", tag: "GRADE",
+  gradient: ["#0b1220", "#2563eb"],
+  tags: ["cinematic", "travel", "corporate"],
   names: [
-    "Teal & Orange Blockbuster", "Moody Noir Contrast", "Golden Hour Warmth",
-    "Bleach Bypass Drama", "Kodak 2383 Print", "Nordic Cold Grade",
-    "Anamorphic Night Grade", "Desaturated Steel", "Amber Desert Dusk",
-    "Cyan Shadow Lift", "Filmic Log Rollout", "Crimson Thriller Grade",
-    "Muted Documentary", "Portra 400 Skin", "Emerald Forest Tone",
-    "High Key Wedding", "Low Key Chiaroscuro", "Bronze Metal Grade",
-    "Slate Blue Midnight", "Sepia Memory Fade", "Neon Rain Grade",
-    "Pastel Romance Wash", "Hard Contrast Punch", "Silver Halide Mono",
-    "Cine Green Matrix", "Warm Vintage Super 8", "Cold Clinical White",
-    "Sunburn Highlight Roll", "Velvet Purple Dusk", "Coastal Haze Grade",
-    "Autumn Rust Palette", "Blockbuster Night Chase",
+    "Dune Sandstorm Grade", "Blade Neon Teal", "Oppenheimer Ash Mono", "Midsommar Bloom Warmth",
+    "Wick Emerald Contrast", "Villeneuve Dust Amber", "Fincher Cyan Shadow", "Nolan Steel Contrast",
+    "A24 Pastel Melancholy", "Arri Alexa Natural", "Venice Skin Rollout", "Log-C Filmic Rollout",
+    "Ektachrome Daylight", "Vision3 500T Night", "Cinestill Halide Halo", "Fuji Eterna Soft Print",
+    "Modern Bleach Steel", "Hyperreal HDR Grade", "Charcoal Luxury Tone", "Editorial Champagne Grade",
+    "Onyx Midnight Grade", "Ivory Skin Cinema", "Marine Deep Grade", "Sunbaked Kodachrome",
   ],
 });
 
-const fSplitScreen = makeSet({
-  prefix: "flm-split", glyph: "grid", tag: "SPLIT",
-  gradient: ["#164e63", "#0ea5e9"],
-  tags: ["corporate", "vlog", "gaming"],
-  names: [
-    "2-Up Vertical Split", "3-Way Reaction Grid", "4-Panel Quad View",
-    "Picture-in-Picture Corner", "Diagonal Cinemascope Split", "Sliding Compare Wipe",
-    "Center Focus Triptych", "Mirrored Duo Frame", "Stacked Horizontal Bands",
-    "Circular Inset Bubble", "6-Cell Mosaic Wall", "Offset Magazine Layout",
-    "Tilted Card Stack", "Vertical Story Trio", "Zoom Call Gallery",
-    "Before & After Slider", "Corner Pip Reaction", "Split Beat Grid",
-    "Dual Interview Frame", "Ken Burns Collage", "Polaroid Scatter Grid",
-    "Wide Banner Split", "Nine-Up Contact Sheet", "Cinematic Letterbox Duo",
-  ],
-});
-
-const fMotionElements = makeSet({
-  prefix: "flm-motion", glyph: "sparkle", tag: "ELEMENT",
-  gradient: ["#7c2d12", "#f59e0b"],
-  names: [
-    "Animated Lower Third", "Callout Arrow Pop", "Progress Bar Wipe",
-    "Location Pin Reveal", "Subscribe Bounce Badge", "Neon Frame Element",
-    "Counter Odometer", "Logo Sting Reveal", "Speech Bubble Pop",
-    "Hand Drawn Circle Mark", "Price Tag Slide", "Chapter Marker Bar",
-    "Social Handle Bug", "Timer Countdown Ring", "Rating Star Burst",
-    "Ticker Tape Crawl", "Map Route Trace", "Sound Wave Bars",
-    "Emoji Reaction Float", "Sticker Frame Border", "Ribbon Banner Unroll",
-    "Highlight Marker Swipe", "Data Chart Grow", "Loading Spinner Wipe",
-    "Quote Card Fade", "Notification Toast Slide", "Cursor Click Ripple",
-    "Confetti Element Burst", "Badge Shine Sweep", "End Card Grid Pop",
-  ],
-});
-
-const fSpeedRamp = makeSet({
-  prefix: "flm-ramp", glyph: "trend", tag: "RAMP",
-  gradient: ["#064e3b", "#10b981"],
-  names: [
-    "Velocity Shift Ramp", "Bullet Time Freeze", "Exponential Deceleration",
-    "Beat Drop Sync Ramp", "Smooth Slow-Mo Curve", "Time Warp Curve",
-    "Snap Speed Punch", "Reverse Kick Back", "Hold & Release Ramp",
-    "Double Speed Dash", "Stutter Step Retime", "Ease-In Landing",
-    "Ease-Out Takeoff", "Freeze Frame Hold", "Rolling Boomerang Loop",
-    "Impact Slam Ramp", "Slow Rise Build", "Rapid Cut Accelerate",
-    "Half Speed Drift", "Triple Time Sprint", "Pendulum Ping-Pong",
-    "Whip Speed Handoff", "Micro Jitter Retime", "Cinematic Ramp Down",
-    "Chase Sequence Boost", "Breath Pause Ramp",
-  ],
-});
-
-const fAiPortrait = makeSet({
-  prefix: "flm-ai", glyph: "beauty", tag: "AI", ai: true,
-  gradient: ["#831843", "#f472b6"],
-  tags: ["wedding", "vlog", "cinematic"],
-  names: [
-    "AI Skin Retouch", "Smart Portrait Cutout", "Relight Studio Key",
-    "Auto Motion Blur", "AI Object Tracker", "Depth Blur Bokeh",
-    "Teeth Brighten Pass", "Eye Sparkle Enhance", "Auto Face Slim",
-    "Blemish Cleanup", "Hair Edge Refine", "Skin Tone Balance",
-    "Portrait Rim Light", "Soft Beauty Diffusion", "Under-Eye Recovery",
-    "Auto Head Reframe", "Makeup Tone Match", "Studio Backdrop Swap",
-    "Face Contour Sculpt", "Catchlight Injection", "Neck Shadow Fix",
-    "Natural Glow Balance", "Portrait Depth Fog", "Auto Colour Skin Match",
-  ],
-});
-
-const filmoraAll = dedupe([
-  ...fCinematic, ...fSplitScreen, ...fMotionElements, ...fSpeedRamp, ...fAiPortrait,
-]);
-
-/* ---------- CapCut-style trending suite ---------- */
-
-const ccTransitions = makeSet({
-  prefix: "cc-trans", glyph: "wipe", tag: "TRANSITION",
-  gradient: ["#831843", "#fb7185"],
-  names: [
-    "Whip Pan Sweep", "Zoom Punch Cut", "Spin Blur Drift",
-    "Flash Bang Cut", "Glitch Slice Jump", "Liquid Warp Melt",
-    "Shutter Slide", "3D Cube Flip", "Card Deck Shuffle",
-    "Bounce Drop In", "Elastic Squash Cut", "Roll Credits Scroll",
-    "Camera Roll Tilt", "Blur Dip To White", "Ink Splash Reveal",
-    "Zoom Through Eye", "Clap Snap Cut", "Slide Door Open",
-    "Diagonal Streak Wipe", "Vertical Scroll Feed", "Colour Flash Pop",
-    "Mask Circle Grow", "Handheld Jolt Cut", "Skew Shear Pass",
-    "Pixel Melt Down", "Split Curtain Pull", "Wave Ripple Jump",
-    "Overhead Swipe Away", "Pop Bubble Burst", "Rotate Corner Peel",
-    "Beat Snap Blink", "Chroma Streak Handoff",
-  ],
-});
-
-const ccCaptions = makeSet({
-  prefix: "cc-text", glyph: "text", tag: "TEXT",
-  gradient: ["#1e1b4b", "#6366f1"],
-  names: [
-    "Auto Caption Karaoke", "Word-by-Word Pop", "Bold Highlight Sub",
-    "Typewriter Caption", "Neon Outline Title", "Bounce Emoji Caption",
-    "Podcast Wave Caption", "Shake Impact Title", "Handwritten Scribble Text",
-    "3D Extrude Headline", "Gradient Fill Sub", "Sticker Box Caption",
-    "Chrome Metal Title", "Blur Focus Reveal Text", "Marquee Scroll Line",
-    "Speech Bubble Sub", "Glitch Type Caption", "Counter Number Roll",
-    "Vertical Stack Kicker", "Lyric Beat Highlight", "Fade Whisper Text",
-    "Bubble Pop Keyword", "Split Colour Word", "Outline Trace Draw",
-    "Retro Terminal Caption", "Rainbow Cycle Text", "Drop Shadow Punch",
-    "Minimal Serif Lower Third",
-  ],
-});
-
-const ccBody = makeSet({
-  prefix: "cc-body", glyph: "portrait", tag: "BODY",
-  gradient: ["#4a044e", "#d946ef"],
-  tags: ["music", "vlog", "gaming"],
-  names: [
-    "Body Glow Outline", "Silhouette Trail Echo", "Clone Motion Trail",
-    "Neon Skeleton Track", "Aura Pulse Wrap", "Freeze Frame Cutout",
-    "Shadow Twin Step", "Particle Body Dissolve", "Electric Edge Arc",
-    "Fire Aura Wrap", "Ice Frost Silhouette", "Rainbow Motion Echo",
-    "Ghost Fade Duplicate", "Sticker Pop Cutout", "Outline Comic Ink",
-    "Halo Ring Orbit", "Body Zoom Isolation", "Smoke Trail Follow",
-    "Star Sparkle Contour", "Chrome Body Shine", "Pixel Dissolve Body",
-    "Wireframe Scan Pass", "Spotlight Subject Lock", "Shockwave Impact Ring",
-  ],
-});
-
-const ccAesthetic = makeSet({
-  prefix: "cc-aes", glyph: "film", tag: "FILTER",
-  gradient: ["#312e81", "#22d3ee"],
-  names: [
-    "Clean Girl Soft Glow", "Y2K Camcorder", "Tokyo Neon Night",
-    "Film Grain Vintage", "Pastel Dream Fade", "HDR Punch Pop",
-    "Cold Blue Aesthetic", "Sunset Peach Fade", "Matte Mocha Tone",
-    "Grunge Green Wash", "Milky Film Haze", "Cherry Blossom Pink",
-    "Moody Rainy Day", "Beach Golden Pop", "Indie Fade Contrast",
-    "Kodak Summer Warmth", "Monochrome Street", "Retro Poster Print",
-    "Cotton Candy Sky", "Cyber Violet Wash", "Soft Focus Diary",
-    "Overexposed Film Burn", "Deep Teal Skate", "Sepia Journal Tone",
-    "Frosted Glass Bloom", "Vintage Magazine Scan", "Dark Academia Tone",
-    "Sunkissed Skin Filter", "Denim Blue Wash", "Faded VHS Pastel",
-  ],
-});
-
-const ccViral = makeSet({
-  prefix: "cc-viral", glyph: "trend", tag: "VIRAL",
-  gradient: ["#7f1d1d", "#f97316"],
-  names: [
-    "Velocity Edit Beat Sync", "Shake On Bass Hit", "Vlog Snap Zoom",
-    "Trending Photo Slideshow", "Anime Impact Frame", "Retro Bounce Loop",
-    "Transition Pack Combo", "Slow Zoom Suspense", "Rapid Cut Montage",
-    "Drop Shadow Bounce", "Mirror Flip Beat", "Strobe Flash Sync",
-    "Punch-In Reaction", "Text Beat Slam", "Zoom Shake Combo",
-    "Chorus Speed Burst", "Freeze Pose Drop", "Colour Pop Highlight",
-    "Handheld Chaos Cam", "Split Beat Bounce", "Countdown Hype Intro",
-    "Cinematic B-Roll Flow", "Meme Zoom Stack", "Loop Seamless Rewind",
-    "Motion Tile Echo", "Trend Outro Card",
-  ],
-});
-
-const capcutAll = dedupe([
-  ...ccTransitions, ...ccCaptions, ...ccBody, ...ccAesthetic, ...ccViral,
-]);
-
-
-/* ---------- Advanced FX Lab (Premiere / Filmora / CapCut pro tier) ---------- */
-
-const axAi = makeUnique({
-  prefix: "ax-ai", glyph: "beauty", tag: "AI", ai: true,
-  gradient: ["#2e1065", "#a855f7"],
-  tags: ["ai", "cinematic", "vlog", "music"],
-  names: [
-    "Smart Body Tracking", "Neural Rotoscope", "AI Depth Estimator", "Voice-to-FX Sync",
-    "AI Sky Replacement", "Neural Style Transfer", "Auto Reframe Tracker", "AI Motion Interpolation",
-    "Pose Skeleton Overlay", "AI Face Landmark Warp", "Semantic Object Removal", "AI Background Blur Matte",
-    "Speech-Driven Caption Beat", "AI Scene Detect Cutter", "Neural Upscale 4K Boost", "AI Denoise Low Light",
-    "Hand Gesture Trigger FX", "AI Eye Contact Fix", "Depth-Aware Light Wrap", "AI Color Match Shot",
-    "Neural Frame Blend Slow-Mo", "AI Crowd Duplicator", "Gaze Tracking Vignette", "AI Lip Sync Retime",
-    "Neural Green Screen Key", "AI Shadow Reconstruction", "Motion Vector Trail", "AI Beat Detect Ramp",
-    "Neural Grain Remover", "AI Portrait Relight Rig", "Depth Parallax 2.5D", "AI Text-to-Overlay",
-    "Segmented Body Recolor", "AI Camera Shake Stabilizer", "Neural Occlusion Masking", "AI Voice Emotion Glow",
-    "Auto Object Highlight Ring", "AI Silhouette Extractor", "Neural Time Remap", "AI Subject Isolation Pop",
-    "Depth Fog Simulation", "AI Reaction Zoom Detect",
-  ],
-});
-
-const axTransitions = makeUnique({
-  prefix: "ax-trans", glyph: "wipe", tag: "TRANSITION",
-  gradient: ["#0c4a6e", "#38bdf8"],
-  tags: ["cinematic", "music", "travel", "gaming"],
-  names: [
-    "Seamless Light Burst", "Optical Zoom Blur", "Directional Slit Slice", "Velocity Ramp Cut",
-    "Lens Distortion Warp Pass", "Radial Streak Dissolve", "Prism Refraction Wipe", "Motion Blur Roll",
-    "Camera Whip Handoff", "Luma Fade Through Black", "Ink Bleed Reveal", "Paper Tear Transition",
-    "Star Wipe Retro Cut", "Kaleidoscope Fold", "Vertical Blinds Sweep", "Circle Iris Expand",
-    "Depth Push Through Wall", "Shatter Glass Break", "Liquid Mercury Flow", "Smoke Dissolve Pass",
-    "Light Leak Handoff", "Barrel Roll Spin", "Anamorphic Streak Swipe", "Cross Zoom Punch Out",
-    "Page Curl Fold", "Pixel Sort Dissolve", "Ripple Water Warp", "Neon Line Sweep",
-    "Split Slide Apart", "Rotating Cube Corner", "Sky Match Cut", "Freeze Frame Push",
-    "Bokeh Bloom Transition", "Vortex Twirl Pass", "Slice Grid Shuffle", "Time Echo Bleed",
-    "Speed Line Rush", "Mask Shape Morph", "Warp Stabilizer Snap", "Chromatic Fade Bloom",
-  ],
-});
-
-const axGlitch = makeUnique({
-  prefix: "ax-glitch", glyph: "vhs", tag: "GLITCH",
-  gradient: ["#4c1d95", "#8b5cf6"],
-  tags: ["retro", "gaming", "music"],
-  names: [
-    "CRT Phosphor Jitter", "VHS Scanlines", "RGB Channel Split", "Cyberpunk Neon Glow",
-    "Datamosh Smear Frames", "Signal Loss Static", "Tracking Error Roll", "Bad TV Interference",
-    "Pixel Sort Corruption", "Analog Tape Warble", "Chromatic Shockwave", "Digital Block Artifact",
-    "Hologram Flicker", "Old Film Jitter Gate", "Camcorder Timestamp 1994", "Betamax Colour Bleed",
-    "Broken LCD Lines", "Terminal Green Phosphor", "Vaporwave Grid Horizon", "Retro Arcade Scan",
-    "Glitch Text Corruption", "Frame Drop Stutter", "Magnetic Tape Damage", "Neon Wireframe Pulse",
-    "Screen Tear Displace", "Static Noise Burst", "8-Bit Pixelate Crush", "Rolling Shutter Skew",
-    "CRT Barrel Curvature", "Ghost Image Echo", "Cyber Grid Overlay", "Halftone Print Dither",
-    "Circuit Trace Glow", "Compression Macroblock", "Interlace Comb Artifact", "Polaroid Fade Burn",
-    "Synthwave Sunset Grade", "Laserdisc Rot Speckle", "Sync Roll Bar", "Retro Colour Bar Flash",
-  ],
-});
-
-const axOverlays = makeUnique({
-  prefix: "ax-ovl", glyph: "leak", tag: "OVERLAY",
+const cgLight = makeSet({
+  prefix: "cg-light", glyph: "flare", tag: "LIGHT",
   gradient: ["#3b0764", "#f59e0b"],
-  tags: ["cinematic", "wedding", "travel", "corporate"],
+  tags: ["cinematic", "wedding", "music"],
   names: [
-    "Cinematic Film Burn", "Lens Flare Distortion", "Dust & Scratches", "Anamorphic Leak Streak",
-    "Dust & Particles Drift", "Anamorphic Lens Flare", "Rain Streak Overlay", "Bokeh Light Leak",
-    "Film Burn Halation", "Snowfall Depth Pass", "Smoke Atmosphere Haze", "Golden Confetti Burst",
-    "Sun Ray God Beams", "Window Blind Shadow", "Volumetric Fog Roll", "Ember Spark Rise",
-    "Water Droplet Lens", "Heat Haze Shimmer", "Projector Gate Weave", "35mm Grain Plate",
-    "Cigarette Smoke Wisp", "Falling Petal Drift", "Star Field Parallax", "Aurora Ribbon Glow",
-    "Caustic Pool Light", "Neon Sign Reflection", "Vintage Vignette Burn", "Halation Bloom Wrap",
-    "Sandstorm Grit Pass", "Ash Fall Slow Drift", "Firefly Bokeh Night", "Ice Frost Edge",
-    "Prism Rainbow Split", "Studio Softbox Sheen", "Torn Paper Frame", "Lightning Flash Strobe",
-    "Cloud Shadow Sweep", "Underwater Ripple Caustics", "Golden Hour Streak", "Old Projector Dust",
+    "Anamorphic Blue Streak", "Volumetric God Ray Flare", "Halation Bloom Wrap", "Practical Bokeh Glow",
+    "Ultra Wide Lens Flare", "Neon Sign Spill Light", "Softbox Beauty Sheen", "Rim Light Sculpt",
+    "Sun Flare Kiss Overlay", "Prism Rainbow Flare", "Studio Kicker Highlight", "Candlelight Warm Glow",
+    "Stadium Lamp Starburst", "Lantern Bokeh Field", "Laser Beam Sweep Flare", "Window Blind Shadow Cast",
+    "Aurora Ribbon Light", "Caustic Water Light", "Golden Hour Streak Flare", "Cyber Rooftop Glow",
   ],
 });
 
-const advancedAll = dedupe([...axAi, ...axTransitions, ...axGlitch, ...axOverlays]);
+const cgAtmosphere = makeSet({
+  prefix: "cg-atmo", glyph: "leak", tag: "ATMOS",
+  gradient: ["#082f49", "#22d3ee"],
+  tags: ["cinematic", "travel", "wedding"],
+  names: [
+    "Volumetric Fog Roll Overlay", "Ember Rise Overlay", "Monsoon Rain Streaks", "Powder Snow Depth Pass",
+    "Desert Grit Overlay", "Cinematic Smoke Haze", "Falling Petal Drift Overlay", "Firefly Night Bokeh",
+    "Ash Fall Slow Overlay", "Heat Shimmer Haze", "Underwater Caustic Overlay", "Storm Cloud Shadow Sweep",
+    "Confetti Burst Overlay", "Ice Frost Edge Overlay", "35mm Grain Plate Overlay", "Projector Gate Dust",
+    "Steam Vent Wisp Overlay", "Pollen Float Overlay",
+  ],
+});
+
+const cgTexture = makeSet({
+  prefix: "cg-tex", glyph: "film", tag: "TEXTURE",
+  gradient: ["#1c1917", "#a8a29e"],
+  tags: ["retro", "cinematic", "minimal"],
+  names: [
+    "Organic Film Grain Grade", "Print Emulsion Grade", "Matte Black Lift Grade", "Silver Halide Mono Grade",
+    "Duotone Editorial Grade", "Split Tone Cyan Amber", "Faded Archive Grade", "Cross Process Grade",
+    "Infrared False Colour Grade", "Cinema Contrast Curve", "Soft Diffusion Filter Grade", "Glass Bloom Filter Grade",
+  ],
+});
+
+const cinemaAll = dedupe([...cgSignature, ...cgLight, ...cgAtmosphere, ...cgTexture]);
+
+/* ---------- Suite B — Motion Lab ---------- */
+
+const mlTransitions = makeSet({
+  prefix: "ml-trans", glyph: "wipe", tag: "TRANSITION",
+  gradient: ["#0c4a6e", "#38bdf8"],
+  tags: ["music", "gaming", "travel"],
+  names: [
+    "Seamless Light Burst Transition", "Optical Zoom Blur Transition", "Directional Slit Transition", "Liquid Mercury Transition",
+    "Prism Refraction Transition", "Camera Whip Handoff Transition", "Shatter Glass Transition", "Ink Bleed Transition",
+    "Vortex Twirl Transition", "Depth Push Through Transition", "Sky Match Cut Transition", "Kaleidoscope Fold Transition",
+    "Pixel Sort Transition", "Bokeh Bloom Transition", "Shape Morph Mask Transition", "Speed Line Rush Transition",
+    "Barrel Roll Transition", "Iris Expand Transition", "Grid Slice Shuffle Transition", "Chromatic Fade Transition",
+  ],
+});
+
+const mlCamera = makeSet({
+  prefix: "ml-cam", glyph: "zoomin", tag: "CAMERA",
+  gradient: ["#111827", "#60a5fa"],
+  tags: ["cinematic", "vlog", "gaming"],
+  names: [
+    "Handheld Breathing Rig", "Dolly Push-In Move", "Parallax Orbit Move", "Crash Zoom Punch",
+    "Snap Pan Reframe", "Gimbal Float Drift", "Vertigo Dolly Zoom", "Crane Rise Move",
+    "Shoulder Shake Rig", "Micro Jitter Handheld", "Slow Creep Push", "Whip Tilt Reframe",
+    "Impact Recoil Shake", "Drone Sweep Move", "Rack Focus Reframe", "Screen Shake Bass Hit",
+  ],
+});
+
+const mlTime = makeSet({
+  prefix: "ml-time", glyph: "trend", tag: "SPEED",
+  gradient: ["#064e3b", "#10b981"],
+  tags: ["music", "gaming", "vlog"],
+  names: [
+    "Velocity Ramp Curve", "Bullet Time Freeze Ramp", "Beat Drop Speed Ramp", "Optical Flow Slow-Mo",
+    "Stutter Step Retime", "Freeze Frame Hold Ramp", "Reverse Kickback Ramp", "Hyperlapse Rush Speed",
+    "Ping-Pong Loop Speed", "Impact Slam Ramp", "Breath Pause Ramp", "Trailer Cut Accelerate Speed",
+    "Whip Handoff Ramp", "Rolling Boomerang Speed",
+  ],
+});
+
+const mlType = makeSet({
+  prefix: "ml-type", glyph: "text", tag: "TYPE",
+  gradient: ["#1e1b4b", "#818cf8"],
+  tags: ["corporate", "music", "vlog"],
+  names: [
+    "Kinetic Caption Karaoke Text", "Word Pop Caption Text", "Swiss Minimal Title Text", "3D Extrude Headline Text",
+    "Chrome Liquid Title Text", "Neon Outline Caption Text", "Typewriter Terminal Text", "Blur Focus Reveal Text",
+    "Split Colour Word Text", "Marquee Ticker Text", "Counter Odometer Text", "Editorial Serif Lower Third Text",
+    "Sticker Bubble Caption Text", "Glass Panel Title Text", "Beat Slam Impact Text", "Handwritten Scribble Text",
+  ],
+});
+
+const motionAll = dedupe([...mlTransitions, ...mlCamera, ...mlTime, ...mlType]);
+
+/* ---------- Suite C — Neural FX ---------- */
+
+const nxSubject = makeSet({
+  prefix: "nx-sub", glyph: "portrait", tag: "AI", ai: true,
+  gradient: ["#2e1065", "#a855f7"],
+  tags: ["ai", "music", "vlog"],
+  names: [
+    "Neural Rotoscope Cutout", "Smart Body Tracking Rig", "Green Screen Neural Key", "Semantic Object Removal",
+    "Subject Isolation Pop", "Body Glow Contour Mask", "Silhouette Extractor Mask", "Occlusion Aware Masking",
+    "Pose Skeleton Overlay Track", "Auto Reframe Subject Tracker", "Segmented Body Recolor Mask", "Spotlight Subject Lock Track",
+    "Motion Vector Trail Track", "Clone Echo Body Trail", "Particle Body Dissolve Mask", "Edge Arc Body Outline",
+  ],
+});
+
+const nxDepth = makeSet({
+  prefix: "nx-depth", glyph: "orbit", tag: "DEPTH", ai: true,
+  gradient: ["#083344", "#06b6d4"],
+  tags: ["ai", "cinematic", "travel"],
+  names: [
+    "AI Depth Estimator Map", "2.5D Depth Parallax", "Depth Aware Background Blur", "Depth Fog Simulation",
+    "Depth Light Wrap Pass", "Cinematic Portrait Depth Bokeh", "Volumetric Depth Relight", "Depth Displacement Warp",
+    "Dolly Zoom Depth Rig", "Layered Depth Sky Replace", "Depth Colour Separation", "Depth Edge Refine Matte",
+  ],
+});
+
+const nxAudio = makeSet({
+  prefix: "nx-audio", glyph: "wave", tag: "REACTIVE", ai: true,
+  gradient: ["#4a044e", "#e879f9"],
+  tags: ["music", "gaming", "ai"],
+  names: [
+    "Voice-to-FX Sync Engine", "Audio Reactive Pulse Rig", "Beat Detect Zoom Sync", "Voice Emotion Glow",
+    "Spectrum Bar Reactive Overlay", "Bass Shockwave Reactive Ring", "Lip Sync Retime Engine", "Waveform Trail Reactive",
+    "Kick Flash Reactive Strobe", "Vocal Isolation Highlight", "Tempo Grid Reactive Shake", "Audio Reactive Colour Cycle",
+  ],
+});
+
+const nxStylize = makeSet({
+  prefix: "nx-style", glyph: "vhs", tag: "STYLIZE",
+  gradient: ["#4c1d95", "#8b5cf6"],
+  tags: ["retro", "gaming", "ai"],
+  names: [
+    "Neural Style Transfer Paint", "Anime Cel Shade Stylize", "Comic Ink Halftone Stylize", "Cyberpunk Neon Glow",
+    "Datamosh Smear Glitch", "CRT Phosphor Jitter Glitch", "RGB Channel Split Glitch", "Hologram Flicker Glitch",
+    "Wireframe Scan Stylize", "Vaporwave Horizon Glitch", "Oil Paint Flow Stylize", "Low Poly Facet Stylize",
+    "Chromatic Shockwave Glitch", "Pixel Crush Glitch", "Screen Tear Displace Glitch", "Circuit Trace Glow Stylize",
+  ],
+});
+
+const neuralAll = dedupe([...nxSubject, ...nxDepth, ...nxAudio, ...nxStylize]);
 
 /* ================= EFFECTS TREE ================= */
 
 export const EFFECTS_TREE: EffectCategory[] = [
   {
-    id: "advanced-fx-lab",
-    label: "Advanced FX Lab",
-    icon: "sparkle",
-    count: advancedAll.length,
-    items: advancedAll,
-    accent: "#a855f7",
-    gradient: ["#a855f7", "#38bdf8"],
+    id: "cinema-grade",
+    label: "Cinema Grade",
+    icon: "film",
+    count: cinemaAll.length,
+    items: cinemaAll,
+    accent: "#60a5fa",
+    gradient: ["#2563eb", "#f59e0b"],
     badge: "NEW",
     children: [
-      { id: "ax-ai", label: "AI Video Effects", icon: "ai", count: axAi.length, items: axAi, accent: "#a855f7", badge: "AI" },
-      { id: "ax-transitions", label: "Advanced Transitions", icon: "target", count: axTransitions.length, items: axTransitions, accent: "#38bdf8", badge: "PRO" },
-      { id: "ax-glitch", label: "Glitch & Retro Styles", icon: "glitch", count: axGlitch.length, items: axGlitch, accent: "#8b5cf6", badge: "GLITCH" },
-      { id: "ax-overlays", label: "Cinematic Overlays", icon: "overlay", count: axOverlays.length, items: axOverlays, accent: "#f59e0b", badge: "FX" },
+      { id: "cg-signature", label: "Signature Looks", icon: "brush", count: cgSignature.length, items: cgSignature, accent: "#60a5fa", badge: "LUT" },
+      { id: "cg-light", label: "Light & Flares", icon: "lightbulb", count: cgLight.length, items: cgLight, accent: "#f59e0b", badge: "LIGHT" },
+      { id: "cg-atmosphere", label: "Atmosphere", icon: "overlay", count: cgAtmosphere.length, items: cgAtmosphere, accent: "#22d3ee", badge: "FX" },
+      { id: "cg-texture", label: "Film Texture", icon: "film", count: cgTexture.length, items: cgTexture, accent: "#a8a29e", badge: "GRAIN" },
     ],
   },
   {
-    id: "pro-studio-suite",
-    label: "Pro Studio Suite",
-    icon: "film",
-    count: filmoraAll.length,
-    items: filmoraAll,
+    id: "motion-lab",
+    label: "Motion Lab",
+    icon: "target",
+    count: motionAll.length,
+    items: motionAll,
     accent: "#38bdf8",
-    gradient: ["#0ea5e9", "#8b5cf6"],
+    gradient: ["#0ea5e9", "#10b981"],
     badge: "PRO",
     children: [
-      { id: "flm-cinematic", label: "Cinematic Filters", icon: "brush", count: fCinematic.length, items: fCinematic, accent: "#60a5fa", badge: "LUT" },
-      { id: "flm-split", label: "Split Screen", icon: "layers", count: fSplitScreen.length, items: fSplitScreen, accent: "#0ea5e9", badge: "LAYOUT" },
-      { id: "flm-elements", label: "Motion Elements", icon: "shapes", count: fMotionElements.length, items: fMotionElements, accent: "#f59e0b", badge: "MOTION" },
-      { id: "flm-ramps", label: "Speed Ramping", icon: "flame", count: fSpeedRamp.length, items: fSpeedRamp, accent: "#10b981", badge: "RAMP" },
-      { id: "flm-ai", label: "AI Portrait & Beauty", icon: "ai", count: fAiPortrait.length, items: fAiPortrait, accent: "#f472b6", badge: "AI" },
+      { id: "ml-transitions", label: "Kinetic Transitions", icon: "target", count: mlTransitions.length, items: mlTransitions, accent: "#38bdf8", badge: "HOT" },
+      { id: "ml-camera", label: "Camera Moves", icon: "camera", count: mlCamera.length, items: mlCamera, accent: "#60a5fa", badge: "RIG" },
+      { id: "ml-time", label: "Speed & Time", icon: "flame", count: mlTime.length, items: mlTime, accent: "#10b981", badge: "RAMP" },
+      { id: "ml-type", label: "Kinetic Typography", icon: "brush", count: mlType.length, items: mlType, accent: "#818cf8", badge: "TEXT" },
     ],
   },
   {
-    id: "trending-social-suite",
-    label: "Trending Social FX",
-    icon: "flame",
-    count: capcutAll.length,
-    items: capcutAll,
-    accent: "#fb7185",
-    gradient: ["#f43f5e", "#f97316"],
-    badge: "VIRAL",
+    id: "neural-fx",
+    label: "Neural FX",
+    icon: "ai",
+    count: neuralAll.length,
+    items: neuralAll,
+    accent: "#a855f7",
+    gradient: ["#a855f7", "#e879f9"],
+    badge: "AI",
     children: [
-      { id: "cc-transitions", label: "Trending Transitions", icon: "target", count: ccTransitions.length, items: ccTransitions, accent: "#fb7185", badge: "HOT" },
-      { id: "cc-captions", label: "Auto-Caption Text FX", icon: "brush", count: ccCaptions.length, items: ccCaptions, accent: "#6366f1", badge: "TEXT" },
-      { id: "cc-body", label: "Body Effects", icon: "smiley", count: ccBody.length, items: ccBody, accent: "#d946ef", badge: "BODY" },
-      { id: "cc-aesthetic", label: "Aesthetic Filters", icon: "wand", count: ccAesthetic.length, items: ccAesthetic, accent: "#22d3ee", badge: "AES" },
-      { id: "cc-viral", label: "Viral Velocity Edits", icon: "sparkle", count: ccViral.length, items: ccViral, accent: "#f97316", badge: "TREND" },
+      { id: "nx-subject", label: "Subject & Body AI", icon: "ai", count: nxSubject.length, items: nxSubject, accent: "#a855f7", badge: "AI" },
+      { id: "nx-depth", label: "Depth & Space", icon: "layers", count: nxDepth.length, items: nxDepth, accent: "#06b6d4", badge: "3D" },
+      { id: "nx-audio", label: "Audio Reactive", icon: "audio", count: nxAudio.length, items: nxAudio, accent: "#e879f9", badge: "SYNC" },
+      { id: "nx-stylize", label: "Stylize & Glitch", icon: "glitch", count: nxStylize.length, items: nxStylize, accent: "#8b5cf6", badge: "STYLE" },
     ],
   },
 ];
+
 
 /* ================= Other Empty tabs ================= */
 

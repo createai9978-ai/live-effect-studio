@@ -365,7 +365,7 @@ export default function PreviewPlayer({
                 ) : (
                   <img
                     key={active.clip.id}
-                    src={active.asset.thumb}
+                    src={active.asset.kind === "image" ? active.asset.url : active.asset.thumb}
                     alt={active.asset.name}
                     className="h-full w-full object-contain transition-transform duration-75"
                     style={{

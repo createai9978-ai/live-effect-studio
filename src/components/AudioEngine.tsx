@@ -53,6 +53,8 @@ function SyncedAudio({
 }) {
   const ref = useRef<HTMLAudioElement>(null);
   const analysisRef = useRef<{ context: AudioContext; analyser: AnalyserNode; raf: number } | null>(null);
+  const playingRef = useRef(playing);
+  playingRef.current = playing;
 
   // play / pause
   useEffect(() => {
@@ -78,7 +80,7 @@ function SyncedAudio({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || !onLevel || !playing) return;
+    if (!el || !onLevel) return;
     const AudioContextCtor = window.AudioContext;
     const context = new AudioContextCtor();
     const analyser = context.createAnalyser();
@@ -89,9 +91,13 @@ function SyncedAudio({
     const bins = new Uint8Array(analyser.frequencyBinCount);
     let raf = 0;
     const sample = () => {
-      analyser.getByteFrequencyData(bins);
-      const energy = bins.reduce((sum, value) => sum + value, 0) / Math.max(1, bins.length * 255);
-      onLevel(Math.min(1, energy * 2.8));
+      if (playingRef.current) {
+        analyser.getByteFrequencyData(bins);
+        const energy = bins.reduce((sum, value) => sum + value, 0) / Math.max(1, bins.length * 255);
+        onLevel(Math.min(1, energy * 2.8));
+      } else {
+        onLevel(0);
+      }
       raf = requestAnimationFrame(sample);
     };
     sample();
@@ -104,7 +110,7 @@ function SyncedAudio({
       analysisRef.current = null;
       onLevel(0);
     };
-  }, [playing, onLevel]);
+  }, [onLevel]);
 
   return (
     <audio

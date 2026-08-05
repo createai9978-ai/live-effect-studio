@@ -867,6 +867,19 @@ function AssetCard({
 
   const preview = previewStyleFor(item.glyph);
   const renderProgram = useMemo(() => item.renderProgram ?? compileRenderProgram(item), [item]);
+  const previewEffect = useMemo(
+    () => ({
+      type: renderProgram.type,
+      intensity: renderProgram.intensity,
+      color: renderProgram.color,
+      seed: renderProgram.seed,
+      motion: renderProgram.motion,
+      warp: renderProgram.warp,
+      trail: renderProgram.trail,
+      audio: renderProgram.type === "voiceSync" ? 0.8 : 0,
+    }),
+    [renderProgram]
+  );
 
 
   return (
@@ -924,16 +937,7 @@ function AssetCard({
           src={previewClipFor(item.id)}
           startOffset={previewOffsetFor(item.id)}
           hovered={localHovered}
-          effect={{
-            type: renderProgram.type,
-            intensity: renderProgram.intensity,
-            color: renderProgram.color,
-            seed: renderProgram.seed,
-            motion: renderProgram.motion,
-            warp: renderProgram.warp,
-            trail: renderProgram.trail,
-            audio: renderProgram.type === "voiceSync" ? 0.8 : 0,
-          }}
+          effect={previewEffect}
           animateClass={localHovered && renderProgram.type === "procedural" ? cardStyles.animateClass : undefined}
           style={{
             filter: undefined,

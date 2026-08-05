@@ -383,7 +383,7 @@ export default function App() {
       setClips((prev) => [...prev, clip]);
       setSelected([clip.id]);
     },
-    [assets, clips, snapTime, trackStates, videoTracks, pushHistory]
+    [assets, clips, snapTime, trackStates, videoTracks, audioTracks, pushHistory]
   );
 
   const updateClipEffects = useCallback(
@@ -1267,7 +1267,7 @@ export default function App() {
       <input
         ref={fileInputRef}
         type="file"
-        accept="video/*,audio/*"
+        accept="video/*,audio/*,image/*"
         multiple
         className="hidden"
         onChange={(e) => {

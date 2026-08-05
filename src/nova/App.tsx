@@ -28,7 +28,6 @@ import {
   defaultValues,
   familyFor,
   paramsToVisual,
-  composeFilters,
 } from "../editor/effectParams";
 import { previewClipFor } from "../editor/previewVideos";
 import {
@@ -1086,7 +1085,6 @@ export default function App() {
       // the compiled CSS from the live parameters replaces the static preset look.
       const family = override?.family ?? familyFor(item.name, item.tag);
       const params = override?.params ?? defaultValues(family);
-      const visual = paramsToVisual(family, params);
       const renderProgram = item.renderProgram ?? compileRenderProgram(item);
       const needsAnalysis = requiresLocalAnalysis(item);
       const finalPatch: Partial<ClipEffects> = {
@@ -1148,7 +1146,6 @@ export default function App() {
   const updateFxParams = useCallback(
     (next: ParamValues, presetName?: string) => {
       if (!selectedFx || !fxSelection) return;
-      const visual = paramsToVisual(fxSelection.family, next);
       updateAppliedEffect(selectedFx.clipId, selectedFx.effectId, {
         params: next,
         preset: presetName ?? fxSelection.ae.preset,

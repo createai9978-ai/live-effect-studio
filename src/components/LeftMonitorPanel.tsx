@@ -113,7 +113,7 @@ function EffectControlsTab({
 
   const fx = clip.effects;
   const set = (patch: Partial<ClipEffects>) => onUpdate(clip.id, patch);
-  const kind = asset.kind === "video" ? "Video" : "Audio";
+  const kind = asset.kind === "video" ? "Video" : asset.kind === "image" ? "Image" : "Audio";
 
   // Effective source duration consumed at current speed
   const sourceUsed = clip.duration * (fx.speed / 100);

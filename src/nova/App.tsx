@@ -320,7 +320,7 @@ export default function App() {
     setAssets((prev) => [...prev, ...ok]);
     if (ok.length) setSourceAssetId((cur) => cur ?? ok[0].id);
     setImporting(false);
-    if (ok.length) showToast(`Imported ${ok.length} clip${ok.length > 1 ? "s" : ""}`, "success");
+    if (ok.length) showToast(`Imported ${ok.length} item${ok.length > 1 ? "s" : ""}`, "success");
   }, [showToast]);
 
   const openImport = useCallback(() => fileInputRef.current?.click(), []);
@@ -483,7 +483,7 @@ export default function App() {
     (assetId: string, offset: number, duration: number) => {
       const asset = assets.find((a) => a.id === assetId);
       if (!asset) return;
-      const track: TrackId = asset.kind === "video" ? videoTracks[videoTracks.length - 1] : audioTracks[0];
+      const track: TrackId = asset.kind === "audio" ? audioTracks[0] : videoTracks[videoTracks.length - 1];
       addClipToTrack(assetId, track, timeRef.current, offset, duration);
     },
     [assets, addClipToTrack, videoTracks, audioTracks]

@@ -10,6 +10,8 @@ import {
 } from "../editor/effectParams";
 import { cn } from "../utils/cn";
 import { VideoProcessor, type EffectParams } from "../editor/VideoProcessor";
+import { curveMeta } from "../editor/motionEngine";
+
 
 type Props = {
   open: boolean;

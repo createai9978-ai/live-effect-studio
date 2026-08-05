@@ -105,13 +105,13 @@ export default function MediaBin({
                 {importing ? "Importing…" : "Import Media"}
               </div>
               <div className="mt-1 text-[10px] leading-relaxed text-zinc-600">
-                Click to browse, or drag video &amp; audio
+                Click to browse, or drag video, audio &amp; image
                 <br />
                 files here from your computer
               </div>
             </div>
           </div>
-          <div className="text-[9px] text-zinc-700">MP4 · MOV · WEBM · MP3 · WAV · AAC</div>
+          <div className="text-[9px] text-zinc-700">MP4 · MOV · WEBM · MP3 · WAV · PNG · JPG</div>
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto px-2.5 pb-2">

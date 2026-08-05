@@ -413,6 +413,38 @@ const FRAGMENT_SHADER_SOURCE = `
 
   vec2 safeUV(vec2 uv) { return clamp(uv, vec2(0.002), vec2(0.998)); }
 
+  // Animated affine transform (eased keyframes are solved on the CPU and
+  // delivered as u_mOffset / u_mScale / u_mRot for this exact frame).
+  vec2 motionXform(vec2 uv, float back) {
+    vec2 c = uv - 0.5;
+    float s = sin(-u_mRot);
+    float co = cos(-u_mRot);
+    c = vec2(c.x * co - c.y * s, c.x * s + c.y * co);
+    float sc = max(0.2, u_mScale - u_mZoomVel * back);
+    c /= sc;
+    c -= u_mOffset - u_mVel * back;
+    return c + 0.5;
+  }
+
+  // Cinematic motion blur: accumulate 11 taps across the shutter interval so
+  // fast eased sections smear and held sections stay razor sharp.
+  vec3 motionSample(vec2 uv) {
+    float speed = length(u_mVel) + abs(u_mZoomVel) * 0.6;
+    if (u_shutter < 0.001 || speed < 0.00008) {
+      return texture2D(u_video, safeUV(motionXform(uv, 0.0))).rgb;
+    }
+    vec3 acc = vec3(0.0);
+    float wsum = 0.0;
+    for (int i = 0; i < 11; i++) {
+      float f = float(i) / 10.0;                 // 0..1 across the open shutter
+      float w = 1.0 - 0.55 * f;                  // weight the newest sample most
+      acc += texture2D(u_video, safeUV(motionXform(uv, f * u_shutter * 1.6))).rgb * w;
+      wsum += w;
+    }
+    return acc / wsum;
+  }
+
+
   vec3 blur5(vec2 uv, vec2 direction) {
     vec3 c = texture2D(u_video, safeUV(uv)).rgb * 0.34;
     c += texture2D(u_video, safeUV(uv + direction)).rgb * 0.22;

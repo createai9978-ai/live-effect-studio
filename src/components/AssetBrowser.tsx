@@ -1323,6 +1323,7 @@ function ReferenceMonitor({
   onPin,
   onUnpin,
   onApply,
+  onApplyAll,
   favorited,
   onToggleFavorite,
 }: {
@@ -1334,6 +1335,8 @@ function ReferenceMonitor({
   onPin: () => void;
   onUnpin: () => void;
   onApply: (item: AssetItem) => void;
+  onApplyAll?: (item: AssetItem) => void;
+
   favorited: boolean;
   onToggleFavorite: () => void;
 }) {

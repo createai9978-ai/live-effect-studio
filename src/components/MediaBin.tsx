@@ -181,9 +181,9 @@ function AssetCard({
       title={`${asset.name} — drag to timeline, double-click for Source Monitor`}
     >
       <div className="relative aspect-video overflow-hidden bg-black">
-        {asset.kind === "video" && asset.thumb ? (
+        {asset.kind !== "audio" && asset.thumb ? (
           <img src={asset.thumb} alt={asset.name} className="h-full w-full object-cover" draggable={false} />
-        ) : asset.kind === "video" ? (
+        ) : asset.kind !== "audio" ? (
           <div className="flex h-full w-full items-center justify-center text-zinc-700">
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -203,11 +203,16 @@ function AssetCard({
         <span
           className={cn(
             "absolute left-1 top-1 rounded px-1 py-px text-[8px] font-semibold",
-            asset.kind === "video" ? "bg-violet-500/80 text-white" : "bg-emerald-500/80 text-white"
+            asset.kind === "video"
+              ? "bg-violet-500/80 text-white"
+              : asset.kind === "image"
+              ? "bg-sky-500/80 text-white"
+              : "bg-emerald-500/80 text-white"
           )}
         >
-          {asset.kind === "video" ? "V" : "A"}
+          {asset.kind === "video" ? "V" : asset.kind === "image" ? "IMG" : "A"}
         </span>
+
         <button
           onClick={(e) => {
             e.stopPropagation();

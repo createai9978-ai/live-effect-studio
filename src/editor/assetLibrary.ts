@@ -276,9 +276,8 @@ const item = (
 ): AssetItem => ({ id, name, glyph, gradient, ...extras });
 
 /* ==============================================================
-   Professional preset library — Filmora-style production suite +
-   CapCut-style trending/social suite. Generated procedurally so every
-   category ships a full, industry-scale count of presets.
+   NOVA 2026 preset generator — every preset is authored by name and
+   compiled into a unique seeded render program.
    ============================================================== */
 const subTags = ["cinematic", "vlog", "gaming", "music", "travel", "wedding"] as ContentTag[];
 

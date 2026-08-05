@@ -346,6 +346,13 @@ const FRAGMENT_SHADER_SOURCE = `
   uniform float u_warp;
   uniform float u_trail;
   uniform float u_audio;
+  uniform vec2 u_mOffset;
+  uniform float u_mScale;
+  uniform float u_mRot;
+  uniform vec2 u_mVel;
+  uniform float u_mZoomVel;
+  uniform float u_shutter;
+
 
   // Pseudo-random noise
   float random(vec2 st) {

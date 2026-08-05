@@ -99,6 +99,22 @@ export function appliedEffectToGpu(effect: AppliedEffect, item: AssetItem | null
   const program = item.renderProgram ?? compileRenderProgram(item);
   if (program.engine === "local-ai" && effect.processingState !== "ready") return null;
   const intensity = Math.max(0, Math.min(1, effect.intensity / 100));
+  // User params modulate the preset's own motion signature rather than replacing it,
+  // so "Motion Blur" / "Speed" sliders feel like an NLE shutter + time control.
+  const sig = program.motionSig;
+  const blurPct = value(effect.params, "motionBlur", -1);
+  const speedPct = value(effect.params, "speed", -1);
+  const amountPct = value(effect.params, "amount", -1);
+  const strength = amountPct >= 0 ? amountPct / 100 : intensity;
+  const motionSig = {
+    ...sig,
+    shutter: blurPct >= 0 ? 30 + (blurPct / 100) * 330 : sig.shutter,
+    period: speedPct > 0 ? Math.max(0.35, sig.period / (speedPct / 100)) : sig.period,
+    amplitude: sig.amplitude * (0.4 + strength * 1.2),
+    zoom: sig.zoom * (0.4 + strength * 1.2),
+    rotation: sig.rotation * (0.4 + strength * 1.2),
+  };
+
   return {
     type: program.type,
     intensity: intensity * program.intensity,
@@ -108,7 +124,9 @@ export function appliedEffectToGpu(effect: AppliedEffect, item: AssetItem | null
     warp: Math.max(0, Math.min(1, value(effect.params, "depth", value(effect.params, "rgbSplit", program.warp * 100)) / 100)),
     trail: Math.max(0, Math.min(1, value(effect.params, "motionBlur", value(effect.params, "feather", program.trail * 100)) / 100)),
     audio: Math.max(0, Math.min(1, value(effect.params, "audioSensitivity", 72) / 100)),
+    motionSig,
   };
+
 }
 
 export function requiresLocalAnalysis(item: AssetItem) {

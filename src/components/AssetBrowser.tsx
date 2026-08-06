@@ -887,6 +887,35 @@ function AssetCard({
     [renderProgram]
   );
 
+  /**
+   * Always-on look signature. Each card renders its own grade even before
+   * hover, derived from the preset's unique seeded render program, so two
+   * cards can never read as the same effect. Hue rotation is deliberately
+   * kept near-zero (it is what used to push warm footage blue).
+   */
+  const uniqueLook = useMemo(() => {
+    const p = renderProgram;
+    const s = p.seed;
+    const t = p.type;
+    const contrast = 1 + (t === "colorGrade" ? 0.16 : 0.06) + s * 0.26;
+    const saturate =
+      t === "colorGrade" && p.color[2] < 0.45
+        ? 0.25 + s * 0.35
+        : 0.85 + p.color[0] * 0.7 + s * 0.2;
+    const brightness = 0.94 + p.color[1] * 0.16;
+    const sepia = t === "colorGrade" || t === "opticalOverlay" ? 0.05 + s * 0.22 : s * 0.06;
+    const parts = [
+      `contrast(${contrast.toFixed(3)})`,
+      `saturate(${saturate.toFixed(3)})`,
+      `brightness(${brightness.toFixed(3)})`,
+      sepia > 0.02 ? `sepia(${sepia.toFixed(3)})` : "",
+      t === "depthMap" ? `blur(${(0.3 + p.warp * 0.9).toFixed(2)}px)` : "",
+      t === "glitchWarp" ? `hue-rotate(${(p.warp * 8 - 4).toFixed(1)}deg)` : "",
+    ].filter(Boolean);
+    return [cardStyles.filter, ...parts].filter(Boolean).join(" ");
+  }, [renderProgram, cardStyles.filter]);
+
+
 
   return (
     <div

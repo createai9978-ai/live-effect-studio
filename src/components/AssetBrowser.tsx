@@ -973,13 +973,14 @@ function AssetCard({
           startOffset={previewOffsetFor(item.id)}
           hovered={localHovered}
           effect={previewEffect}
-          animateClass={localHovered && renderProgram.type === "procedural" ? cardStyles.animateClass : undefined}
+          animateClass={cardStyles.animateClass}
           style={{
-            filter: undefined,
+            filter: uniqueLook || undefined,
             transform: preview.transform,
             transformOrigin: "center center",
           }}
         />
+
 
         {preview.overlay && (
           <div

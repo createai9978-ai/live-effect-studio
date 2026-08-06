@@ -124,11 +124,13 @@ export default function LivePreviewVideo({
       )}
       <canvas
         ref={canvasRef}
+        style={{ filter: style?.filter }}
         className={cn(
           "pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-150",
           hovered && effectReady ? "opacity-100" : "opacity-0"
         )}
       />
+
       {/* Neutral loading surface — deliberately colourless so no tint can bleed through */}
       {!ready && (
         <div className="absolute inset-0 animate-pulse bg-[linear-gradient(110deg,#111218_0%,#191b24_45%,#111218_90%)]" />

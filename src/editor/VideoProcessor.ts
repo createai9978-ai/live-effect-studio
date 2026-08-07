@@ -34,7 +34,20 @@ export type EffectType =
   | "textMotion"
   | "colorGrade"
   | "speedWarp"
-  | "voiceSync";
+  | "voiceSync"
+  // ---- Real visual-effect primitives (NOT colour grades) ----
+  | "gaussianBlur"
+  | "directionalBlur"
+  | "rgbSplit"
+  | "cameraShake"
+  | "grain"
+  | "zoomPulse"
+  | "glow"
+  | "vhs"
+  | "lightLeakFx"
+  | "glitchBlock"
+  | "kaleido"
+  | "mirror";
 
 export type EffectParams = {
   type: EffectType;

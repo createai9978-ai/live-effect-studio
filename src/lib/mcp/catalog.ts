@@ -111,7 +111,7 @@ export function describeItem(item: AssetItem) {
     },
     motion: {
       trajectory: program.motionSig.trajectory,
-      easing: program.motionSig.easing,
+      easing: program.motionSig.curve,
       periodSeconds: Number(program.motionSig.period.toFixed(2)),
       shutterDegrees: Math.round(program.motionSig.shutter),
     },

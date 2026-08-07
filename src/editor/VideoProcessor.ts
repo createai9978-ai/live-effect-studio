@@ -34,7 +34,20 @@ export type EffectType =
   | "textMotion"
   | "colorGrade"
   | "speedWarp"
-  | "voiceSync";
+  | "voiceSync"
+  // ---- Real visual-effect primitives (NOT colour grades) ----
+  | "gaussianBlur"
+  | "directionalBlur"
+  | "rgbSplit"
+  | "cameraShake"
+  | "grain"
+  | "zoomPulse"
+  | "glow"
+  | "vhs"
+  | "lightLeakFx"
+  | "glitchBlock"
+  | "kaleido"
+  | "mirror";
 
 export type EffectParams = {
   type: EffectType;
@@ -319,6 +332,18 @@ const EFFECT_TYPE_MAP: Record<EffectType, number> = {
   colorGrade: 25,
   speedWarp: 26,
   voiceSync: 27,
+  gaussianBlur: 28,
+  directionalBlur: 29,
+  rgbSplit: 30,
+  cameraShake: 31,
+  grain: 32,
+  zoomPulse: 33,
+  glow: 34,
+  vhs: 35,
+  lightLeakFx: 36,
+  glitchBlock: 37,
+  kaleido: 38,
+  mirror: 39,
 };
 
 /** Vertex shader - pass-through */
@@ -555,6 +580,123 @@ const FRAGMENT_SHADER_SOURCE = `
       vec3 pulse = texture2D(u_video, pulseUV).rgb;
       float ring = smoothstep(0.03, 0.0, abs(length(centered) - (0.18 + beat * 0.32)));
       color = mix(color, pulse, u_intensity * 0.8) + u_color * ring * beat * u_intensity;
+    } else if (u_effectType == 28) {
+      // Gaussian blur — real spatial convolution, 13 taps on two axes.
+      float r = (0.6 + u_intensity * 5.0 + u_warp * 4.0);
+      vec2 px = r / u_resolution;
+      vec3 acc = vec3(0.0);
+      float wsum = 0.0;
+      for (int i = -3; i <= 3; i++) {
+        for (int j = -3; j <= 3; j++) {
+          vec2 o = vec2(float(i), float(j)) * px;
+          float w = exp(-(float(i * i + j * j)) / 6.0);
+          acc += texture2D(u_video, safeUV(uv + o)).rgb * w;
+          wsum += w;
+        }
+      }
+      color = acc / wsum;
+    } else if (u_effectType == 29) {
+      // Directional / motion blur along a preset-specific angle.
+      float ang = u_seed * 6.2831 + u_time * u_motion * 0.4;
+      vec2 dir = vec2(cos(ang), sin(ang)) * (0.004 + u_intensity * 0.05);
+      vec3 acc = vec3(0.0);
+      for (int i = 0; i < 9; i++) {
+        float t = (float(i) / 8.0 - 0.5);
+        acc += texture2D(u_video, safeUV(uv + dir * t)).rgb;
+      }
+      color = acc / 9.0;
+    } else if (u_effectType == 30) {
+      // RGB split — geometric channel displacement, not a tint.
+      float ang = u_seed * 6.2831;
+      vec2 d = vec2(cos(ang), sin(ang)) * (0.004 + u_intensity * 0.03) * (0.7 + 0.3 * sin(u_time * 3.0));
+      color.r = texture2D(u_video, safeUV(uv + d)).r;
+      color.g = texture2D(u_video, safeUV(uv)).g;
+      color.b = texture2D(u_video, safeUV(uv - d)).b;
+    } else if (u_effectType == 31) {
+      // Camera shake — real frame displacement with sub-pixel jitter.
+      float f = 6.0 + u_motion * 22.0;
+      vec2 shake = vec2(
+        sin(u_time * f + u_seed * 11.0) * 0.5 + sin(u_time * f * 2.3) * 0.5,
+        cos(u_time * f * 0.87 + u_seed * 7.0)
+      ) * (0.004 + u_intensity * 0.045);
+      vec2 z = (uv - 0.5) / (1.0 + u_intensity * 0.08) + 0.5;
+      color = texture2D(u_video, safeUV(z + shake)).rgb;
+    } else if (u_effectType == 32) {
+      // Film grain + subtle gate flicker.
+      float n = random(uv * u_resolution * 0.5 + fract(u_time) * 91.7) - 0.5;
+      float lum = dot(color, vec3(0.299, 0.587, 0.114));
+      color += n * u_intensity * 0.35 * (1.2 - lum);
+      color *= 1.0 + sin(u_time * 21.0 + u_seed * 5.0) * 0.012 * u_intensity;
+    } else if (u_effectType == 33) {
+      // Zoom pulse — rhythmic scale punch with radial smear.
+      float beat = 0.5 + 0.5 * sin(u_time * (2.0 + u_motion * 6.0) + u_seed * 6.28);
+      float s = 1.0 + beat * (0.06 + u_intensity * 0.22);
+      vec2 z = (uv - 0.5) / s + 0.5;
+      vec3 acc = vec3(0.0);
+      for (int i = 0; i < 6; i++) {
+        float t = float(i) / 5.0;
+        vec2 p = mix(z, uv, t * 0.35);
+        acc += texture2D(u_video, safeUV(p)).rgb;
+      }
+      color = acc / 6.0;
+    } else if (u_effectType == 34) {
+      // Glow / bloom — highlight extraction blurred and screened back.
+      vec2 px = (2.5 + u_intensity * 6.0) / u_resolution;
+      vec3 bloom = vec3(0.0);
+      for (int i = -2; i <= 2; i++) {
+        for (int j = -2; j <= 2; j++) {
+          vec3 s = texture2D(u_video, safeUV(uv + vec2(float(i), float(j)) * px)).rgb;
+          float l = dot(s, vec3(0.299, 0.587, 0.114));
+          bloom += s * smoothstep(0.55, 1.0, l);
+        }
+      }
+      bloom /= 25.0;
+      color = 1.0 - (1.0 - color) * (1.0 - bloom * (0.6 + u_intensity * 1.4));
+    } else if (u_effectType == 35) {
+      // VHS — tape warp, head-switch tear, scanlines and chroma bleed.
+      float line = floor(uv.y * 240.0);
+      float wob = sin(u_time * 2.0 + line * 0.09) * 0.0018 * (1.0 + u_intensity * 6.0);
+      float tear = step(0.985, random(vec2(line, floor(u_time * 8.0)))) * 0.03 * u_intensity;
+      vec2 p = safeUV(uv + vec2(wob + tear, 0.0));
+      color.r = texture2D(u_video, safeUV(p + vec2(0.0035 * u_intensity, 0.0))).r;
+      color.g = texture2D(u_video, p).g;
+      color.b = texture2D(u_video, safeUV(p - vec2(0.0035 * u_intensity, 0.0))).b;
+      color *= 0.86 + 0.14 * sin(uv.y * u_resolution.y * 1.6);
+      color += (random(uv + fract(u_time)) - 0.5) * 0.08 * u_intensity;
+    } else if (u_effectType == 36) {
+      // Light leak — animated soft gradient burn across the frame.
+      float ang = u_seed * 6.2831;
+      vec2 dir = vec2(cos(ang), sin(ang));
+      float pos = 0.5 + 0.45 * sin(u_time * (0.25 + u_motion * 0.5) + u_seed * 3.1);
+      float band = exp(-pow((dot(uv - 0.5, dir) + 0.5 - pos) * 3.4, 2.0) * 4.0);
+      vec3 leak = mix(vec3(1.0, 0.62, 0.28), u_color, 0.45) * band * u_intensity * 1.4;
+      color = 1.0 - (1.0 - color) * (1.0 - leak);
+    } else if (u_effectType == 37) {
+      // Digital glitch — block displacement + channel corruption.
+      float rows = 14.0 + floor(u_seed * 26.0);
+      float row = floor(uv.y * rows);
+      float t = floor(u_time * (6.0 + u_motion * 14.0));
+      float hit = step(0.7, random(vec2(row, t)));
+      float shift = (random(vec2(row, t + 1.0)) - 0.5) * u_intensity * 0.22 * hit;
+      vec2 p = safeUV(uv + vec2(shift, 0.0));
+      color = texture2D(u_video, p).rgb;
+      color.r = texture2D(u_video, safeUV(p + vec2(shift * 0.4, 0.0))).r;
+      color.b = texture2D(u_video, safeUV(p - vec2(shift * 0.4, 0.0))).b;
+      color = mix(color, vec3(dot(color, vec3(0.33))), hit * 0.12 * u_intensity);
+    } else if (u_effectType == 38) {
+      // Kaleidoscope fold.
+      vec2 c = uv - 0.5;
+      float a = atan(c.y, c.x);
+      float rr = length(c);
+      float seg = 3.0 + floor(u_seed * 6.0);
+      a = abs(mod(a + u_time * 0.2 * u_motion, 6.2831 / seg) - 3.1415 / seg);
+      vec2 p = safeUV(vec2(cos(a), sin(a)) * rr + 0.5);
+      color = mix(color, texture2D(u_video, p).rgb, u_intensity);
+    } else if (u_effectType == 39) {
+      // Mirror split.
+      vec2 p = uv;
+      p.x = uv.x < 0.5 ? uv.x : 1.0 - uv.x;
+      color = mix(color, texture2D(u_video, safeUV(p)).rgb, u_intensity);
     }
 
     gl_FragColor = vec4(color, 1.0);

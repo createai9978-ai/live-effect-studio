@@ -44,6 +44,8 @@ type Props = {
   /** Human-readable name of the selected clip, shown in the preview badge. */
   previewClipName?: string | null;
   projectClipSrc?: string | null;
+  /** The user's own imported photos/videos/audio, shown in the "Mine" tab. */
+  myMedia?: AssetItem[];
   onHoverEffect?: (id: string | null) => void;
 };
 
@@ -59,6 +61,7 @@ export default function AssetBrowser({
   previewFrameUrl,
   previewClipName,
   projectClipSrc,
+  myMedia = [],
   onHoverEffect,
 }: Props) {
   const [tab, setTab] = useState<AssetTab>(initialTab);
@@ -379,15 +382,16 @@ export default function AssetBrowser({
                 />
               ) : tab === "mine" ? (
                 <MineTab
-                  items={
-                    activeTags.size === 0
-                      ? favoriteItems
-                      : favoriteItems.filter((i) => {
-                          const s = new Set(i.tags ?? []);
-                          for (const t of activeTags) if (!s.has(t)) return false;
-                          return true;
-                        })
-                  }
+                  items={[...myMedia, ...favoriteItems]
+                    .filter((i) => {
+                      const q = query.trim().toLowerCase();
+                      if (q && !`${i.name} ${i.tag ?? ""}`.toLowerCase().includes(q)) return false;
+                      if (activeTags.size === 0) return true;
+                      const s = new Set(i.tags ?? []);
+                      for (const t of activeTags) if (!s.has(t)) return false;
+                      return true;
+                    })
+                    .filter((i, idx, arr) => arr.findIndex((x) => x.id === i.id) === idx)}
                   onApply={handleCardActivate}
                   onHover={handleHover}
                   previewFrameUrl={previewFrameUrl ?? null}

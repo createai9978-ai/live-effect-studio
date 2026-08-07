@@ -83,6 +83,12 @@ export type AssetItem = {
   is16K?: boolean;
   tags?: ContentTag[];
   preview?: string;
+  /** Audio/media source url (stock + audio tabs). */
+  src?: string;
+  /** Explicit GPU effect primitive — bypasses keyword inference entirely. */
+  fx?: import("./VideoProcessor").EffectType;
+  /** Hard separation between colour science (LUTs/grades) and real visual effects. */
+  kind?: "grade" | "effect" | "media";
   /** Unique executable render descriptor; never shared by differently named assets. */
   renderProgram?: import("./effectRuntime").RenderProgram;
 };
@@ -281,14 +287,20 @@ const item = (
    ============================================================== */
 const subTags = ["cinematic", "vlog", "gaming", "music", "travel", "wedding"] as ContentTag[];
 
+type FxType = import("./VideoProcessor").EffectType;
+
 type SetSpec = {
   prefix: string;
-  names: string[];
+  /** Either a plain name, or [name, explicit GPU effect primitive]. */
+  names: (string | [string, FxType])[];
   glyph: ThumbGlyph;
   gradient: [string, string];
   tag: string;
   tags?: ContentTag[];
   ai?: boolean;
+  /** Default effect primitive for every entry that does not declare its own. */
+  fx?: FxType;
+  kind?: "grade" | "effect" | "media";
 };
 
 /**
@@ -301,7 +313,9 @@ const GLOBAL_NAMES = new Set<string>();
 
 function makeSet(spec: SetSpec): AssetItem[] {
   const out: AssetItem[] = [];
-  spec.names.forEach((name, i) => {
+  spec.names.forEach((entry, i) => {
+    const name = Array.isArray(entry) ? entry[0] : entry;
+    const fx = Array.isArray(entry) ? entry[1] : spec.fx;
     const key = name.trim().toLowerCase();
     const id = `${spec.prefix}-${i}`;
     // Strict global de-duplication: a preset name/id may only exist once in the whole library.
@@ -316,6 +330,8 @@ function makeSet(spec: SetSpec): AssetItem[] {
         isExclusive: i % 9 === 0,
         isAiPro: spec.ai || undefined,
         tags: [pool[i % pool.length]],
+        fx,
+        kind: spec.kind ?? (fx ? "effect" : "grade"),
         // Generated presets use live video + a seeded shader, never recycled still thumbnails.
         preview: undefined,
       });
@@ -509,9 +525,93 @@ const nxStylize = makeSet({
 
 const neuralAll = dedupe([...nxSubject, ...nxDepth, ...nxAudio, ...nxStylize]);
 
+/* ---------- Suite D — Visual FX (real image-altering primitives) ---------- */
+
+const vfxBlur = makeSet({
+  prefix: "vfx-blur", glyph: "bokeh", tag: "BLUR",
+  gradient: ["#0f172a", "#64748b"],
+  tags: ["cinematic", "minimal", "corporate"],
+  names: [
+    ["Gaussian Soft Blur", "gaussianBlur"],
+    ["Heavy Dream Blur", "gaussianBlur"],
+    ["Directional Motion Blur", "directionalBlur"],
+    ["Whip Streak Blur", "directionalBlur"],
+    ["Radial Zoom Blur", "zoomPulse"],
+    ["Focus Pull Defocus", "gaussianBlur"],
+    ["Speed Smear Blur", "directionalBlur"],
+    ["Tilt Shift Miniature", "gaussianBlur"],
+  ],
+});
+
+const vfxDistort = makeSet({
+  prefix: "vfx-dist", glyph: "shake", tag: "DISTORT",
+  gradient: ["#1e1b4b", "#f43f5e"],
+  tags: ["gaming", "music", "vlog"],
+  names: [
+    ["RGB Split Displace", "rgbSplit"],
+    ["Chromatic Aberration Lens", "chromaticAberration"],
+    ["Camera Shake Handheld", "cameraShake"],
+    ["Bass Impact Shake", "cameraShake"],
+    ["Earthquake Rumble Shake", "cameraShake"],
+    ["Zoom Pulse Punch", "zoomPulse"],
+    ["Kaleidoscope Fold FX", "kaleido"],
+    ["Mirror Split FX", "mirror"],
+  ],
+});
+
+const vfxGlitch = makeSet({
+  prefix: "vfx-glitch", glyph: "vhs", tag: "GLITCH",
+  gradient: ["#4c1d95", "#22d3ee"],
+  tags: ["gaming", "retro", "music"],
+  names: [
+    ["Digital Block Glitch", "glitchBlock"],
+    ["Signal Corrupt Glitch", "glitchBlock"],
+    ["Datamosh Tear FX", "glitchBlock"],
+    ["VHS Tape Warp", "vhs"],
+    ["Retro VHS Scanlines", "vhs"],
+    ["CRT Phosphor Roll", "vhs"],
+    ["Hologram Interference", "rgbSplit"],
+    ["Cyberpunk Neon Glow FX", "glow"],
+  ],
+});
+
+const vfxLight = makeSet({
+  prefix: "vfx-light", glyph: "flare", tag: "LIGHT FX",
+  gradient: ["#7c2d12", "#fbbf24"],
+  tags: ["cinematic", "wedding", "travel"],
+  names: [
+    ["Soft Bloom Glow", "glow"],
+    ["Dreamy Halation Glow", "glow"],
+    ["Warm Light Leak Sweep", "lightLeakFx"],
+    ["Sunset Leak Burn", "lightLeakFx"],
+    ["Cool Window Leak", "lightLeakFx"],
+    ["35mm Grain Texture FX", "grain"],
+    ["Heavy Noise Stock FX", "grain"],
+    ["Neon Glow Pulse", "glow"],
+  ],
+});
+
+const visualAll = dedupe([...vfxBlur, ...vfxDistort, ...vfxGlitch, ...vfxLight]);
+
 /* ================= EFFECTS TREE ================= */
 
 export const EFFECTS_TREE: EffectCategory[] = [
+  {
+    id: "visual-fx",
+    label: "Visual Effects",
+    icon: "glitch",
+    count: visualAll.length,
+    items: visualAll,
+    accent: "#f43f5e",
+    gradient: ["#f43f5e", "#22d3ee"],
+    badge: "FX",
+    children: [
+      { id: "vfx-blur-cat", label: "Blur & Focus", icon: "distort", count: vfxBlur.length, items: vfxBlur, accent: "#94a3b8", badge: "BLUR" },
+      { id: "vfx-distort-cat", label: "Distort & Shake", icon: "distort", count: vfxDistort.length, items: vfxDistort, accent: "#f43f5e", badge: "WARP" },
+      { id: "vfx-glitch-cat", label: "Glitch & VHS", icon: "glitch", count: vfxGlitch.length, items: vfxGlitch, accent: "#22d3ee", badge: "GLITCH" },
+      { id: "vfx-light-cat", label: "Glow, Grain & Leaks", icon: "lightbulb", count: vfxLight.length, items: vfxLight, accent: "#fbbf24", badge: "LIGHT" },
+    ],
+  },
   {
     id: "cinema-grade",
     label: "Cinema Grade",
@@ -563,15 +663,143 @@ export const EFFECTS_TREE: EffectCategory[] = [
 ];
 
 
-/* ================= Other Empty tabs ================= */
+/* ================= Standalone library tabs ================= */
 
-export const TITLES: AssetItem[] = [];
-export const TRANSITIONS: AssetItem[] = [];
-export const FILTERS: AssetItem[] = [];
-export const STICKERS: AssetItem[] = [];
-export const STOCK: AssetItem[] = [];
-export const AUDIO_LIB: AssetItem[] = [];
-export const TEMPLATES: AssetItem[] = [];
+/** Colour science only — LUTs and grades never displace pixels. */
+export const FILTERS: AssetItem[] = makeSet({
+  prefix: "flt", glyph: "star", tag: "FILTER", kind: "grade", fx: "colorGrade",
+  gradient: ["#0f172a", "#f59e0b"],
+  tags: ["cinematic", "vlog", "retro", "minimal"],
+  names: [
+    "Vintage Film Fade", "Moody Dark Teal", "Neon Teal Pop", "Aesthetic Warm Sun",
+    "Retro VHS Colour", "Clean Natural Skin", "Bleach Bypass Steel", "Golden Hour Warmth",
+    "Nordic Cool Mist", "Tokyo Night Neon", "Desert Amber Dust", "Soft Pastel Dream",
+    "Noir High Contrast", "Kodak Portra Film", "Fuji Cinema Soft", "Emerald Forest Tone",
+    "Coral Beach Summer", "Faded Polaroid", "Cyber Magenta Wash", "Documentary Flat Log",
+  ],
+});
+
+/** Clip-to-clip transitions. */
+export const TRANSITIONS: AssetItem[] = makeSet({
+  prefix: "trn", glyph: "wipe", tag: "TRANSITION",
+  gradient: ["#0c4a6e", "#38bdf8"],
+  tags: ["music", "gaming", "travel", "vlog"],
+  names: [
+    ["Fade To Black", "transitionWarp"],
+    ["Cross Dissolve", "transitionWarp"],
+    ["Zoom In Punch", "zoomPulse"],
+    ["Zoom Out Pull", "zoomPulse"],
+    ["Linear Wipe", "transitionWarp"],
+    ["Clock Wipe", "transitionWarp"],
+    ["Slide Left Push", "directionalBlur"],
+    ["Slide Up Push", "directionalBlur"],
+    ["Glitch Cut Transition", "glitchBlock"],
+    ["RGB Split Transition", "rgbSplit"],
+    ["Whip Pan Blur Transition", "directionalBlur"],
+    ["Light Burst Transition", "glow"],
+    ["VHS Roll Transition", "vhs"],
+    ["Shake Cut Transition", "cameraShake"],
+    ["Kaleido Fold Transition", "kaleido"],
+    ["Mirror Flip Transition", "mirror"],
+  ],
+});
+
+/** Animated titles, lower thirds and callouts. */
+export const TITLES: AssetItem[] = makeSet({
+  prefix: "ttl", glyph: "text", tag: "TITLE", fx: "textMotion",
+  gradient: ["#1e1b4b", "#818cf8"],
+  tags: ["corporate", "vlog", "music", "minimal"],
+  names: [
+    "Clean Lower Third", "Bold Broadcast Lower Third", "Minimal Name Card", "Glass Panel Title",
+    "Kinetic Caption Pop", "Auto Caption Karaoke", "Typewriter Intro Title", "Neon Outline Title",
+    "Big Impact Slam Title", "Editorial Serif Title", "Callout Arrow Label", "Circle Callout Tag",
+    "Chapter Marker Title", "Subscribe Callout", "End Card Outro Title", "Social Handle Bar",
+  ],
+});
+
+/** Animated stickers and overlay elements. */
+export const STICKERS: AssetItem[] = makeSet({
+  prefix: "stk", glyph: "sparkle", tag: "STICKER", fx: "opticalOverlay",
+  gradient: ["#4a044e", "#f472b6"],
+  tags: ["vlog", "music", "gaming", "wedding"],
+  names: [
+    "Sparkle Burst Sticker", "Heart Float Overlay", "Fire Emoji Pop", "Arrow Pointer Sticker",
+    "Confetti Rain Overlay", "Star Twinkle Overlay", "Speech Bubble Sticker", "Loading Spinner Sticker",
+    "Progress Bar Overlay", "Emoji Reaction Burst", "Snow Fall Overlay", "Rain Drop Overlay",
+    "Light Dust Overlay", "Bokeh Circles Overlay", "Grid Scan Overlay", "Film Border Overlay",
+  ],
+});
+
+/** Ready-to-use project templates. */
+export const TEMPLATES: AssetItem[] = makeSet({
+  prefix: "tpl", glyph: "grid", tag: "TEMPLATE",
+  gradient: ["#7f1d1d", "#fb7185"],
+  tags: ["vlog", "corporate", "travel", "wedding"],
+  names: [
+    ["Travel Vlog Opener", "zoomPulse"],
+    ["Beat Sync Montage", "cameraShake"],
+    ["Product Launch Promo", "glow"],
+    ["Cinematic Trailer Kit", "directionalBlur"],
+    ["Wedding Story Reel", "glow"],
+    ["Gaming Highlight Reel", "glitchBlock"],
+    ["Podcast Clip Template", "textMotion"],
+    ["Real Estate Tour Kit", "gaussianBlur"],
+    ["Fitness Reel Template", "zoomPulse"],
+    ["Retro Music Video Kit", "vhs"],
+    ["Corporate Explainer Kit", "textMotion"],
+    ["Food Recipe Reel", "grain"],
+  ],
+});
+
+/** Royalty-free stock footage & photos (live preview clips resolve per id). */
+export const STOCK: AssetItem[] = makeSet({
+  prefix: "stock", glyph: "film", tag: "STOCK", kind: "media",
+  gradient: ["#083344", "#22d3ee"],
+  tags: ["travel", "cinematic", "corporate", "minimal"],
+  names: [
+    "Aerial Coastline 4K", "City Night Traffic 4K", "Forest Mist Morning", "Desert Dunes Sunset",
+    "Ocean Waves Slow-Mo", "Mountain Drone Sweep", "Rainy Window Mood", "Neon Street Tokyo",
+    "Coffee Shop Ambience", "Office Team Meeting", "Snow Peaks Flyover", "Waterfall Close-Up",
+    "Traffic Light Trails", "Skyline Timelapse", "Beach Sunrise Walk", "Autumn Leaves Fall",
+    "Studio Portrait Light", "Abstract Ink Flow", "Bokeh Night Lights", "Highway Drive POV",
+    "Countryside Fields", "Underwater Reef Dive", "Campfire Night Close", "Modern Architecture Pan",
+  ],
+});
+
+const audioTrack = (
+  id: string,
+  name: string,
+  tag: string,
+  duration: string,
+  tags: ContentTag[]
+): AssetItem => ({
+  id, name, tag, duration, kind: "media", glyph: "note",
+  gradient: grad("#064e3b", "#34d399"), tags,
+});
+
+/** Background music beds + sound effects. */
+export const AUDIO_LIB: AssetItem[] = [
+  audioTrack("aud-cin-1", "Cinematic Rise Epic", "CINEMATIC", "2:14", ["cinematic"]),
+  audioTrack("aud-cin-2", "Emotional Piano Score", "CINEMATIC", "3:02", ["cinematic"]),
+  audioTrack("aud-cin-3", "Trailer Tension Build", "CINEMATIC", "1:48", ["cinematic"]),
+  audioTrack("aud-cin-4", "Orchestral Horizon", "CINEMATIC", "2:36", ["cinematic"]),
+  audioTrack("aud-vlog-1", "Sunny Vlog Ukulele", "VLOG", "2:05", ["vlog"]),
+  audioTrack("aud-vlog-2", "Daily Routine Pop", "VLOG", "2:22", ["vlog"]),
+  audioTrack("aud-vlog-3", "Travel Diary Acoustic", "VLOG", "2:47", ["travel"]),
+  audioTrack("aud-vlog-4", "Morning Energy Indie", "VLOG", "1:58", ["vlog"]),
+  audioTrack("aud-corp-1", "Corporate Uplift", "CORPORATE", "2:30", ["corporate"]),
+  audioTrack("aud-corp-2", "Clean Tech Presentation", "CORPORATE", "2:12", ["corporate"]),
+  audioTrack("aud-corp-3", "Product Reveal Minimal", "CORPORATE", "1:40", ["minimal"]),
+  audioTrack("aud-lofi-1", "Lo-Fi Study Loop", "LO-FI", "3:10", ["minimal"]),
+  audioTrack("aud-lofi-2", "Midnight Lo-Fi Tape", "LO-FI", "2:52", ["retro"]),
+  audioTrack("aud-lofi-3", "Rainy Day Lo-Fi", "LO-FI", "3:24", ["minimal"]),
+  audioTrack("aud-sfx-1", "Whoosh Transition SFX", "SFX", "0:02", ["music"]),
+  audioTrack("aud-sfx-2", "Impact Boom SFX", "SFX", "0:03", ["gaming"]),
+  audioTrack("aud-sfx-3", "Riser Sweep SFX", "SFX", "0:05", ["music"]),
+  audioTrack("aud-sfx-4", "Camera Shutter SFX", "SFX", "0:01", ["minimal"]),
+  audioTrack("aud-sfx-5", "Glitch Stutter SFX", "SFX", "0:02", ["gaming"]),
+  audioTrack("aud-sfx-6", "Pop Click UI SFX", "SFX", "0:01", ["minimal"]),
+];
 
 /** All tags an item carries — checks both its own tags and inferred glyph/family tags. */
 export function itemTags(i: AssetItem): ContentTag[] {

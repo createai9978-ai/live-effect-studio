@@ -47,6 +47,7 @@ import {
   TrackState,
   Workspace,
   gradeToFilter,
+  fmtDuration,
   probeFile,
   uid,
 } from "../editor/types";
@@ -1168,6 +1169,23 @@ export default function App() {
     return { clip, ae, asset, family, params: ae.params ?? defaultValues(family) };
   }, [selectedFx, clips, assets]);
 
+  /** The user's imported media, surfaced inside the browser's "Mine" tab. */
+  const myMediaItems = useMemo<AssetItem[]>(
+    () =>
+      assets.map((a) => ({
+        id: `mine-${a.id}`,
+        name: a.name,
+        tag: a.kind === "audio" ? "MY AUDIO" : a.kind === "image" ? "MY PHOTO" : "MY VIDEO",
+        kind: "media",
+        glyph: a.kind === "audio" ? "note" : a.kind === "image" ? "portrait" : "film",
+        duration: fmtDuration(a.duration),
+        preview: a.thumb,
+        gradient: "linear-gradient(135deg,#0f172a,#334155)",
+      })),
+    [assets]
+  );
+
+
   const updateFxParams = useCallback(
     (next: ParamValues, presetName?: string) => {
       if (!selectedFx || !fxSelection) return;
@@ -1473,6 +1491,7 @@ export default function App() {
         previewFrameUrl={selectedAsset?.thumb ?? assets.find((a) => a.thumb)?.thumb ?? null}
         previewClipName={selectedAsset?.name ?? assets.find((a) => a.thumb)?.name ?? null}
         projectClipSrc={selectedAsset?.url ?? assets.find((a) => a.kind === "video")?.url ?? null}
+        myMedia={myMediaItems}
         onHoverEffect={setHoveredEffectId}
       />
 

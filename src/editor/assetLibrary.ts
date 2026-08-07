@@ -525,9 +525,93 @@ const nxStylize = makeSet({
 
 const neuralAll = dedupe([...nxSubject, ...nxDepth, ...nxAudio, ...nxStylize]);
 
+/* ---------- Suite D — Visual FX (real image-altering primitives) ---------- */
+
+const vfxBlur = makeSet({
+  prefix: "vfx-blur", glyph: "bokeh", tag: "BLUR",
+  gradient: ["#0f172a", "#64748b"],
+  tags: ["cinematic", "minimal", "corporate"],
+  names: [
+    ["Gaussian Soft Blur", "gaussianBlur"],
+    ["Heavy Dream Blur", "gaussianBlur"],
+    ["Directional Motion Blur", "directionalBlur"],
+    ["Whip Streak Blur", "directionalBlur"],
+    ["Radial Zoom Blur", "zoomPulse"],
+    ["Focus Pull Defocus", "gaussianBlur"],
+    ["Speed Smear Blur", "directionalBlur"],
+    ["Tilt Shift Miniature", "gaussianBlur"],
+  ],
+});
+
+const vfxDistort = makeSet({
+  prefix: "vfx-dist", glyph: "shake", tag: "DISTORT",
+  gradient: ["#1e1b4b", "#f43f5e"],
+  tags: ["gaming", "music", "vlog"],
+  names: [
+    ["RGB Split Displace", "rgbSplit"],
+    ["Chromatic Aberration Lens", "chromaticAberration"],
+    ["Camera Shake Handheld", "cameraShake"],
+    ["Bass Impact Shake", "cameraShake"],
+    ["Earthquake Rumble Shake", "cameraShake"],
+    ["Zoom Pulse Punch", "zoomPulse"],
+    ["Kaleidoscope Fold FX", "kaleido"],
+    ["Mirror Split FX", "mirror"],
+  ],
+});
+
+const vfxGlitch = makeSet({
+  prefix: "vfx-glitch", glyph: "vhs", tag: "GLITCH",
+  gradient: ["#4c1d95", "#22d3ee"],
+  tags: ["gaming", "retro", "music"],
+  names: [
+    ["Digital Block Glitch", "glitchBlock"],
+    ["Signal Corrupt Glitch", "glitchBlock"],
+    ["Datamosh Tear FX", "glitchBlock"],
+    ["VHS Tape Warp", "vhs"],
+    ["Retro VHS Scanlines", "vhs"],
+    ["CRT Phosphor Roll", "vhs"],
+    ["Hologram Interference", "rgbSplit"],
+    ["Cyberpunk Neon Glow FX", "glow"],
+  ],
+});
+
+const vfxLight = makeSet({
+  prefix: "vfx-light", glyph: "flare", tag: "LIGHT FX",
+  gradient: ["#7c2d12", "#fbbf24"],
+  tags: ["cinematic", "wedding", "travel"],
+  names: [
+    ["Soft Bloom Glow", "glow"],
+    ["Dreamy Halation Glow", "glow"],
+    ["Warm Light Leak Sweep", "lightLeakFx"],
+    ["Sunset Leak Burn", "lightLeakFx"],
+    ["Cool Window Leak", "lightLeakFx"],
+    ["35mm Grain Texture FX", "grain"],
+    ["Heavy Noise Stock FX", "grain"],
+    ["Neon Glow Pulse", "glow"],
+  ],
+});
+
+const visualAll = dedupe([...vfxBlur, ...vfxDistort, ...vfxGlitch, ...vfxLight]);
+
 /* ================= EFFECTS TREE ================= */
 
 export const EFFECTS_TREE: EffectCategory[] = [
+  {
+    id: "visual-fx",
+    label: "Visual Effects",
+    icon: "glitch",
+    count: visualAll.length,
+    items: visualAll,
+    accent: "#f43f5e",
+    gradient: ["#f43f5e", "#22d3ee"],
+    badge: "FX",
+    children: [
+      { id: "vfx-blur-cat", label: "Blur & Focus", icon: "distort", count: vfxBlur.length, items: vfxBlur, accent: "#94a3b8", badge: "BLUR" },
+      { id: "vfx-distort-cat", label: "Distort & Shake", icon: "distort", count: vfxDistort.length, items: vfxDistort, accent: "#f43f5e", badge: "WARP" },
+      { id: "vfx-glitch-cat", label: "Glitch & VHS", icon: "glitch", count: vfxGlitch.length, items: vfxGlitch, accent: "#22d3ee", badge: "GLITCH" },
+      { id: "vfx-light-cat", label: "Glow, Grain & Leaks", icon: "lightbulb", count: vfxLight.length, items: vfxLight, accent: "#fbbf24", badge: "LIGHT" },
+    ],
+  },
   {
     id: "cinema-grade",
     label: "Cinema Grade",

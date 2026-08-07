@@ -61,6 +61,7 @@ export default function AssetBrowser({
   previewFrameUrl,
   previewClipName,
   projectClipSrc,
+  myMedia = [],
   onHoverEffect,
 }: Props) {
   const [tab, setTab] = useState<AssetTab>(initialTab);

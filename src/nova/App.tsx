@@ -1491,6 +1491,7 @@ export default function App() {
         previewFrameUrl={selectedAsset?.thumb ?? assets.find((a) => a.thumb)?.thumb ?? null}
         previewClipName={selectedAsset?.name ?? assets.find((a) => a.thumb)?.name ?? null}
         projectClipSrc={selectedAsset?.url ?? assets.find((a) => a.kind === "video")?.url ?? null}
+        myMedia={myMediaItems}
         onHoverEffect={setHoveredEffectId}
       />
 

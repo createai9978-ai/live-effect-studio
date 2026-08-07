@@ -44,6 +44,8 @@ type Props = {
   /** Human-readable name of the selected clip, shown in the preview badge. */
   previewClipName?: string | null;
   projectClipSrc?: string | null;
+  /** The user's own imported photos/videos/audio, shown in the "Mine" tab. */
+  myMedia?: AssetItem[];
   onHoverEffect?: (id: string | null) => void;
 };
 

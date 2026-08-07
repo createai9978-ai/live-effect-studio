@@ -287,14 +287,20 @@ const item = (
    ============================================================== */
 const subTags = ["cinematic", "vlog", "gaming", "music", "travel", "wedding"] as ContentTag[];
 
+type FxType = import("./VideoProcessor").EffectType;
+
 type SetSpec = {
   prefix: string;
-  names: string[];
+  /** Either a plain name, or [name, explicit GPU effect primitive]. */
+  names: (string | [string, FxType])[];
   glyph: ThumbGlyph;
   gradient: [string, string];
   tag: string;
   tags?: ContentTag[];
   ai?: boolean;
+  /** Default effect primitive for every entry that does not declare its own. */
+  fx?: FxType;
+  kind?: "grade" | "effect" | "media";
 };
 
 /**
@@ -307,7 +313,9 @@ const GLOBAL_NAMES = new Set<string>();
 
 function makeSet(spec: SetSpec): AssetItem[] {
   const out: AssetItem[] = [];
-  spec.names.forEach((name, i) => {
+  spec.names.forEach((entry, i) => {
+    const name = Array.isArray(entry) ? entry[0] : entry;
+    const fx = Array.isArray(entry) ? entry[1] : spec.fx;
     const key = name.trim().toLowerCase();
     const id = `${spec.prefix}-${i}`;
     // Strict global de-duplication: a preset name/id may only exist once in the whole library.
@@ -322,6 +330,8 @@ function makeSet(spec: SetSpec): AssetItem[] {
         isExclusive: i % 9 === 0,
         isAiPro: spec.ai || undefined,
         tags: [pool[i % pool.length]],
+        fx,
+        kind: spec.kind ?? (fx ? "effect" : "grade"),
         // Generated presets use live video + a seeded shader, never recycled still thumbnails.
         preview: undefined,
       });

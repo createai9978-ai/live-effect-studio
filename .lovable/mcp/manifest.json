@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "effect-studio-pro",
+      "version": "0.1.0",
+      "title": "Effect Studio Pro"
+    },
+    "tools": [
+      {
+        "name": "list_categories",
+        "title": "List effect categories",
+        "description": "List every effect category, sub-category and asset library in Effect Studio Pro with item counts.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_presets",
+        "title": "Search presets",
+        "description": "Search the Effect Studio Pro catalog of effects, filters, transitions, titles, stickers, templates, stock media and audio by keyword, library or tag.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Keyword to match against preset names and categories."
+            },
+            "library": {
+              "type": "string",
+              "description": "Restrict results to one library: effects, filters, transitions, titles, stickers, templates, stock or audio."
+            },
+            "tag": {
+              "type": "string",
+              "description": "Mood tag such as cinematic, vlog, gaming, retro or ai."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991,
+              "description": "Maximum results to return (1-100, default 25)."
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_preset",
+        "title": "Get preset details",
+        "description": "Get the full technical detail of one Effect Studio Pro preset: its render engine, GPU effect primitive, default parameter values and motion signature.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Preset id, as returned by search_presets."
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

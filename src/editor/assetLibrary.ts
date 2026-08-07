@@ -83,6 +83,12 @@ export type AssetItem = {
   is16K?: boolean;
   tags?: ContentTag[];
   preview?: string;
+  /** Audio/media source url (stock + audio tabs). */
+  src?: string;
+  /** Explicit GPU effect primitive — bypasses keyword inference entirely. */
+  fx?: import("./VideoProcessor").EffectType;
+  /** Hard separation between colour science (LUTs/grades) and real visual effects. */
+  kind?: "grade" | "effect" | "media";
   /** Unique executable render descriptor; never shared by differently named assets. */
   renderProgram?: import("./effectRuntime").RenderProgram;
 };

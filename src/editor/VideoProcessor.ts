@@ -332,6 +332,18 @@ const EFFECT_TYPE_MAP: Record<EffectType, number> = {
   colorGrade: 25,
   speedWarp: 26,
   voiceSync: 27,
+  gaussianBlur: 28,
+  directionalBlur: 29,
+  rgbSplit: 30,
+  cameraShake: 31,
+  grain: 32,
+  zoomPulse: 33,
+  glow: 34,
+  vhs: 35,
+  lightLeakFx: 36,
+  glitchBlock: 37,
+  kaleido: 38,
+  mirror: 39,
 };
 
 /** Vertex shader - pass-through */

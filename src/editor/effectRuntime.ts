@@ -33,13 +33,29 @@ function unit(h: number, shift: number) {
   return ((h >>> shift) & 255) / 255;
 }
 
-export function compileRenderProgram(item: Pick<AssetItem, "id" | "name" | "tag" | "glyph">): RenderProgram {
+/** Effect types that genuinely alter the image composition (not colour only). */
+const VISUAL_FX: EffectType[] = [
+  "gaussianBlur", "directionalBlur", "rgbSplit", "chromaticAberration", "cameraShake",
+  "grain", "zoomPulse", "glow", "vhs", "lightLeakFx", "glitchBlock", "kaleido", "mirror",
+];
+
+export function isVisualFx(type: EffectType) {
+  return VISUAL_FX.includes(type);
+}
+
+export function compileRenderProgram(
+  item: Pick<AssetItem, "id" | "name" | "tag" | "glyph"> & { fx?: EffectType }
+): RenderProgram {
   const h = hash(`${item.id}:${item.name}`);
   const text = `${item.name} ${item.tag ?? ""} ${item.glyph}`.toLowerCase();
   let type: EffectType = "procedural";
   let engine: EffectEngine = "gpu";
 
-  if (/rotoscope|cutout|silhouette|segment|mask|object remove|green screen/.test(text)) {
+  if (item.fx) {
+    // Explicitly authored effects always win — no keyword guessing, no tint fallback.
+    type = item.fx;
+    engine = "gpu";
+  } else if (/rotoscope|cutout|silhouette|segment|mask|object remove|green screen/.test(text)) {
     type = "rotoscope";
     engine = "local-ai";
   } else if (/depth|parallax|background blur|fog/.test(text)) {
@@ -54,23 +70,28 @@ export function compileRenderProgram(item: Pick<AssetItem, "id" | "name" | "tag"
   } else if (/interpolat|frame blend|slow-mo|time remap|lip sync|beat detect/.test(text)) {
     type = "motionVectors";
     engine = "local-ai";
-  } else if (/trail|echo|clone|ghost/.test(text)) type = "motionTrail";
-  else if (/glitch|vhs|crt|scan|datamosh|signal|pixel|cyber|retro/.test(text)) type = "glitchWarp";
+  } else if (/vhs|crt|scanline/.test(text)) type = "vhs";
+  else if (/rgb split|channel split|chromatic/.test(text)) type = "rgbSplit";
+  else if (/shake|handheld|jitter|recoil/.test(text)) type = "cameraShake";
+  else if (/grain|noise|dust|scratch/.test(text)) type = "grain";
+  else if (/glow|bloom|halation|flare|leak|burn/.test(text)) type = "glow";
+  else if (/trail|echo|clone|ghost/.test(text)) type = "motionTrail";
+  else if (/glitch|datamosh|signal|pixel|cyber|retro/.test(text)) type = "glitchBlock";
   else if (/transition|wipe|slit|dissolve|push|slide|zoom|whip|burst|morph/.test(text)) type = "transitionWarp";
-  else if (/flare|leak|burn|dust|scratch|bokeh|fog|smoke|rain|snow|spark|overlay|halation/.test(text)) type = "opticalOverlay";
-  else if (/split|grid|panel|mosaic|picture-in-picture/.test(text)) type = "splitLayout";
+  else if (/bokeh|fog|smoke|rain|snow|spark|overlay/.test(text)) type = "opticalOverlay";
+  else if (/split|grid|panel|mosaic|picture-in-picture|mirror|kaleido/.test(text)) type = "splitLayout";
   else if (/caption|text|title|word|headline|lower third/.test(text)) type = "textMotion";
   else if (/lut|grade|filter|tone|kodak|portra|noir|warmth|aesthetic/.test(text)) type = "colorGrade";
   else if (/speed|ramp|velocity|freeze|hyperlapse/.test(text)) type = "speedWarp";
 
   const flavor: MotionFlavor =
-    type === "glitchWarp" || type === "speedWarp"
+    type === "glitchWarp" || type === "speedWarp" || type === "glitchBlock" || type === "vhs" || type === "rgbSplit"
       ? "glitch"
-      : type === "transitionWarp" || type === "motionTrail" || type === "motionVectors" || type === "textMotion" || type === "splitLayout"
+      : type === "transitionWarp" || type === "motionTrail" || type === "motionVectors" || type === "textMotion" || type === "splitLayout" || type === "cameraShake" || type === "zoomPulse"
       ? "kinetic"
       : type === "rotoscope" || type === "depthMap" || type === "bodyTrack" || type === "voiceSync"
       ? "ai"
-      : type === "opticalOverlay"
+      : type === "opticalOverlay" || type === "lightLeakFx" || type === "glow" || type === "grain"
       ? "atmosphere"
       : "cinematic";
 

@@ -29,6 +29,24 @@ function hash(value: string) {
   return h >>> 0;
 }
 
+/**
+ * Curated cinematic tint palette. Random RGB triplets used to land on cold
+ * blue values, which made every preset read as "brightness + blue cast".
+ * These are all real film-grade tints, normalised around neutral luminance.
+ */
+const GRADE_PALETTE: Array<[number, number, number]> = [
+  [1.00, 0.92, 0.82], // tungsten warm
+  [1.00, 0.86, 0.70], // golden hour
+  [0.98, 0.94, 0.90], // neutral clean
+  [1.00, 0.80, 0.62], // sodium amber
+  [0.92, 0.96, 0.95], // cool steel (subtle)
+  [1.00, 0.90, 0.88], // skin-safe rose
+  [0.88, 0.96, 0.92], // teal shadow
+  [1.00, 0.96, 0.88], // bleach warm
+  [0.95, 0.92, 1.00], // soft lavender
+  [1.00, 0.88, 0.78], // sunset copper
+];
+
 function unit(h: number, shift: number) {
   return ((h >>> shift) & 255) / 255;
 }
@@ -104,7 +122,7 @@ export function compileRenderProgram(
     motion: 0.18 + unit(h, 8) * 0.78,
     warp: 0.08 + unit(h, 16) * 0.72,
     trail: unit(h, 24) * 0.9,
-    color: [0.35 + unit(h, 0) * 0.65, 0.35 + unit(h, 8) * 0.65, 0.35 + unit(h, 16) * 0.65],
+    color: GRADE_PALETTE[h % GRADE_PALETTE.length],
     motionSig: motionSignatureFor(`${item.id}:${item.name}:${type}`, flavor),
   };
 }

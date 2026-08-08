@@ -1305,7 +1305,7 @@ export default function App() {
     : null;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#0c0d13] font-sans text-zinc-200 antialiased selection:bg-violet-500/30">
+    <div className="flex h-screen flex-col overflow-hidden bg-[#0B0E14] font-sans text-zinc-200 antialiased selection:bg-violet-500/30">
       <input
         ref={fileInputRef}
         type="file"

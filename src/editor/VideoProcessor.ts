@@ -115,9 +115,17 @@ export class VideoProcessor {
     this.failed = false;
 
     let gl: WebGLRenderingContext | null = null;
+    // alpha:false + opaque black clear guarantees the drawing buffer can never
+    // composite as a translucent (blue-looking) layer over the video element.
+    const attrs: WebGLContextAttributes = {
+      alpha: false,
+      premultipliedAlpha: false,
+      preserveDrawingBuffer: true,
+      antialias: false,
+    };
     try {
-      gl = (canvas.getContext("webgl", { premultipliedAlpha: false, preserveDrawingBuffer: true }) ??
-        canvas.getContext("experimental-webgl", { premultipliedAlpha: false })) as WebGLRenderingContext | null;
+      gl = (canvas.getContext("webgl", attrs) ??
+        canvas.getContext("experimental-webgl", attrs)) as WebGLRenderingContext | null;
     } catch {
       gl = null;
     }
@@ -288,7 +296,7 @@ export class VideoProcessor {
     }
 
 
-    gl.clearColor(0, 0, 0, 0);
+    gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
@@ -479,6 +487,13 @@ const FRAGMENT_SHADER_SOURCE = `
     return c;
   }
 
+  // Luminance-normalised tint: keeps whites white so a preset can never turn a
+  // white background blue — only shadows/mids receive the preset colour.
+  vec3 tintColor() {
+    float l = max(0.001, dot(u_color, vec3(0.299, 0.587, 0.114)));
+    return clamp(u_color / l, 0.0, 2.0);
+  }
+
   void main() {
     // Sample through the preset's own animated transform, with shutter blur.
     vec2 uv = motionXform(v_uv, 0.0);
@@ -497,7 +512,7 @@ const FRAGMENT_SHADER_SOURCE = `
       color += lightLeak(uv, u_color);
     } else if (u_effectType == 4) {
       // Atmosphere gradient (simplified)
-      color = mix(color, u_color, u_intensity * 0.3);
+      color = mix(color, mix(color, tintColor() * dot(color, vec3(0.333)), 0.85), u_intensity * 0.3);
     } else if (u_effectType == 5) {
       // Speed glitch
       color = speedGlitch(u_video, uv);
@@ -537,7 +552,7 @@ const FRAGMENT_SHADER_SOURCE = `
       vec2 trackedUV = safeUV(uv - delta * (0.25 + u_warp * 0.55));
       color = mix(color, texture2D(u_video, trackedUV).rgb, u_intensity * 0.72);
       float ring = smoothstep(0.025, 0.0, abs(distance(uv, center) - (0.19 + u_warp * 0.08)));
-      color += u_color * ring * u_intensity;
+      color += tintColor() * ring * u_intensity;
     } else if (u_effectType == 18 || u_effectType == 19) {
       vec2 vector = vec2(sin(u_time * (1.0 + u_motion * 3.0) + u_seed * 12.0), cos(u_time * 0.8 + u_seed * 7.0));
       vector *= (0.002 + u_warp * 0.018);
@@ -556,7 +571,7 @@ const FRAGMENT_SHADER_SOURCE = `
     } else if (u_effectType == 22) {
       vec2 lightPos = vec2(0.2 + 0.6 * fract(u_seed + u_time * 0.035 * (1.0 + u_motion)), 0.25 + u_seed * 0.35);
       float flare = pow(max(0.0, 1.0 - distance(uv, lightPos)), 8.0) + smoothstep(0.012, 0.0, abs(uv.y - lightPos.y)) * 0.22;
-      color += u_color * flare * u_intensity;
+      color += tintColor() * flare * u_intensity;
     } else if (u_effectType == 23) {
       float cols = 2.0 + floor(u_seed * 3.0);
       vec2 tile = fract(uv * vec2(cols, 2.0));
@@ -565,11 +580,17 @@ const FRAGMENT_SHADER_SOURCE = `
     } else if (u_effectType == 24) {
       float scan = smoothstep(0.025, 0.0, abs(uv.y - (0.72 + sin(u_time * 1.4 + u_seed * 8.0) * 0.035)));
       float bars = step(0.48, fract(uv.x * (8.0 + floor(u_seed * 12.0)) + u_time * u_motion));
-      color += u_color * scan * bars * u_intensity;
+      color += tintColor() * scan * bars * u_intensity;
     } else if (u_effectType == 25) {
+      // Colour grade: filmic S-curve + shadow/highlight split tone. Highlights
+      // are protected, so white stays white instead of picking up a cast.
       float luma = dot(color, vec3(0.299, 0.587, 0.114));
-      vec3 tint = mix(vec3(luma), color * u_color * 1.35, 0.62 + u_seed * 0.25);
-      color = mix(color, tint, u_intensity);
+      vec3 curved = clamp((color - 0.5) * (1.0 + u_intensity * 0.45) + 0.5, 0.0, 1.0);
+      vec3 sat = mix(vec3(luma), curved, 1.0 + u_intensity * 0.25);
+      vec3 shadowTint = tintColor();
+      float shadowMask = (1.0 - smoothstep(0.05, 0.75, luma));
+      vec3 graded = sat * mix(vec3(1.0), shadowTint, shadowMask * u_intensity * 0.5);
+      color = clamp(mix(color, graded, u_intensity), 0.0, 1.0);
     } else if (u_effectType == 26) {
       vec2 dir = normalize(uv - vec2(0.5) + vec2(0.0001));
       color = mix(color, blur5(uv, dir * (0.002 + u_motion * 0.012)), u_intensity * 0.72);
@@ -699,7 +720,7 @@ const FRAGMENT_SHADER_SOURCE = `
       color = mix(color, texture2D(u_video, safeUV(p)).rgb, u_intensity);
     }
 
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(clamp(color, 0.0, 1.0), 1.0);
   }
 `;
 

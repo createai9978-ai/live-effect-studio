@@ -85,7 +85,7 @@ export default function SourceMonitor({ asset, onInsert }: Props) {
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Viewer */}
       <div className="relative flex min-h-0 flex-1 items-center justify-center bg-black p-3">
-        <div className="relative aspect-video max-h-full w-full overflow-hidden rounded-md bg-[#07080c] ring-1 ring-white/[0.07]">
+        <div className="relative aspect-video max-h-full w-full overflow-hidden rounded-md bg-[#000000] ring-1 ring-white/[0.07]">
           {asset.kind === "video" ? (
             <video
               key={asset.id}

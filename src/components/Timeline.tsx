@@ -131,7 +131,7 @@ export default function Timeline(props: Props) {
   return (
     <div className="flex min-w-0 flex-1">
       {/* ============ TOOL RAIL ============ */}
-      <div className="flex w-11 shrink-0 flex-col items-center gap-1 border-r border-white/[0.06] bg-[#14151d] py-2">
+      <div className="flex w-11 shrink-0 flex-col items-center gap-1 border-r border-white/[0.06] bg-[#171C29] py-2">
         {TOOLS.map((t) => (
           <Tooltip key={t.id} label={t.label.split(" — ")[0]} hint={`Shortcut ${t.key}${t.label.includes(" — ") ? ` · ${t.label.split(" — ")[1]}` : ""}`} side="right">
             <button
@@ -192,7 +192,7 @@ export default function Timeline(props: Props) {
       </div>
 
       {/* ============ TIMELINE ============ */}
-      <div className="flex min-w-0 flex-1 flex-col bg-[#111218]">
+      <div className="flex min-w-0 flex-1 flex-col bg-[#141824]">
         {/* Header bar */}
         <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] px-3 py-1">
           <span className="font-mono text-[10px] text-cyan-300">{toTimecode(time)}</span>
@@ -233,7 +233,7 @@ export default function Timeline(props: Props) {
           <div className="flex h-full flex-col" style={{ width: `${zoom * 100}%`, minWidth: "100%" }}>
             {/* Ruler */}
             <div className="flex h-5 shrink-0">
-              <div className="shrink-0 border-b border-r border-white/[0.05] bg-[#14151d]" style={{ width: HEAD_W }} />
+              <div className="shrink-0 border-b border-r border-white/[0.05] bg-[#171C29]" style={{ width: HEAD_W }} />
               <div
                 className="relative flex-1 cursor-col-resize border-b border-white/[0.05] bg-[#0e0f15]"
                 onMouseDown={scrub}
@@ -295,7 +295,7 @@ export default function Timeline(props: Props) {
                 );
               })}
               <div className="flex h-1 shrink-0">
-                <div className="shrink-0 bg-[#14151d]" style={{ width: HEAD_W }} />
+                <div className="shrink-0 bg-[#171C29]" style={{ width: HEAD_W }} />
                 <div className="flex-1 bg-black/40" />
               </div>
               {audioTracks.map((t) => (
@@ -360,7 +360,7 @@ function TrackHead({
   const anySolo = state.solo;
   return (
     <div
-      className="sticky left-0 z-10 flex shrink-0 items-center gap-1 border-b border-r border-white/[0.05] bg-[#14151d] px-1.5"
+      className="sticky left-0 z-10 flex shrink-0 items-center gap-1 border-b border-r border-white/[0.05] bg-[#171C29] px-1.5"
       style={{ width: HEAD_W }}
     >
       {/* Track Targeting box (source-patching) */}
@@ -944,10 +944,10 @@ function EffectsSubTrack({
   const [dropTarget, setDropTarget] = useState<string | null>(null);
 
   return (
-    <div className="flex h-9 shrink-0 border-b border-white/[0.04] bg-[#0c0d13]/70">
+    <div className="flex h-9 shrink-0 border-b border-white/[0.04] bg-[#0B0E14]/70">
       {/* Lane header */}
       <div
-        className="sticky left-0 z-10 flex shrink-0 items-center gap-1 border-r border-white/[0.05] bg-[#111218] px-2 text-[9.5px] font-bold text-fuchsia-300"
+        className="sticky left-0 z-10 flex shrink-0 items-center gap-1 border-r border-white/[0.05] bg-[#141824] px-2 text-[9.5px] font-bold text-fuchsia-300"
         style={{ width: HEAD_W }}
       >
         <span className="rounded bg-fuchsia-500/15 px-1.5 py-0.5 tracking-wider ring-1 ring-fuchsia-500/30">

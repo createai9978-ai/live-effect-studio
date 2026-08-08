@@ -174,7 +174,7 @@ export default function EffectControlPanel({
         <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[1fr_330px]">
           {/* Live program preview */}
           <div className="relative flex min-h-[300px] flex-col bg-black p-5">
-            <div className="relative flex-1 overflow-hidden rounded-xl bg-[#07080c] ring-1 ring-white/[0.08]">
+            <div className="relative flex-1 overflow-hidden rounded-xl bg-[#000000] ring-1 ring-white/[0.08]">
               {src ? (
                 <video
                   ref={videoRef}

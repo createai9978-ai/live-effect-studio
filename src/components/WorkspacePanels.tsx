@@ -5,7 +5,7 @@ import { cn } from "../utils/cn";
 /* ================= Audio workspace: mixer ================= */
 export function AudioMixerPanel() {
   return (
-    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#111218]">
+    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#141824]">
       <div className="border-b border-white/[0.05] px-3 py-2 text-[11px] font-semibold text-zinc-200">
         Audio Track Mixer
       </div>
@@ -138,7 +138,7 @@ export function GraphicsPanel() {
     setLayers((prev) => prev.map((l) => (l.id === selected ? { ...l, ...patch } : l)));
 
   return (
-    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#111218]">
+    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#141824]">
       <div className="flex items-center justify-between border-b border-white/[0.05] px-3 py-2">
         <span className="text-[11px] font-semibold text-zinc-200">Essential Graphics</span>
         <button
@@ -156,7 +156,7 @@ export function GraphicsPanel() {
 
       <div className="flex-1 space-y-3 overflow-y-auto p-3">
         {/* layers */}
-        <div className="rounded-xl border border-white/[0.07] bg-[#14151d] p-3">
+        <div className="rounded-xl border border-white/[0.07] bg-[#171C29] p-3">
           <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Layers</div>
           {layers.length === 0 ? (
             <div className="text-[10px] text-zinc-600">No graphic layers. Click “+ Text” to add a title.</div>
@@ -187,7 +187,7 @@ export function GraphicsPanel() {
 
         {/* edit */}
         {sel && (
-          <div className="rounded-xl border border-white/[0.07] bg-[#14151d] p-3">
+          <div className="rounded-xl border border-white/[0.07] bg-[#171C29] p-3">
             <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Edit Text</div>
             <input
               value={sel.text}

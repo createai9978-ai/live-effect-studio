@@ -28,7 +28,7 @@ export default function MediaBin({
   return (
     <aside
       className={cn(
-        "relative flex w-64 shrink-0 flex-col border-r border-white/[0.06] bg-[#111218] transition",
+        "relative flex w-64 shrink-0 flex-col border-r border-white/[0.06] bg-[#141824] transition",
         dragOver && "ring-2 ring-inset ring-violet-500/60"
       )}
       onDragOver={(e) => {
@@ -148,7 +148,7 @@ export default function MediaBin({
       </div>
 
       {dragOver && (
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[#111218]/80">
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[#141824]/80">
           <div className="rounded-lg border border-dashed border-violet-400 px-4 py-3 text-[12px] text-violet-300">
             Drop files to import
           </div>

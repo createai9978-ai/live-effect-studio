@@ -2,6 +2,10 @@ import MenuBar, { MenuActions } from "./MenuBar";
 import { Workspace } from "../editor/types";
 import { cn } from "../utils/cn";
 import Tooltip from "./Tooltip";
+import AdminToggle from "../admin/AdminToggle";
+import EditableText from "../admin/EditableText";
+import { useAdmin } from "../admin/AdminContext";
+
 
 const WORKSPACES: { id: Workspace; label: string; hint: string }[] = [
   { id: "editing", label: "Editing", hint: "Timeline, trimming and assembly tools" },

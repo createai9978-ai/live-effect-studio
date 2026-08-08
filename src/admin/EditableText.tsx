@@ -75,8 +75,9 @@ export default function EditableText({
       >
         {value}
       </Tag>
-      <button
-        type="button"
+      <span
+        role="button"
+        tabIndex={0}
         title="Edit this text"
         onClick={(e) => {
           e.preventDefault();
@@ -84,14 +85,14 @@ export default function EditableText({
           setEditing(true);
         }}
         className={cn(
-          "shrink-0 rounded p-0.5 text-[var(--nova-accent,#00E5FF)] opacity-60 transition hover:opacity-100",
+          "inline-flex shrink-0 cursor-pointer rounded p-0.5 text-[var(--nova-accent,#00E5FF)] opacity-60 transition hover:opacity-100",
           pencilClassName
         )}
       >
         <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
         </svg>
-      </button>
+      </span>
     </span>
   );
 }

@@ -147,7 +147,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           // `zoom` scales the whole px-based UI predictably in Chromium-based browsers.
           zoom: settings.fontScale,
         }}
-        className="contents-none h-full"
+        className="h-full"
       >
         {children}
       </div>

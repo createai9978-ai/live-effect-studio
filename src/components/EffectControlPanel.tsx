@@ -11,6 +11,7 @@ import {
 import { cn } from "../utils/cn";
 import { VideoProcessor, type EffectParams } from "../editor/VideoProcessor";
 import { curveMeta } from "../editor/motionEngine";
+import MotionControlsPanel from "./MotionControlsPanel";
 
 
 type Props = {
@@ -76,6 +77,7 @@ export default function EffectControlPanel({
   const [savingName, setSavingName] = useState("");
   const [showSave, setShowSave] = useState(false);
   const [bypass, setBypass] = useState(false);
+  const [tab, setTab] = useState<"params" | "motion">("params");
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const processorRef = useRef<VideoProcessor | null>(null);

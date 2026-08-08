@@ -62,7 +62,7 @@ type ModalKind =
 
 
 
-export default function App() {
+function AppInner() {
   // ---- LocalStorage Keys ----
   const LOCAL_STORAGE_KEYS = {
     assets: "nova_studio.assets.v1",

@@ -70,18 +70,26 @@ export default function TopBar({
             <button
               onClick={() => onSetWorkspace(w.id)}
               aria-pressed={workspace === w.id}
+              style={
+                workspace === w.id
+                  ? {
+                      background: `linear-gradient(90deg, ${settings.accent}22, ${settings.accent2}33)`,
+                      color: settings.accent,
+                      boxShadow: `0 0 0 1px ${settings.accent}55`,
+                    }
+                  : undefined
+              }
               className={cn(
                 "rounded-md px-3 py-1 text-[11px] transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] active:scale-95",
-                workspace === w.id
-                  ? "bg-gradient-to-r from-[#00E5FF]/20 to-[#8A2BE2]/25 text-[#7FF3FF] ring-1 ring-[#00E5FF]/40 shadow-lg shadow-[#00E5FF]/15"
-                  : "text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-200"
+                workspace !== w.id && "text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-200"
               )}
             >
-              {w.label}
+              <EditableText id={`workspace.${w.id}`} text={w.label} />
             </button>
           </Tooltip>
         ))}
       </div>
+
 
       {/* Project name */}
       <div className="hidden items-center gap-2 rounded-lg border border-white/[0.06] bg-black/30 px-3 py-1 lg:flex">

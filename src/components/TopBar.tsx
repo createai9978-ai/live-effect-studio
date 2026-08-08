@@ -129,7 +129,8 @@ export default function TopBar({
         Export
       </button>
       </Tooltip>
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 text-[10px] font-bold text-white ring-2 ring-white/10">
+      <AdminToggle />
+
         AK
       </div>
     </header>

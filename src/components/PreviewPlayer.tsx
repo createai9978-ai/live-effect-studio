@@ -225,7 +225,7 @@ export default function PreviewPlayer({
       const intensity = (mergedEffects.lutIntensity ?? 100) / 100;
       if (mergedEffects.lutType === "tealOrange") {
         // Teal and Orange classic commercial look
-        filters.push(`contrast(${1 + 0.25 * intensity}) saturate(${1 + 0.35 * intensity}) hue-rotate(${-10 * intensity}deg) sepia(${0.15 * intensity})`);
+        filters.push(`contrast(${1 + 0.25 * intensity}) saturate(${1 + 0.35 * intensity}) sepia(${0.12 * intensity})`);
       } else if (mergedEffects.lutType === "vintageKodak") {
         // 1970s warm vintage look
         filters.push(`sepia(${0.4 * intensity}) contrast(${1 + 0.15 * intensity}) saturate(${1 - 0.2 * intensity})`);

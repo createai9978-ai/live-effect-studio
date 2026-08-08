@@ -144,7 +144,7 @@ const SCHEMAS: Record<EffectFamily, FamilySchema> = {
     familyLabel: "Cinematic Overlay",
     params: [
       num("opacity", "Overlay Opacity", 0, 100, 70),
-      sel("blend", "Blend Mode", ["screen", "overlay", "soft-light", "lighten", "color-dodge"], "screen"),
+      sel("blend", "Blend Mode", ["screen", "overlay", "soft-light", "lighten"], "screen"),
       num("bloom", "Bloom / Halation", 0, 100, 40),
       num("grain", "Dust & Grain", 0, 100, 25),
       num("warmth", "Overlay Warmth", -100, 100, 20, "", 1),
@@ -153,7 +153,7 @@ const SCHEMAS: Record<EffectFamily, FamilySchema> = {
       { name: "Soft", values: { opacity: 40, blend: "soft-light", bloom: 20, grain: 10, warmth: 10 } },
       { name: "Balanced", values: { opacity: 70, blend: "screen", bloom: 40, grain: 25, warmth: 20 } },
       { name: "Anamorphic", values: { opacity: 85, blend: "screen", bloom: 75, grain: 20, warmth: 35 } },
-      { name: "Blown Out", values: { opacity: 100, blend: "color-dodge", bloom: 95, grain: 40, warmth: 55 } },
+      { name: "Blown Out", values: { opacity: 100, blend: "screen", bloom: 95, grain: 40, warmth: 55 } },
     ],
   },
   lut: {
@@ -313,7 +313,7 @@ export function paramsToVisual(family: EffectFamily, v: ParamValues): VisualResu
       f.push(
         `saturate(${(1 + split * 0.7).toFixed(3)})`,
         `contrast(${(1 + noise * 0.4).toFixed(3)})`,
-        `hue-rotate(${(split * 12).toFixed(1)}deg)`
+        `contrast(${(1 + split * 0.12).toFixed(3)})`
       );
       if (v.mode === "VHS") f.push(`brightness(1.03)`);
       if (v.mode === "Signal Loss") f.push(`grayscale(${(noise * 0.35).toFixed(2)})`);
@@ -329,7 +329,7 @@ export function paramsToVisual(family: EffectFamily, v: ParamValues): VisualResu
       const warm = n(v.warmth) / 100;
       f.push(`brightness(${(1 + bloom * 0.15).toFixed(3)})`, `saturate(${(1 + bloom * 0.25).toFixed(3)})`);
       if (warm > 0) f.push(`sepia(${(warm * 0.3).toFixed(2)})`);
-      if (warm < 0) f.push(`hue-rotate(${(warm * 15).toFixed(1)}deg)`);
+      if (warm < 0) f.push(`saturate(${(1 + warm * 0.25).toFixed(3)})`, `contrast(${(1 - warm * 0.08).toFixed(3)})`);
       overlay = `radial-gradient(ellipse at 70% 35%, rgba(255,224,170,${(0.25 + bloom * 0.5).toFixed(2)}), transparent 55%), linear-gradient(90deg, transparent 25%, rgba(255,240,210,${(bloom * 0.35).toFixed(2)}) 50%, transparent 75%)`;
       overlayBlend = String(v.blend ?? "screen");
       overlayOpacity = n(v.opacity, 70) / 100;
@@ -344,9 +344,9 @@ export function paramsToVisual(family: EffectFamily, v: ParamValues): VisualResu
       );
       const t = n(v.temperature) / 100;
       if (t > 0) f.push(`sepia(${(t * 0.35 * i).toFixed(2)})`);
-      if (t < 0) f.push(`hue-rotate(${(t * 14 * i).toFixed(1)}deg)`);
+      if (t < 0) f.push(`saturate(${(1 + t * 0.22 * i).toFixed(3)})`, `contrast(${(1 - t * 0.1 * i).toFixed(3)})`);
       if (n(v.fade) > 2) {
-        overlay = `linear-gradient(0deg, rgba(120,130,160,${((n(v.fade) / 100) * 0.35).toFixed(2)}), rgba(120,130,160,${((n(v.fade) / 100) * 0.2).toFixed(2)}))`;
+        overlay = `linear-gradient(0deg, rgba(200,196,190,${((n(v.fade) / 100) * 0.3).toFixed(2)}), rgba(200,196,190,${((n(v.fade) / 100) * 0.16).toFixed(2)}))`;
         overlayBlend = "screen";
         overlayOpacity = 0.6;
       }

@@ -253,12 +253,13 @@ export default function Timeline(props: Props) {
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
           <div className="flex h-full flex-col" style={{ width: `${zoom * 100}%`, minWidth: "100%" }}>
             {/* Ruler */}
-            <div className="flex h-5 shrink-0">
+            <div className="flex h-6 shrink-0">
               <div className="shrink-0 border-b border-r border-white/[0.05] bg-[#171C29]" style={{ width: HEAD_W }} />
               <div
-                className="relative flex-1 cursor-col-resize border-b border-white/[0.05] bg-[#0e0f15]"
-                onMouseDown={scrub}
+                className="relative flex-1 cursor-col-resize touch-none select-none border-b border-white/[0.05] bg-[#0e0f15]"
+                onPointerDown={(e) => beginScrub(e)}
               >
+
                 {Array.from({ length: tickCount }).map((_, i) => {
                   const sec = i * step;
                   const left = ((sec / seqDur) * 100 * seqDur) / seqDur; // simple

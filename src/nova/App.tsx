@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import TopBar from "../components/TopBar";
+import { AdminProvider } from "../admin/AdminContext";
+import AdminPanel from "../admin/AdminPanel";
+
 import HomeScreen, { AspectRatio } from "./HomeScreen";
 import SpeedCurveEditor from "../components/SpeedCurveEditor";
 import MediaBin from "../components/MediaBin";

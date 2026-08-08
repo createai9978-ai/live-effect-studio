@@ -73,7 +73,7 @@ export default function Tooltip({
           role="tooltip"
           style={{ left: pos.x, top: pos.y, transform }}
           className={cn(
-            "pointer-events-none fixed z-[200] max-w-[220px] animate-[nova-tip_.16s_cubic-bezier(.22,1,.36,1)] rounded-lg border border-white/[0.09] bg-[#0f1017]/95 px-2.5 py-1.5 shadow-2xl shadow-black/60 backdrop-blur-md",
+            "pointer-events-none fixed z-[200] max-w-[220px] animate-[nova-tip_.16s_cubic-bezier(.22,1,.36,1)] rounded-lg border border-white/[0.09] bg-[#10141F]/95 px-2.5 py-1.5 shadow-2xl shadow-black/60 backdrop-blur-md",
             className
           )}
         >

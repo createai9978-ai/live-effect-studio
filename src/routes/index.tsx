@@ -29,14 +29,14 @@ function Index() {
   return (
     <ClientOnly
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#0c0d13] text-sm text-zinc-500">
+        <div className="flex min-h-screen items-center justify-center bg-[#0B0E14] text-sm text-zinc-500">
           Loading NOVA Studio…
         </div>
       }
     >
       <Suspense
         fallback={
-          <div className="flex min-h-screen items-center justify-center bg-[#0c0d13] text-sm text-zinc-500">
+          <div className="flex min-h-screen items-center justify-center bg-[#0B0E14] text-sm text-zinc-500">
             Loading NOVA Studio…
           </div>
         }

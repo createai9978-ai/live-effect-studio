@@ -32,7 +32,7 @@ export default function LeftMonitorPanel({
   }, [selectedClip?.id]);
 
   return (
-    <section className="flex w-[44%] min-w-[360px] max-w-[560px] shrink-0 flex-col border-r border-white/[0.06] bg-[#111218]">
+    <section className="flex w-[44%] min-w-[360px] max-w-[560px] shrink-0 flex-col border-r border-white/[0.06] bg-[#141824]">
       {/* Tabs */}
       <div className="flex items-center border-b border-white/[0.05]">
         {(
@@ -121,7 +121,7 @@ function EffectControlsTab({
   return (
     <div className="flex-1 space-y-3 overflow-y-auto p-3">
       {/* Clip header */}
-      <div className="rounded-xl border border-white/[0.07] bg-[#14151d] p-3">
+      <div className="rounded-xl border border-white/[0.07] bg-[#171C29] p-3">
         <div className="mb-1 flex items-center gap-2">
           <span
             className={cn(
@@ -288,7 +288,7 @@ function EffectControlsTab({
             className="absolute inset-0"
             style={{
               backgroundImage:
-                "repeating-conic-gradient(#2a2a35 0% 25%, #14151d 0% 50%)",
+                "repeating-conic-gradient(#2a2a35 0% 25%, #171C29 0% 50%)",
               backgroundSize: "10px 10px",
             }}
           />
@@ -521,7 +521,7 @@ function ParamGroup({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-white/[0.07] bg-[#14151d] p-3">
+    <div className="rounded-xl border border-white/[0.07] bg-[#171C29] p-3">
       <div className="mb-2.5 flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
           {title}

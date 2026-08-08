@@ -24,7 +24,7 @@ export default function TopBar({
   onOpenAssetBrowser: () => void;
 }) {
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-[#111218] px-3">
+    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-[#141824] px-3">
       {/* Logo */}
       <div className="flex shrink-0 items-center gap-2.5">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 shadow-lg shadow-violet-500/30">

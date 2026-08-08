@@ -134,9 +134,9 @@ export default function AssetBrowser({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[95] flex flex-col bg-[#0a0b10]/95 backdrop-blur-md">
+    <div className="fixed inset-0 z-[95] flex flex-col bg-[#0B0E14]/95 backdrop-blur-md">
       {/* ============ Header row 1: brand + global search + close ============ */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] bg-[#111218] px-3 py-2">
+      <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] bg-[#141824] px-3 py-2">
         <div className="flex shrink-0 items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 shadow shadow-violet-500/30">
             <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
@@ -202,7 +202,7 @@ export default function AssetBrowser({
       </div>
 
       {/* ============ Tag filter chips ============ */}
-      <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-white/[0.05] bg-[#0d0e14] px-3 py-1.5 nova-scroll-thin">
+      <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-white/[0.05] bg-[#10141F] px-3 py-1.5 nova-scroll-thin">
         <span className="mr-1 shrink-0 text-[9.5px] uppercase tracking-widest text-zinc-600">Tags</span>
         {TAG_META.map((t) => {
           const active = activeTags.has(t.id);
@@ -239,7 +239,7 @@ export default function AssetBrowser({
       {/* ============ Header row 2: colour-coded category tabs ============ */}
       <div
         className={cn(
-          "flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-white/[0.06] bg-[#111218] px-3 py-1.5 transition",
+          "flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-white/[0.06] bg-[#141824] px-3 py-1.5 transition",
           globalQuery && "pointer-events-none opacity-40"
         )}
       >
@@ -299,7 +299,7 @@ export default function AssetBrowser({
         <main className="flex min-w-0 flex-1 flex-col">
           {/* Sub-header (in-tab search + context info) — hidden when global search is active */}
           {!globalQuery && (
-            <div className="flex items-center gap-3 border-b border-white/[0.05] bg-[#111218] px-4 py-2">
+            <div className="flex items-center gap-3 border-b border-white/[0.05] bg-[#141824] px-4 py-2">
               <div className="flex flex-1 items-center gap-2 rounded-md bg-black/40 px-2.5 py-1.5 ring-1 ring-white/[0.06] focus-within:ring-violet-500/50">
                 <svg className="h-3.5 w-3.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
                   <circle cx="11" cy="11" r="7" />
@@ -342,7 +342,7 @@ export default function AssetBrowser({
           {/* Grid or media picker */}
           {/* Sub-header 2: adjustable thumbnail sizes + count */}
           {!globalQuery && (
-            <div className="flex shrink-0 items-center gap-2 border-b border-white/[0.04] bg-[#0f1017] px-4 py-1.5">
+            <div className="flex shrink-0 items-center gap-2 border-b border-white/[0.04] bg-[#10141F] px-4 py-1.5">
               <span className="text-[10px] text-zinc-600">Thumbnail</span>
               <div className="flex items-center rounded-md border border-white/[0.06] bg-black/40 p-0.5">
                 {(["s", "m", "l"] as const).map((s) => (
@@ -474,7 +474,7 @@ function EffectsSidebar({
   onToggleExpand: (id: string) => void;
 }) {
   return (
-    <aside className="flex w-[240px] shrink-0 flex-col border-r border-white/[0.06] bg-[#0f1017]">
+    <aside className="flex w-[240px] shrink-0 flex-col border-r border-white/[0.06] bg-[#10141F]">
       <div className="border-b border-white/[0.05] p-3">
         <div className="flex items-center gap-2 rounded-md bg-black/40 px-2 py-1.5 ring-1 ring-white/[0.06] focus-within:ring-violet-500/50">
           <svg className="h-3 w-3 text-zinc-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
@@ -948,7 +948,7 @@ function AssetCard({
       }}
       className={cn(
         // Premium hover: subtle lift + scale + violet glow, GPU-composited to stay artefact-free
-        "group relative flex cursor-grab flex-col overflow-hidden rounded-xl border border-white/[0.06] bg-[#14151d] text-left text-zinc-200",
+        "group relative flex cursor-grab flex-col overflow-hidden rounded-xl border border-white/[0.06] bg-[#171C29] text-left text-zinc-200",
         "transform-gpu [backface-visibility:hidden] will-change-transform",
         "transition-[transform,box-shadow,border-color] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
         "hover:-translate-y-[3px] hover:scale-[1.025] hover:border-violet-400/50 hover:shadow-[0_20px_44px_-16px_rgba(139,92,246,0.55)]",
@@ -963,7 +963,7 @@ function AssetCard({
     >
       <div
         className={cn(
-          "relative overflow-hidden bg-[#101119] [contain:paint]",
+          "relative overflow-hidden bg-[#10141F] [contain:paint]",
           tall ? "aspect-[4/3]" : size === "s" ? "aspect-[16/10]" : size === "l" ? "aspect-[21/9]" : "aspect-video"
         )}
       >
@@ -1102,7 +1102,7 @@ function AssetCard({
 /* ================= Detail rail (hover info) ================= */
 function DetailRail({ item, hasPreview }: { item: AssetItem | null; hasPreview: boolean }) {
   return (
-    <div className="flex h-10 shrink-0 items-center gap-3 border-t border-white/[0.05] bg-[#0f1017] px-4">
+    <div className="flex h-10 shrink-0 items-center gap-3 border-t border-white/[0.05] bg-[#10141F] px-4">
       {item ? (
         <>
           <div
@@ -1387,7 +1387,7 @@ function ReferenceMonitor({
     : undefined;
 
   return (
-    <aside className="hidden w-[320px] shrink-0 flex-col border-l border-white/[0.06] bg-[#0d0e14] xl:flex">
+    <aside className="hidden w-[320px] shrink-0 flex-col border-l border-white/[0.06] bg-[#10141F] xl:flex">
       <div className="flex items-center justify-between border-b border-white/[0.05] px-3 py-2">
         <div className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400 shadow-[0_0_6px] shadow-fuchsia-400/70" />

@@ -149,9 +149,9 @@
 :root {
   color-scheme: dark;
   /* Design tokens */
-  --nova-bg: #0c0d13;
-  --nova-panel: #111218;
-  --nova-panel-2: #14151d;
+  --nova-bg: #0B0E14;
+  --nova-panel: #141824;
+  --nova-panel-2: #171C29;
   --nova-line: rgba(255, 255, 255, 0.06);
   --nova-accent-1: #8b5cf6;
   --nova-accent-2: #d946ef;

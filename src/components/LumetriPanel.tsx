@@ -117,7 +117,7 @@ function ColorWheel({
         onDoubleClick={() => onChange({ x: 0, y: 0 })}
         title={`${label} — drag to adjust, double-click to reset`}
       >
-        <div className="pointer-events-none absolute inset-[16%] rounded-full bg-[#14151d]" />
+        <div className="pointer-events-none absolute inset-[16%] rounded-full bg-[#171C29]" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/40" />
         <div
           className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-white/20 shadow"
@@ -244,7 +244,7 @@ export default function LumetriPanel({
   const isDefault = JSON.stringify(grade) === JSON.stringify(DEFAULT_GRADE);
 
   return (
-    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#111218]">
+    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#141824]">
       <div className="flex items-center justify-between border-b border-white/[0.05] px-3 py-2">
         <span className="text-[11px] font-semibold text-zinc-200">Lumetri Color</span>
         <button
@@ -260,7 +260,7 @@ export default function LumetriPanel({
 
       <div className="flex-1 space-y-3 overflow-y-auto p-3">
         {/* Scope */}
-        <div className="rounded-xl border border-white/[0.07] bg-[#14151d] p-3">
+        <div className="rounded-xl border border-white/[0.07] bg-[#171C29] p-3">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Histogram</span>
             <span className="font-mono text-[9px] text-zinc-600">RGB · Rec.709</span>
@@ -270,7 +270,7 @@ export default function LumetriPanel({
 
         <div className="text-[9px] text-zinc-600">Applied to Program output</div>
 
-        <div className="rounded-xl border border-white/[0.07] bg-[#14151d] p-3">
+        <div className="rounded-xl border border-white/[0.07] bg-[#171C29] p-3">
           <div className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
             Basic Correction
           </div>
@@ -306,7 +306,7 @@ export default function LumetriPanel({
           </div>
         </div>
 
-        <div className="rounded-xl border border-white/[0.07] bg-[#14151d] p-3">
+        <div className="rounded-xl border border-white/[0.07] bg-[#171C29] p-3">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Color Wheels</span>
             <button
@@ -323,7 +323,7 @@ export default function LumetriPanel({
           </div>
         </div>
 
-        <div className="rounded-xl border border-white/[0.07] bg-[#14151d] p-3">
+        <div className="rounded-xl border border-white/[0.07] bg-[#171C29] p-3">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">RGB Curves · Master</span>
             <span className="font-mono text-[9px] text-zinc-600">mid {Math.round(grade.curve * 100)}%</span>

@@ -282,7 +282,7 @@ export default function PreviewPlayer({
   }, [mergedEffects, playing, time]);
 
   return (
-    <main className="flex min-w-0 flex-1 flex-col bg-[#0a0b10]">
+    <main className="flex min-w-0 flex-1 flex-col bg-[#0B0E14]">
       {/* Monitor header */}
       <div className="flex items-center justify-between border-b border-white/[0.05] px-4 py-1.5">
         <div className="flex items-center gap-2 text-[11px]">
@@ -307,7 +307,7 @@ export default function PreviewPlayer({
 
       {/* Video frame */}
       <div className="relative flex min-h-0 flex-1 items-center justify-center bg-black p-4">
-        <div className="relative aspect-video max-h-full w-full max-w-full overflow-hidden rounded-md bg-[#07080c] shadow-2xl shadow-black/60 ring-1 ring-white/[0.07]">
+        <div className="relative aspect-video max-h-full w-full max-w-full overflow-hidden rounded-md bg-[#000000] shadow-2xl shadow-black/60 ring-1 ring-white/[0.07]">
           {active && mergedEffects ? (
             <>
               {(() => {

@@ -195,7 +195,7 @@ export default function SpeedCurveEditor({
                   cx={xOf(p.t)}
                   cy={yOf(p.s)}
                   r={dragIdx === i || hoverIdx === i ? 3.4 : 2.4}
-                  fill={dragIdx === i ? "rgb(232 121 249)" : "#0f1017"}
+                  fill={dragIdx === i ? "rgb(232 121 249)" : "#10141F"}
                   stroke="rgb(216 180 254)"
                   strokeWidth={1.2}
                   vectorEffect="non-scaling-stroke"

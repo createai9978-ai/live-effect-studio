@@ -24,7 +24,7 @@ export default function TopBar({
   onOpenAssetBrowser: () => void;
 }) {
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-[#141824] px-3">
+    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-[#141824]/80 backdrop-blur-xl px-3">
       {/* Logo */}
       <div className="flex shrink-0 items-center gap-2.5">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 shadow-lg shadow-violet-500/30">
@@ -52,7 +52,7 @@ export default function TopBar({
               className={cn(
                 "rounded-md px-3 py-1 text-[11px] transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] active:scale-95",
                 workspace === w.id
-                  ? "bg-gradient-to-r from-violet-600/80 to-fuchsia-600/80 text-white shadow-lg shadow-violet-600/25"
+                  ? "bg-gradient-to-r from-[#00E5FF]/20 to-[#8A2BE2]/25 text-[#7FF3FF] ring-1 ring-[#00E5FF]/40 shadow-lg shadow-[#00E5FF]/15"
                   : "text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-200"
               )}
             >

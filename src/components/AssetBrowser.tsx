@@ -136,7 +136,7 @@ export default function AssetBrowser({
   return (
     <div className="fixed inset-0 z-[95] flex flex-col bg-[#0B0E14]/95 backdrop-blur-md">
       {/* ============ Header row 1: brand + global search + close ============ */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] bg-[#141824] px-3 py-2">
+      <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] bg-[#141824]/80 backdrop-blur-xl px-3 py-2">
         <div className="flex shrink-0 items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 shadow shadow-violet-500/30">
             <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
@@ -239,7 +239,7 @@ export default function AssetBrowser({
       {/* ============ Header row 2: colour-coded category tabs ============ */}
       <div
         className={cn(
-          "flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-white/[0.06] bg-[#141824] px-3 py-1.5 transition",
+          "flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-white/[0.06] bg-[#141824]/80 backdrop-blur-xl px-3 py-1.5 transition",
           globalQuery && "pointer-events-none opacity-40"
         )}
       >
@@ -914,7 +914,7 @@ function AssetCard({
       `brightness(${brightness.toFixed(3)})`,
       sepia > 0.02 ? `sepia(${sepia.toFixed(3)})` : "",
       t === "depthMap" ? `blur(${(0.3 + p.warp * 0.9).toFixed(2)}px)` : "",
-      t === "glitchWarp" ? `hue-rotate(${(p.warp * 8 - 4).toFixed(1)}deg)` : "",
+      t === "glitchWarp" ? `contrast(${(1 + p.warp * 0.12).toFixed(3)})` : "",
     ].filter(Boolean);
     return [cardStyles.filter, ...parts].filter(Boolean).join(" ");
   }, [renderProgram, cardStyles.filter]);

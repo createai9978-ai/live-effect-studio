@@ -210,7 +210,7 @@ export default function HomeScreen({
           <div className="mt-8 pb-10">
             <h2 className="mb-3 text-[13px] font-medium text-zinc-200">Local Projects</h2>
             {recentProjects.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-[#141824]/50 py-14">
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-[#181B24]/50 py-14">
                 <svg className="mb-3 h-10 w-10 text-zinc-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 7l9-4 9 4-9 4-9-4zM3 12l9 4 9-4M3 17l9 4 9-4" />
                 </svg>

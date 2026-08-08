@@ -140,9 +140,9 @@ export default function AssetBrowser({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[95] flex flex-col bg-[#0B0E14]/95 backdrop-blur-md">
+    <div className="fixed inset-0 z-[95] flex flex-col bg-[#0F1117]/95 backdrop-blur-md">
       {/* ============ Header row 1: brand + global search + close ============ */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] bg-[#141824]/80 backdrop-blur-xl px-3 py-2">
+      <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] bg-[#181B24]/80 backdrop-blur-xl px-3 py-2">
         <div className="flex shrink-0 items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 shadow shadow-violet-500/30">
             <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
@@ -245,7 +245,7 @@ export default function AssetBrowser({
       {/* ============ Header row 2: colour-coded category tabs ============ */}
       <div
         className={cn(
-          "flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-white/[0.06] bg-[#141824]/80 backdrop-blur-xl px-3 py-1.5 transition",
+          "flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-white/[0.06] bg-[#181B24]/80 backdrop-blur-xl px-3 py-1.5 transition",
           globalQuery && "pointer-events-none opacity-40"
         )}
       >
@@ -307,7 +307,7 @@ export default function AssetBrowser({
         <main className="flex min-w-0 flex-1 flex-col">
           {/* Sub-header (in-tab search + context info) — hidden when global search is active */}
           {!globalQuery && (
-            <div className="flex items-center gap-3 border-b border-white/[0.05] bg-[#141824] px-4 py-2">
+            <div className="flex items-center gap-3 border-b border-white/[0.05] bg-[#181B24] px-4 py-2">
               <div className="flex flex-1 items-center gap-2 rounded-md bg-black/40 px-2.5 py-1.5 ring-1 ring-white/[0.06] focus-within:ring-violet-500/50">
                 <svg className="h-3.5 w-3.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
                   <circle cx="11" cy="11" r="7" />

@@ -32,7 +32,7 @@ export default function LeftMonitorPanel({
   }, [selectedClip?.id]);
 
   return (
-    <section className="flex w-[44%] min-w-[360px] max-w-[560px] shrink-0 flex-col border-r border-white/[0.06] bg-[#141824]">
+    <section className="flex w-[44%] min-w-[360px] max-w-[560px] shrink-0 flex-col border-r border-white/[0.06] bg-[#181B24]">
       {/* Tabs */}
       <div className="flex items-center border-b border-white/[0.05]">
         {(

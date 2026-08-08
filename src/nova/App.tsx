@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import TopBar from "../components/TopBar";
+import HomeScreen, { AspectRatio } from "./HomeScreen";
 import SpeedCurveEditor from "../components/SpeedCurveEditor";
 import MediaBin from "../components/MediaBin";
 import LeftMonitorPanel from "../components/LeftMonitorPanel";
@@ -243,6 +244,9 @@ export default function App() {
 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  /** Launcher gate — the editor mounts only after a project is created/opened. */
+  const [projectStarted, setProjectStarted] = useState(false);
+  const [, setAspect] = useState<AspectRatio>("16:9");
   const projectFileRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef(0);
   const rafRef = useRef<number | null>(null);
@@ -1299,13 +1303,28 @@ export default function App() {
     renderSequence,
   ]);
 
+  if (!projectStarted) {
+    return (
+      <HomeScreen
+        onCreateProject={(r: AspectRatio) => {
+          setAspect(r);
+          setProjectStarted(true);
+        }}
+        onOpenProject={() => {
+          setProjectStarted(true);
+          window.setTimeout(() => projectFileRef.current?.click(), 60);
+        }}
+      />
+    );
+  }
+
   const selectedClipObj = clips.find((c) => c.id === selected[0]) ?? null;
   const selectedAsset = selectedClipObj
     ? assets.find((a) => a.id === selectedClipObj.assetId) ?? null
     : null;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#0B0E14] font-sans text-zinc-200 antialiased selection:bg-violet-500/30">
+    <div className="flex h-screen flex-col overflow-hidden bg-[#0F1117] font-sans text-zinc-200 antialiased selection:bg-violet-500/30">
       <input
         ref={fileInputRef}
         type="file"

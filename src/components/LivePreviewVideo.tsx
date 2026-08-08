@@ -133,7 +133,7 @@ export default function LivePreviewVideo({
 
       {/* Neutral loading surface — deliberately colourless so no tint can bleed through */}
       {!ready && (
-        <div className="absolute inset-0 animate-pulse bg-[linear-gradient(110deg,#141824_0%,#191b24_45%,#141824_90%)]" />
+        <div className="absolute inset-0 animate-pulse bg-[linear-gradient(110deg,#181B24_0%,#191b24_45%,#181B24_90%)]" />
       )}
     </div>
   );

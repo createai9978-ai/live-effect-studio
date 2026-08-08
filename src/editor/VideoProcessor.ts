@@ -115,9 +115,17 @@ export class VideoProcessor {
     this.failed = false;
 
     let gl: WebGLRenderingContext | null = null;
+    // alpha:false + opaque black clear guarantees the drawing buffer can never
+    // composite as a translucent (blue-looking) layer over the video element.
+    const attrs: WebGLContextAttributes = {
+      alpha: false,
+      premultipliedAlpha: false,
+      preserveDrawingBuffer: true,
+      antialias: false,
+    };
     try {
-      gl = (canvas.getContext("webgl", { premultipliedAlpha: false, preserveDrawingBuffer: true }) ??
-        canvas.getContext("experimental-webgl", { premultipliedAlpha: false })) as WebGLRenderingContext | null;
+      gl = (canvas.getContext("webgl", attrs) ??
+        canvas.getContext("experimental-webgl", attrs)) as WebGLRenderingContext | null;
     } catch {
       gl = null;
     }

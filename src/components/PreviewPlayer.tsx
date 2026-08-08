@@ -85,6 +85,10 @@ export default function PreviewPlayer({
   const [webglSupported, setWebglSupported] = useState(true);
   const [gpuFrameReady, setGpuFrameReady] = useState(false);
   const [activeEffects, setActiveEffects] = useState<EffectParams[]>([]);
+  // Intrinsic aspect of the current source. Overlays are constrained to this
+  // letterboxed content box so a "screen" blend can never light up the black
+  // surround (that was the blue/white wash around the frame).
+  const [videoAspect, setVideoAspect] = useState<number | null>(null);
 
   // topmost audible video clip under the playhead (respects mute/solo)
   const active = useMemo(() => {
@@ -347,6 +351,7 @@ export default function PreviewPlayer({
                     }}
                     onLoadedMetadata={(e) => {
                       const v = e.currentTarget;
+                      if (v.videoWidth && v.videoHeight) setVideoAspect(v.videoWidth / v.videoHeight);
                       const rate = Math.max(0.1, mergedEffects.speed / 100);
                       v.playbackRate = rate;
                       v.currentTime = Math.max(0, active.clip.offset + (time - active.clip.start) * rate);

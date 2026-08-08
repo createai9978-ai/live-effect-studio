@@ -699,7 +699,7 @@ const fltSummer = makeSet({
   names: ["Coral Beach Summer", "Tropical Aqua Pop", "Golden Hour Warmth", "Poolside Bright", "Sun Kissed Sand"],
 });
 const fltLifestyle = makeSet({
-  prefix: "flt-life", glyph: "brush", tag: "LIFESTYLE", kind: "grade", fx: "colorGrade",
+  prefix: "flt-life", glyph: "star", tag: "LIFESTYLE", kind: "grade", fx: "colorGrade",
   gradient: ["#1f2937", "#f9a8d4"], tags: ["vlog", "minimal"],
   names: ["Soft Pastel Dream", "Cafe Morning Tone", "Urban Everyday", "Nordic Cool Mist", "Muted Journal"],
 });
@@ -769,7 +769,7 @@ const trnPremium = makeSet({
   ],
 });
 const trn3D = makeSet({
-  prefix: "trn-3d", glyph: "cube", tag: "3D",
+  prefix: "trn-3d", glyph: "wipe", tag: "3D",
   gradient: ["#082f49", "#60a5fa"], tags: ["corporate", "gaming"],
   names: [
     ["Cube Rotate 3D", "transitionWarp"],
@@ -789,7 +789,7 @@ const trnFilmBurn = makeSet({
   ],
 });
 const trnGlitchCat = makeSet({
-  prefix: "trn-glitch", glyph: "glitch", tag: "GLITCH",
+  prefix: "trn-glitch", glyph: "vhs", tag: "GLITCH",
   gradient: ["#4c1d95", "#22d3ee"], tags: ["gaming", "retro"],
   names: [
     ["Glitch Cut Transition", "glitchBlock"],
@@ -822,17 +822,17 @@ const ttlLuxury = makeSet({
   names: ["Gold Serif Reveal", "Champagne Script Title", "Marble Editorial Title", "Diamond Shine Headline"],
 });
 const ttlTech = makeSet({
-  prefix: "ttl-tech", glyph: "glitch", tag: "TECH", fx: "textMotion",
+  prefix: "ttl-tech", glyph: "vhs", tag: "TECH", fx: "textMotion",
   gradient: ["#0b1220", "#22d3ee"], tags: ["gaming", "corporate"],
   names: ["Typewriter Terminal Title", "HUD Data Readout", "Glitch Scramble Title", "Circuit Trace Reveal"],
 });
 const ttlFun = makeSet({
-  prefix: "ttl-fun", glyph: "brush", tag: "GRAFFITI & FUN", fx: "textMotion",
+  prefix: "ttl-fun", glyph: "star", tag: "GRAFFITI & FUN", fx: "textMotion",
   gradient: ["#4a044e", "#f472b6"], tags: ["vlog", "music"],
   names: ["Spray Tag Pop", "Comic Slam Title", "Sticker Doodle Title", "Bubble Cartoon Title"],
 });
 const ttlSport = makeSet({
-  prefix: "ttl-sport", glyph: "target", tag: "SPORT", fx: "textMotion",
+  prefix: "ttl-sport", glyph: "logo", tag: "SPORT", fx: "textMotion",
   gradient: ["#052e16", "#4ade80"], tags: ["gaming", "corporate"],
   names: ["Stadium Scoreline Title", "Match Day Slam", "Kickoff Countdown Title", "Trophy Reveal Title"],
 });
@@ -844,17 +844,17 @@ const stkTrending = makeSet({
   names: ["Sparkle Burst Sticker", "Emoji Reaction Burst", "Fire Emoji Pop", "Confetti Rain Overlay"],
 });
 const stkSubscribe = makeSet({
-  prefix: "stk-sub", glyph: "target", tag: "SUBSCRIBE", fx: "opticalOverlay",
+  prefix: "stk-sub", glyph: "logo", tag: "SUBSCRIBE", fx: "opticalOverlay",
   gradient: ["#7f1d1d", "#fb7185"], tags: ["vlog"],
   names: ["Subscribe Button Pop", "Subscribed Bell Ring", "Follow Button Slide", "Like & Share Bar"],
 });
 const stkArrow = makeSet({
-  prefix: "stk-arrow", glyph: "target", tag: "ARROW", fx: "opticalOverlay",
+  prefix: "stk-arrow", glyph: "logo", tag: "ARROW", fx: "opticalOverlay",
   gradient: ["#7c2d12", "#fb923c"], tags: ["corporate", "vlog"],
   names: ["Curved Hand Arrow", "Straight Pointer Arrow", "Dashed Path Arrow", "Circle Highlight Arrow"],
 });
 const stkLine = makeSet({
-  prefix: "stk-line", glyph: "brush", tag: "LINE", fx: "opticalOverlay",
+  prefix: "stk-line", glyph: "star", tag: "LINE", fx: "opticalOverlay",
   gradient: ["#0f172a", "#22d3ee"], tags: ["minimal"],
   names: ["Underline Sweep", "Scribble Circle Line", "Divider Draw Line", "Speed Line Frame"],
 });
@@ -907,7 +907,7 @@ const tplExclusive = makeSet({
   ],
 });
 const tplTravel = makeSet({
-  prefix: "tpl-travel", glyph: "camera", tag: "TRAVEL",
+  prefix: "tpl-travel", glyph: "pan", tag: "TRAVEL",
   gradient: ["#083344", "#22d3ee"], tags: ["travel"],
   names: [
     ["Travel Vlog Opener", "zoomPulse"],
@@ -916,7 +916,7 @@ const tplTravel = makeSet({
   ],
 });
 const tplGallery = makeSet({
-  prefix: "tpl-gal", glyph: "layers", tag: "GALLERY",
+  prefix: "tpl-gal", glyph: "grid", tag: "GALLERY",
   gradient: ["#1c1917", "#a8a29e"], tags: ["wedding", "minimal"],
   names: [
     ["Wedding Story Reel", "glow"],
@@ -947,29 +947,29 @@ const cat = (
 /** Sub-category rails for every non-effects library tab. */
 export const LIB_TREES: Partial<Record<AssetTab, EffectCategory[]>> = {
   filters: [
-    cat("flt-cat-basic", "Basic", "star", fltBasic, "#38bdf8", "AI"),
+    cat("flt-cat-basic", "Basic", "sparkle", fltBasic, "#38bdf8", "AI"),
     cat("flt-cat-mono", "Mono", "film", fltMono, "#a8a29e"),
-    cat("flt-cat-cine", "Cinematic", "star", fltCinematic, "#f59e0b", "HOT"),
-    cat("flt-cat-port", "Portrait", "beauty", fltPortrait, "#fbcfe8"),
-    cat("flt-cat-sum", "Summer", "flare", fltSummer, "#fde68a"),
+    cat("flt-cat-cine", "Cinematic", "sparkle", fltCinematic, "#f59e0b", "HOT"),
+    cat("flt-cat-port", "Portrait", "smiley", fltPortrait, "#fbcfe8"),
+    cat("flt-cat-sum", "Summer", "lightbulb", fltSummer, "#fde68a"),
     cat("flt-cat-life", "Lifestyle", "brush", fltLifestyle, "#f9a8d4"),
     cat("flt-cat-val", "Valentine", "sparkle", fltValentine, "#fb7185"),
-    cat("flt-cat-retro", "Retro", "vhs", fltRetro, "#f472b6"),
+    cat("flt-cat-retro", "Retro", "film", fltRetro, "#f472b6"),
   ],
   transitions: [
-    cat("trn-cat-trend", "Trending", "wipe", trnTrending, "#38bdf8", "HOT"),
-    cat("trn-cat-fade", "Fade & Dissolve", "wipe", trnFade, "#94a3b8"),
-    cat("trn-cat-zoom", "Zoom", "zoomin", trnZoom, "#818cf8"),
-    cat("trn-cat-slide", "Slides", "wipe", trnSlides, "#22d3ee"),
+    cat("trn-cat-trend", "Trending", "reveal", trnTrending, "#38bdf8", "HOT"),
+    cat("trn-cat-fade", "Fade & Dissolve", "reveal", trnFade, "#94a3b8"),
+    cat("trn-cat-zoom", "Zoom", "camera", trnZoom, "#818cf8"),
+    cat("trn-cat-slide", "Slides", "reveal", trnSlides, "#22d3ee"),
     cat("trn-cat-prem", "Premium", "sparkle", trnPremium, "#fbbf24", "PRO"),
-    cat("trn-cat-3d", "3D", "cube", trn3D, "#60a5fa"),
-    cat("trn-cat-burn", "Film Burn", "leak", trnFilmBurn, "#fb923c"),
+    cat("trn-cat-3d", "3D", "shapes", trn3D, "#60a5fa"),
+    cat("trn-cat-burn", "Film Burn", "overlay", trnFilmBurn, "#fb923c"),
     cat("trn-cat-glitch", "Glitch", "glitch", trnGlitchCat, "#22d3ee"),
   ],
   titles: [
-    cat("ttl-cat-trend", "Trending", "text", ttlTrending, "#818cf8", "HOT"),
-    cat("ttl-cat-cap", "AI Captions", "text", ttlCaptions, "#22d3ee", "AI"),
-    cat("ttl-cat-lt", "Lower Thirds", "text", ttlLowerThirds, "#38bdf8"),
+    cat("ttl-cat-trend", "Trending", "brush", ttlTrending, "#818cf8", "HOT"),
+    cat("ttl-cat-cap", "AI Captions", "brush", ttlCaptions, "#22d3ee", "AI"),
+    cat("ttl-cat-lt", "Lower Thirds", "brush", ttlLowerThirds, "#38bdf8"),
     cat("ttl-cat-lux", "Luxury", "sparkle", ttlLuxury, "#fbbf24"),
     cat("ttl-cat-tech", "Tech", "glitch", ttlTech, "#22d3ee"),
     cat("ttl-cat-fun", "Graffiti & Fun", "brush", ttlFun, "#f472b6"),
@@ -980,17 +980,17 @@ export const LIB_TREES: Partial<Record<AssetTab, EffectCategory[]>> = {
     cat("stk-cat-sub", "Subscribe", "target", stkSubscribe, "#fb7185"),
     cat("stk-cat-arrow", "Arrow", "target", stkArrow, "#fb923c"),
     cat("stk-cat-line", "Line", "brush", stkLine, "#22d3ee"),
-    cat("stk-cat-part", "Particle", "leak", stkParticle, "#a5f3fc"),
-    cat("stk-cat-social", "Social Media", "grid", stkSocial, "#818cf8"),
+    cat("stk-cat-part", "Particle", "overlay", stkParticle, "#a5f3fc"),
+    cat("stk-cat-social", "Social Media", "layers", stkSocial, "#818cf8"),
     cat("stk-cat-love", "Love", "sparkle", stkLove, "#fda4af"),
   ],
   templates: [
-    cat("tpl-cat-trend", "Trending", "grid", tplTrending, "#fb7185", "HOT"),
+    cat("tpl-cat-trend", "Trending", "layers", tplTrending, "#fb7185", "HOT"),
     cat("tpl-cat-logo", "Logo Reveal", "sparkle", tplLogo, "#60a5fa"),
-    cat("tpl-cat-excl", "Exclusive", "star", tplExclusive, "#fbbf24", "PRO"),
+    cat("tpl-cat-excl", "Exclusive", "sparkle", tplExclusive, "#fbbf24", "PRO"),
     cat("tpl-cat-travel", "Travel", "camera", tplTravel, "#22d3ee"),
     cat("tpl-cat-gal", "Gallery", "layers", tplGallery, "#a8a29e"),
-    cat("tpl-cat-sub", "Subscribe", "grid", tplSubscribe, "#f472b6"),
+    cat("tpl-cat-sub", "Subscribe", "layers", tplSubscribe, "#f472b6"),
   ],
 };
 

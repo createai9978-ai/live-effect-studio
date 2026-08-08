@@ -789,6 +789,7 @@ function BrowserContent({
                 onApply={() => onApply(it)}
                 onHover={onHover}
                 tall={tab === "audio"}
+                ratio={ratioFor(tab)}
                 previewFrameUrl={previewFrameUrl}
                 favorited={favorites.has(it.id)}
                 onToggleFavorite={() => onToggleFavorite(it.id)}
@@ -813,11 +814,14 @@ function AssetCard({
   favorited,
   onToggleFavorite,
   size = "m",
+  ratio,
 }: {
   item: AssetItem;
   onApply: () => void;
   onHover: (id: string | null) => void;
   tall?: boolean;
+  /** Filmora-style tile shape for the tab this card lives in. */
+  ratio?: "video" | "square" | "wide" | "portrait";
   previewFrameUrl: string | null;
   favorited: boolean;
   onToggleFavorite: () => void;
@@ -977,7 +981,21 @@ function AssetCard({
       <div
         className={cn(
           "relative overflow-hidden bg-[#10141F] [contain:paint]",
-          tall ? "aspect-[4/3]" : size === "s" ? "aspect-[16/10]" : size === "l" ? "aspect-[21/9]" : "aspect-video"
+          ratio === "square"
+            ? "aspect-square"
+            : ratio === "portrait"
+              ? "aspect-[3/4]"
+              : ratio === "wide"
+                ? "aspect-[21/9]"
+                : ratio === "video"
+                  ? "aspect-video"
+                  : tall
+                    ? "aspect-[4/3]"
+                    : size === "s"
+                      ? "aspect-[16/10]"
+                      : size === "l"
+                        ? "aspect-[21/9]"
+                        : "aspect-video"
         )}
       >
         {/*
@@ -1355,10 +1373,30 @@ function gridColsFor(tab: AssetTab, size: "s" | "m" | "l"): string {
          : size === "l" ? "grid-cols-1 md:grid-cols-2"
          :                 "grid-cols-2 lg:grid-cols-3";
   }
-  // Default effects/transitions/filters/etc.
+  // Stickers are square chips — Filmora packs many more per row.
+  if (tab === "stickers") {
+    if (size === "s") return "grid-cols-4 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10";
+    if (size === "l") return "grid-cols-2 md:grid-cols-3 xl:grid-cols-4";
+    return "grid-cols-3 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7";
+  }
+  // Titles are wider name plates.
+  if (tab === "titles") {
+    if (size === "s") return "grid-cols-2 md:grid-cols-3 xl:grid-cols-4";
+    if (size === "l") return "grid-cols-1 xl:grid-cols-2";
+    return "grid-cols-2 xl:grid-cols-3";
+  }
+  // Default effects/transitions/filters/etc. — 16:9 tiles.
   if (size === "s") return "grid-cols-3 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7";
   if (size === "l") return "grid-cols-1 md:grid-cols-2 xl:grid-cols-3";
   return "grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
+}
+
+/** Filmora tile shape per tab. */
+function ratioFor(tab: AssetTab): "video" | "square" | "wide" | "portrait" | undefined {
+  if (tab === "stickers") return "square";
+  if (tab === "titles") return "wide";
+  if (tab === "audio") return undefined;
+  return "video";
 }
 
 /* ================= Docked reference monitor ================= */

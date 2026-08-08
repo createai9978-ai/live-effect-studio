@@ -88,6 +88,8 @@ export default function Timeline(props: Props) {
   } = props;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [razorHoverX, setRazorHoverX] = useState<number | null>(null);
+  const [scrubbing, setScrubbing] = useState(false);
+
 
   const step = niceStep(seqDur / zoom);
   const tickCount = Math.floor(seqDur / step) + 1;
@@ -117,16 +119,35 @@ export default function Timeline(props: Props) {
     return width / seqDur;
   };
 
-  const scrub = (e: React.MouseEvent) => {
-    onSeek(timeFromClientX(e.clientX));
-    const move = (ev: MouseEvent) => onSeek(timeFromClientX(ev.clientX));
+  /**
+   * Pointer-based scrubbing. Used by BOTH the ruler and the playhead needle so
+   * the cyan line can be grabbed and dragged anywhere across the sequence
+   * without losing the pointer (pointer capture keeps events flowing even when
+   * the cursor leaves the element or crosses the video tracks).
+   */
+  const beginScrub = (e: React.PointerEvent, seekImmediately = true) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (seekImmediately) onSeek(timeFromClientX(e.clientX));
+    setScrubbing(true);
+    const target = e.currentTarget as HTMLElement;
+    try {
+      target.setPointerCapture(e.pointerId);
+    } catch {
+      /* pointer capture unsupported — window listeners below still work */
+    }
+    const move = (ev: PointerEvent) => onSeek(timeFromClientX(ev.clientX));
     const up = () => {
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseup", up);
+      setScrubbing(false);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
     };
-    window.addEventListener("mousemove", move);
-    window.addEventListener("mouseup", up);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
   };
+
 
   return (
     <div className="flex min-w-0 flex-1">
@@ -232,12 +253,13 @@ export default function Timeline(props: Props) {
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
           <div className="flex h-full flex-col" style={{ width: `${zoom * 100}%`, minWidth: "100%" }}>
             {/* Ruler */}
-            <div className="flex h-5 shrink-0">
+            <div className="flex h-6 shrink-0">
               <div className="shrink-0 border-b border-r border-white/[0.05] bg-[#171C29]" style={{ width: HEAD_W }} />
               <div
-                className="relative flex-1 cursor-col-resize border-b border-white/[0.05] bg-[#0e0f15]"
-                onMouseDown={scrub}
+                className="relative flex-1 cursor-col-resize touch-none select-none border-b border-white/[0.05] bg-[#0e0f15]"
+                onPointerDown={(e) => beginScrub(e)}
               >
+
                 {Array.from({ length: tickCount }).map((_, i) => {
                   const sec = i * step;
                   const left = ((sec / seqDur) * 100 * seqDur) / seqDur; // simple
@@ -310,14 +332,48 @@ export default function Timeline(props: Props) {
                 />
               ))}
 
-              {/* Playhead — offset by HEAD_W */}
+              {/* Playhead — offset by HEAD_W, sits above every video/audio lane */}
               <div
-                className="pointer-events-none absolute top-0 bottom-0 z-20"
-                style={{ left: `calc(${HEAD_W}px + (100% - ${HEAD_W}px) * ${Math.min(100, (time / seqDur) * 100) / 100})` }}
+                className="pointer-events-none absolute top-0 bottom-0 z-[60]"
+                style={{
+                  left: `calc(${HEAD_W}px + (100% - ${HEAD_W}px) * ${Math.min(100, (time / seqDur) * 100) / 100})`,
+                  willChange: "left",
+                  transition: scrubbing ? "none" : "left 90ms linear",
+                }}
               >
-                <div className="h-full w-px bg-cyan-400 shadow-[0_0_8px] shadow-cyan-400/70" />
-                <div className="absolute top-0 left-1/2 h-2 w-3 -translate-x-1/2 rounded-b-sm bg-cyan-400" />
+                <div
+                  className={cn(
+                    "h-full w-px bg-cyan-300",
+                    scrubbing ? "shadow-[0_0_14px] shadow-cyan-300" : "shadow-[0_0_8px] shadow-cyan-400/70"
+                  )}
+                />
+                {/* Wide invisible grab strip so the thin line is easy to catch */}
+                <div
+                  role="slider"
+                  aria-label="Timeline playhead"
+                  aria-valuemin={0}
+                  aria-valuemax={seqDur}
+                  aria-valuenow={time}
+                  tabIndex={0}
+                  onPointerDown={(e) => beginScrub(e, false)}
+                  onKeyDown={(e) => {
+                    const nudge = e.shiftKey ? 1 : 1 / 30;
+                    if (e.key === "ArrowLeft") { e.preventDefault(); onSeek(Math.max(0, time - nudge)); }
+                    if (e.key === "ArrowRight") { e.preventDefault(); onSeek(Math.min(seqDur, time + nudge)); }
+                  }}
+                  className="pointer-events-auto absolute inset-y-0 left-1/2 w-3 -translate-x-1/2 cursor-ew-resize touch-none outline-none"
+                />
+                <div
+                  onPointerDown={(e) => beginScrub(e, false)}
+                  className={cn(
+                    "pointer-events-auto absolute -top-6 left-1/2 flex h-6 w-4 -translate-x-1/2 cursor-ew-resize touch-none items-end justify-center rounded-b-[3px] bg-gradient-to-b from-cyan-200 to-cyan-500 shadow-[0_2px_10px] shadow-cyan-500/50 transition-transform duration-150 ease-[cubic-bezier(.22,1,.36,1)] hover:scale-110",
+                    scrubbing && "scale-110"
+                  )}
+                >
+                  <span className="mb-0.5 h-2 w-px bg-cyan-900/60" />
+                </div>
               </div>
+
 
               {/* Razor blade indicator — follows the mouse while razor tool is active */}
               {tool === "razor" && razorHoverX !== null && (() => {

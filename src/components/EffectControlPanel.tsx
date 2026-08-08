@@ -11,6 +11,7 @@ import {
 import { cn } from "../utils/cn";
 import { VideoProcessor, type EffectParams } from "../editor/VideoProcessor";
 import { curveMeta } from "../editor/motionEngine";
+import MotionControlsPanel from "./MotionControlsPanel";
 
 
 type Props = {
@@ -76,6 +77,7 @@ export default function EffectControlPanel({
   const [savingName, setSavingName] = useState("");
   const [showSave, setShowSave] = useState(false);
   const [bypass, setBypass] = useState(false);
+  const [tab, setTab] = useState<"params" | "motion">("params");
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const processorRef = useRef<VideoProcessor | null>(null);
@@ -236,8 +238,33 @@ export default function EffectControlPanel({
 
           {/* Parameters */}
           <div className="flex min-h-0 flex-col overflow-y-auto border-t border-white/[0.05] bg-[#0e0f14] lg:border-t-0 lg:border-l">
+            {/* Tabs */}
+            <div className="sticky top-0 z-10 flex shrink-0 gap-1 border-b border-white/[0.05] bg-[#0e0f14]/95 p-2 backdrop-blur">
+              {(["params", "motion"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className={cn(
+                    "flex-1 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all duration-250 ease-[cubic-bezier(.22,1,.36,1)]",
+                    tab === t
+                      ? "bg-gradient-to-br from-violet-500/25 to-fuchsia-500/20 text-white shadow-[0_6px_18px_-10px_rgba(167,139,250,0.9)] ring-1 ring-violet-400/40"
+                      : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100"
+                  )}
+                >
+                  {t === "params" ? "Parameters" : "Motion Controls"}
+                </button>
+              ))}
+            </div>
+
+            {tab === "motion" ? (
+              <div className="nova-fade-in">
+                <MotionControlsPanel shutter={effect?.motionSig?.shutter ?? 180} />
+              </div>
+            ) : (
+            <>
             {/* Presets */}
             <div className="border-b border-white/[0.05] p-4">
+
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Presets</span>
                 <button
@@ -420,6 +447,9 @@ export default function EffectControlPanel({
                 </div>
               )}
             </div>
+            </>
+            )}
+
 
             {/* Footer */}
             <div className="mt-auto flex items-center gap-2 border-t border-white/[0.05] p-3">

@@ -445,6 +445,9 @@ export default function EffectControlPanel({
                 </div>
               )}
             </div>
+            </>
+            )}
+
 
             {/* Footer */}
             <div className="mt-auto flex items-center gap-2 border-t border-white/[0.05] p-3">

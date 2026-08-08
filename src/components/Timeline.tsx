@@ -88,6 +88,8 @@ export default function Timeline(props: Props) {
   } = props;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [razorHoverX, setRazorHoverX] = useState<number | null>(null);
+  const [scrubbing, setScrubbing] = useState(false);
+
 
   const step = niceStep(seqDur / zoom);
   const tickCount = Math.floor(seqDur / step) + 1;

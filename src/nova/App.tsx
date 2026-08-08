@@ -1352,6 +1352,7 @@ export default function App() {
         onSetWorkspace={setWorkspace}
         menuActions={menuActions}
         projectName={projectName}
+        onGoHome={() => setProjectStarted(false)}
         onOpenAssetBrowser={() => openAssetBrowser("effects")}
       />
 

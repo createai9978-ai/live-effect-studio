@@ -20,8 +20,8 @@
 
 @theme inline {
   /* NOVA Studio workstation palette */
-  --color-nova-canvas: oklch(0.16 0.021 262);   /* #0B0E14 */
-  --color-nova-panel: oklch(0.22 0.026 264);    /* #141824 */
+  --color-nova-canvas: oklch(0.16 0.021 262);   /* #0F1117 */
+  --color-nova-panel: oklch(0.22 0.026 264);    /* #181B24 */
   --color-nova-surface: oklch(0.26 0.026 264);  /* #171C29 */
   --color-nova-cyan: oklch(0.84 0.14 205);      /* #00E5FF */
   --color-nova-lavender: oklch(0.53 0.26 302);  /* #8A2BE2 */
@@ -155,8 +155,8 @@
 :root {
   color-scheme: dark;
   /* Design tokens */
-  --nova-bg: #0B0E14;
-  --nova-panel: #141824;
+  --nova-bg: #0F1117;
+  --nova-panel: #181B24;
   --nova-panel-2: #171C29;
   --nova-line: rgba(255, 255, 255, 0.06);
   --nova-accent-1: #8b5cf6;

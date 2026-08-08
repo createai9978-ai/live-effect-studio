@@ -663,93 +663,349 @@ export const EFFECTS_TREE: EffectCategory[] = [
 ];
 
 
-/* ================= Standalone library tabs ================= */
+/* ================= Standalone library tabs =================
+   Each library tab now mirrors a pro NLE: a left sub-category rail
+   (Trending / Basic / Mono / Zoom / Film Burn / …) with its own curated
+   collections, instead of one flat pool.
+   ========================================================================= */
 
-/** Colour science only — LUTs and grades never displace pixels. */
-export const FILTERS: AssetItem[] = makeSet({
-  prefix: "flt", glyph: "star", tag: "FILTER", kind: "grade", fx: "colorGrade",
-  gradient: ["#0f172a", "#f59e0b"],
-  tags: ["cinematic", "vlog", "retro", "minimal"],
+/* ---------- FILTERS ---------- */
+const fltBasic = makeSet({
+  prefix: "flt-basic", glyph: "star", tag: "FILTER", kind: "grade", fx: "colorGrade",
+  gradient: ["#0f172a", "#38bdf8"], tags: ["minimal", "vlog"],
   names: [
-    "Vintage Film Fade", "Moody Dark Teal", "Neon Teal Pop", "Aesthetic Warm Sun",
-    "Retro VHS Colour", "Clean Natural Skin", "Bleach Bypass Steel", "Golden Hour Warmth",
-    "Nordic Cool Mist", "Tokyo Night Neon", "Desert Amber Dust", "Soft Pastel Dream",
-    "Noir High Contrast", "Kodak Portra Film", "Fuji Cinema Soft", "Emerald Forest Tone",
-    "Coral Beach Summer", "Faded Polaroid", "Cyber Magenta Wash", "Documentary Flat Log",
+    "AI Colour Enhance", "AI White Balance", "Sunny Days", "Teal & Orange",
+    "Auto Contrast Lift", "Clean Daylight", "Soft Skin Balance", "Vivid Punch",
   ],
 });
+const fltMono = makeSet({
+  prefix: "flt-mono", glyph: "film", tag: "MONO", kind: "grade", fx: "colorGrade",
+  gradient: ["#0a0a0a", "#a8a29e"], tags: ["cinematic", "minimal"],
+  names: ["Noir High Contrast", "Silver Print Mono", "Charcoal Fade Mono", "Ink Wash Mono", "Platinum Soft Mono", "Street Grit Mono"],
+});
+const fltCinematic = makeSet({
+  prefix: "flt-cine", glyph: "star", tag: "CINEMATIC", kind: "grade", fx: "colorGrade",
+  gradient: ["#0f172a", "#f59e0b"], tags: ["cinematic"],
+  names: ["Moody Dark Teal", "Bleach Bypass Steel", "Blockbuster Amber", "Cold Thriller Blue", "Desaturated Drama", "Anamorphic Night"],
+});
+const fltPortrait = makeSet({
+  prefix: "flt-port", glyph: "beauty", tag: "PORTRAIT", kind: "grade", fx: "colorGrade",
+  gradient: ["#3f1d38", "#fbcfe8"], tags: ["wedding", "vlog"],
+  names: ["Clean Natural Skin", "Soft Beauty Glow Tone", "Studio Ivory Portrait", "Warm Editorial Skin", "Matte Fashion Portrait"],
+});
+const fltSummer = makeSet({
+  prefix: "flt-sum", glyph: "flare", tag: "SUMMER", kind: "grade", fx: "colorGrade",
+  gradient: ["#0369a1", "#fde68a"], tags: ["travel"],
+  names: ["Coral Beach Summer", "Tropical Aqua Pop", "Golden Hour Warmth", "Poolside Bright", "Sun Kissed Sand"],
+});
+const fltLifestyle = makeSet({
+  prefix: "flt-life", glyph: "star", tag: "LIFESTYLE", kind: "grade", fx: "colorGrade",
+  gradient: ["#1f2937", "#f9a8d4"], tags: ["vlog", "minimal"],
+  names: ["Soft Pastel Dream", "Cafe Morning Tone", "Urban Everyday", "Nordic Cool Mist", "Muted Journal"],
+});
+const fltValentine = makeSet({
+  prefix: "flt-val", glyph: "sparkle", tag: "VALENTINE", kind: "grade", fx: "colorGrade",
+  gradient: ["#4c0519", "#fb7185"], tags: ["wedding"],
+  names: ["Rose Blush Romance", "Candlelit Crimson", "Soft Pink Diffusion", "Velvet Love Tone"],
+});
+const fltRetro = makeSet({
+  prefix: "flt-retro", glyph: "vhs", tag: "RETRO", kind: "grade", fx: "colorGrade",
+  gradient: ["#3b0764", "#f472b6"], tags: ["retro"],
+  names: ["Vintage Film Fade", "Retro VHS Colour", "Faded Polaroid", "Cyber Magenta Wash", "Super 8 Sunwash", "Tokyo Night Neon"],
+});
 
-/** Clip-to-clip transitions. */
-export const TRANSITIONS: AssetItem[] = makeSet({
-  prefix: "trn", glyph: "wipe", tag: "TRANSITION",
-  gradient: ["#0c4a6e", "#38bdf8"],
-  tags: ["music", "gaming", "travel", "vlog"],
+/* ---------- TRANSITIONS ---------- */
+const trnTrending = makeSet({
+  prefix: "trn-trend", glyph: "wipe", tag: "TRENDING",
+  gradient: ["#0c4a6e", "#38bdf8"], tags: ["music", "gaming"],
+  names: [
+    ["Tropical Waves Sweep", "transitionWarp"],
+    ["Gold Glow Luxury Wipe", "glow"],
+    ["Page Flip Snap", "transitionWarp"],
+    ["Ink Splash Reveal", "transitionWarp"],
+    ["Speed Line Rush Cut", "directionalBlur"],
+  ],
+});
+const trnFade = makeSet({
+  prefix: "trn-fade", glyph: "wipe", tag: "FADE",
+  gradient: ["#111827", "#94a3b8"], tags: ["cinematic"],
   names: [
     ["Fade To Black", "transitionWarp"],
     ["Cross Dissolve", "transitionWarp"],
+    ["Additive Dissolve", "glow"],
+    ["White Flash Dissolve", "glow"],
+    ["Black Flash Cut", "transitionWarp"],
+  ],
+});
+const trnZoom = makeSet({
+  prefix: "trn-zoom", glyph: "zoomin", tag: "ZOOM",
+  gradient: ["#1e1b4b", "#818cf8"], tags: ["gaming", "music"],
+  names: [
     ["Zoom In Punch", "zoomPulse"],
     ["Zoom Out Pull", "zoomPulse"],
-    ["Linear Wipe", "transitionWarp"],
-    ["Clock Wipe", "transitionWarp"],
+    ["Spin Zoom Blur", "directionalBlur"],
+    ["Crash Zoom Handoff", "zoomPulse"],
+  ],
+});
+const trnSlides = makeSet({
+  prefix: "trn-slide", glyph: "wipe", tag: "SLIDE",
+  gradient: ["#0f172a", "#22d3ee"], tags: ["corporate", "travel"],
+  names: [
     ["Slide Left Push", "directionalBlur"],
     ["Slide Up Push", "directionalBlur"],
+    ["Linear Wipe", "transitionWarp"],
+    ["Clock Wipe", "transitionWarp"],
+    ["Grid Slice Push", "transitionWarp"],
+  ],
+});
+const trnPremium = makeSet({
+  prefix: "trn-prem", glyph: "sparkle", tag: "PREMIUM",
+  gradient: ["#3b0764", "#fbbf24"], tags: ["wedding", "cinematic"],
+  names: [
+    ["Luxury Light Burst", "glow"],
+    ["Prism Refraction Wipe", "chromaticAberration"],
+    ["Liquid Mercury Morph", "transitionWarp"],
+    ["Shatter Glass Break", "glitchBlock"],
+  ],
+});
+const trn3D = makeSet({
+  prefix: "trn-3d", glyph: "wipe", tag: "3D",
+  gradient: ["#082f49", "#60a5fa"], tags: ["corporate", "gaming"],
+  names: [
+    ["Cube Rotate 3D", "transitionWarp"],
+    ["Depth Push Through 3D", "zoomPulse"],
+    ["Barrel Roll 3D", "transitionWarp"],
+    ["Card Flip 3D", "mirror"],
+  ],
+});
+const trnFilmBurn = makeSet({
+  prefix: "trn-burn", glyph: "leak", tag: "FILM BURN",
+  gradient: ["#7c2d12", "#fbbf24"], tags: ["retro", "cinematic"],
+  names: [
+    ["Film Burn Roll", "lightLeakFx"],
+    ["Emulsion Melt Burn", "lightLeakFx"],
+    ["Projector Gate Flash", "grain"],
+    ["Analog Tape Roll", "vhs"],
+  ],
+});
+const trnGlitchCat = makeSet({
+  prefix: "trn-glitch", glyph: "vhs", tag: "GLITCH",
+  gradient: ["#4c1d95", "#22d3ee"], tags: ["gaming", "retro"],
+  names: [
     ["Glitch Cut Transition", "glitchBlock"],
     ["RGB Split Transition", "rgbSplit"],
-    ["Whip Pan Blur Transition", "directionalBlur"],
-    ["Light Burst Transition", "glow"],
     ["VHS Roll Transition", "vhs"],
+    ["Pixel Sort Cut", "glitchBlock"],
     ["Shake Cut Transition", "cameraShake"],
-    ["Kaleido Fold Transition", "kaleido"],
-    ["Mirror Flip Transition", "mirror"],
   ],
 });
 
-/** Animated titles, lower thirds and callouts. */
-export const TITLES: AssetItem[] = makeSet({
-  prefix: "ttl", glyph: "text", tag: "TITLE", fx: "textMotion",
-  gradient: ["#1e1b4b", "#818cf8"],
-  tags: ["corporate", "vlog", "music", "minimal"],
+/* ---------- TITLES ---------- */
+const ttlTrending = makeSet({
+  prefix: "ttl-trend", glyph: "text", tag: "TRENDING", fx: "textMotion",
+  gradient: ["#1e1b4b", "#818cf8"], tags: ["music", "vlog"],
+  names: ["Wintertime Frost Title", "Infernal Wild Metal Title", "Melting Candle Script", "Neon Graffiti Title", "Voltage Surge Title", "Groovy Disco Title"],
+});
+const ttlCaptions = makeSet({
+  prefix: "ttl-cap", glyph: "text", tag: "CAPTIONS", fx: "textMotion",
+  gradient: ["#0f172a", "#22d3ee"], tags: ["vlog", "music"],
+  names: ["Auto Caption Karaoke", "Word Pop Caption", "Bold Subtitle Bar", "Highlight Word Caption", "Bounce Caption Stack"],
+});
+const ttlLowerThirds = makeSet({
+  prefix: "ttl-lt", glyph: "text", tag: "LOWER THIRD", fx: "textMotion",
+  gradient: ["#082f49", "#38bdf8"], tags: ["corporate", "minimal"],
+  names: ["Clean Lower Third", "Bold Broadcast Lower Third", "Minimal Name Card", "Glass Panel Title", "Social Handle Bar"],
+});
+const ttlLuxury = makeSet({
+  prefix: "ttl-lux", glyph: "sparkle", tag: "LUXURY", fx: "textMotion",
+  gradient: ["#3b0764", "#fbbf24"], tags: ["wedding", "corporate"],
+  names: ["Gold Serif Reveal", "Champagne Script Title", "Marble Editorial Title", "Diamond Shine Headline"],
+});
+const ttlTech = makeSet({
+  prefix: "ttl-tech", glyph: "vhs", tag: "TECH", fx: "textMotion",
+  gradient: ["#0b1220", "#22d3ee"], tags: ["gaming", "corporate"],
+  names: ["Typewriter Terminal Title", "HUD Data Readout", "Glitch Scramble Title", "Circuit Trace Reveal"],
+});
+const ttlFun = makeSet({
+  prefix: "ttl-fun", glyph: "star", tag: "GRAFFITI & FUN", fx: "textMotion",
+  gradient: ["#4a044e", "#f472b6"], tags: ["vlog", "music"],
+  names: ["Spray Tag Pop", "Comic Slam Title", "Sticker Doodle Title", "Bubble Cartoon Title"],
+});
+const ttlSport = makeSet({
+  prefix: "ttl-sport", glyph: "logo", tag: "SPORT", fx: "textMotion",
+  gradient: ["#052e16", "#4ade80"], tags: ["gaming", "corporate"],
+  names: ["Stadium Scoreline Title", "Match Day Slam", "Kickoff Countdown Title", "Trophy Reveal Title"],
+});
+
+/* ---------- STICKERS ---------- */
+const stkTrending = makeSet({
+  prefix: "stk-trend", glyph: "sparkle", tag: "TRENDING", fx: "opticalOverlay",
+  gradient: ["#4a044e", "#f472b6"], tags: ["vlog", "music"],
+  names: ["Sparkle Burst Sticker", "Emoji Reaction Burst", "Fire Emoji Pop", "Confetti Rain Overlay"],
+});
+const stkSubscribe = makeSet({
+  prefix: "stk-sub", glyph: "logo", tag: "SUBSCRIBE", fx: "opticalOverlay",
+  gradient: ["#7f1d1d", "#fb7185"], tags: ["vlog"],
+  names: ["Subscribe Button Pop", "Subscribed Bell Ring", "Follow Button Slide", "Like & Share Bar"],
+});
+const stkArrow = makeSet({
+  prefix: "stk-arrow", glyph: "logo", tag: "ARROW", fx: "opticalOverlay",
+  gradient: ["#7c2d12", "#fb923c"], tags: ["corporate", "vlog"],
+  names: ["Curved Hand Arrow", "Straight Pointer Arrow", "Dashed Path Arrow", "Circle Highlight Arrow"],
+});
+const stkLine = makeSet({
+  prefix: "stk-line", glyph: "star", tag: "LINE", fx: "opticalOverlay",
+  gradient: ["#0f172a", "#22d3ee"], tags: ["minimal"],
+  names: ["Underline Sweep", "Scribble Circle Line", "Divider Draw Line", "Speed Line Frame"],
+});
+const stkParticle = makeSet({
+  prefix: "stk-part", glyph: "leak", tag: "PARTICLE", fx: "opticalOverlay",
+  gradient: ["#082f49", "#a5f3fc"], tags: ["cinematic", "wedding"],
+  names: ["Star Twinkle Overlay", "Snow Fall Overlay", "Rain Drop Overlay", "Bokeh Circles Overlay", "Light Dust Overlay"],
+});
+const stkSocial = makeSet({
+  prefix: "stk-social", glyph: "grid", tag: "SOCIAL", fx: "opticalOverlay",
+  gradient: ["#1e1b4b", "#818cf8"], tags: ["vlog", "music"],
+  names: ["Story Progress Bar", "Chat Bubble Pop", "Poll Sticker", "Location Tag Sticker"],
+});
+const stkLove = makeSet({
+  prefix: "stk-love", glyph: "sparkle", tag: "LOVE", fx: "opticalOverlay",
+  gradient: ["#4c0519", "#fda4af"], tags: ["wedding"],
+  names: ["Heart Float Overlay", "Kiss Mark Pop", "Love Frame Border", "Petal Drift Hearts"],
+});
+
+/* ---------- TEMPLATES ---------- */
+const tplTrending = makeSet({
+  prefix: "tpl-trend", glyph: "grid", tag: "TRENDING",
+  gradient: ["#7f1d1d", "#fb7185"], tags: ["vlog", "music"],
   names: [
-    "Clean Lower Third", "Bold Broadcast Lower Third", "Minimal Name Card", "Glass Panel Title",
-    "Kinetic Caption Pop", "Auto Caption Karaoke", "Typewriter Intro Title", "Neon Outline Title",
-    "Big Impact Slam Title", "Editorial Serif Title", "Callout Arrow Label", "Circle Callout Tag",
-    "Chapter Marker Title", "Subscribe Callout", "End Card Outro Title", "Social Handle Bar",
+    ["Minimalist Thanks End Screen", "textMotion"],
+    ["Minimalist Countdown", "zoomPulse"],
+    ["Combustive Cinematic Opener", "glow"],
+    ["Neon Blue End Card", "glow"],
+    ["Beat Sync Montage", "cameraShake"],
   ],
 });
-
-/** Animated stickers and overlay elements. */
-export const STICKERS: AssetItem[] = makeSet({
-  prefix: "stk", glyph: "sparkle", tag: "STICKER", fx: "opticalOverlay",
-  gradient: ["#4a044e", "#f472b6"],
-  tags: ["vlog", "music", "gaming", "wedding"],
+const tplLogo = makeSet({
+  prefix: "tpl-logo", glyph: "sparkle", tag: "LOGO", 
+  gradient: ["#0b1220", "#60a5fa"], tags: ["corporate"],
   names: [
-    "Sparkle Burst Sticker", "Heart Float Overlay", "Fire Emoji Pop", "Arrow Pointer Sticker",
-    "Confetti Rain Overlay", "Star Twinkle Overlay", "Speech Bubble Sticker", "Loading Spinner Sticker",
-    "Progress Bar Overlay", "Emoji Reaction Burst", "Snow Fall Overlay", "Rain Drop Overlay",
-    "Light Dust Overlay", "Bokeh Circles Overlay", "Grid Scan Overlay", "Film Border Overlay",
+    ["Particle Logo Reveal", "glow"],
+    ["Liquid Ink Logo Reveal", "transitionWarp"],
+    ["Glitch Logo Sting", "glitchBlock"],
+    ["Light Streak Logo Reveal", "lightLeakFx"],
   ],
 });
-
-/** Ready-to-use project templates. */
-export const TEMPLATES: AssetItem[] = makeSet({
-  prefix: "tpl", glyph: "grid", tag: "TEMPLATE",
-  gradient: ["#7f1d1d", "#fb7185"],
-  tags: ["vlog", "corporate", "travel", "wedding"],
+const tplExclusive = makeSet({
+  prefix: "tpl-excl", glyph: "star", tag: "EXCLUSIVE",
+  gradient: ["#3b0764", "#fbbf24"], tags: ["cinematic", "corporate"],
+  names: [
+    ["Cinematic Trailer Kit", "directionalBlur"],
+    ["Product Launch Promo", "glow"],
+    ["Luxury Brand Showcase", "glow"],
+    ["Fashion Lookbook Kit", "zoomPulse"],
+  ],
+});
+const tplTravel = makeSet({
+  prefix: "tpl-travel", glyph: "pan", tag: "TRAVEL",
+  gradient: ["#083344", "#22d3ee"], tags: ["travel"],
   names: [
     ["Travel Vlog Opener", "zoomPulse"],
-    ["Beat Sync Montage", "cameraShake"],
-    ["Product Launch Promo", "glow"],
-    ["Cinematic Trailer Kit", "directionalBlur"],
-    ["Wedding Story Reel", "glow"],
-    ["Gaming Highlight Reel", "glitchBlock"],
-    ["Podcast Clip Template", "textMotion"],
-    ["Real Estate Tour Kit", "gaussianBlur"],
-    ["Fitness Reel Template", "zoomPulse"],
-    ["Retro Music Video Kit", "vhs"],
-    ["Corporate Explainer Kit", "textMotion"],
-    ["Food Recipe Reel", "grain"],
+    ["Road Trip Story Reel", "directionalBlur"],
+    ["Map Route Journey Kit", "textMotion"],
   ],
 });
+const tplGallery = makeSet({
+  prefix: "tpl-gal", glyph: "grid", tag: "GALLERY",
+  gradient: ["#1c1917", "#a8a29e"], tags: ["wedding", "minimal"],
+  names: [
+    ["Wedding Story Reel", "glow"],
+    ["Photo Slideshow Frames", "transitionWarp"],
+    ["Split Screen Gallery", "splitLayout"],
+  ],
+});
+const tplSubscribe = makeSet({
+  prefix: "tpl-sub", glyph: "grid", tag: "SUBSCRIBE",
+  gradient: ["#4a044e", "#f472b6"], tags: ["vlog", "gaming"],
+  names: [
+    ["Subscribe Outro Kit", "textMotion"],
+    ["Gaming Highlight Reel", "glitchBlock"],
+    ["Podcast Clip Template", "textMotion"],
+    ["Fitness Reel Template", "zoomPulse"],
+  ],
+});
+
+const cat = (
+  id: string,
+  label: string,
+  icon: EffectIcon,
+  items: AssetItem[],
+  accent: string,
+  badge?: string
+): EffectCategory => ({ id, label, icon, count: items.length, items, accent, badge });
+
+/** Sub-category rails for every non-effects library tab. */
+export const LIB_TREES: Partial<Record<AssetTab, EffectCategory[]>> = {
+  filters: [
+    cat("flt-cat-basic", "Basic", "sparkle", fltBasic, "#38bdf8", "AI"),
+    cat("flt-cat-mono", "Mono", "film", fltMono, "#a8a29e"),
+    cat("flt-cat-cine", "Cinematic", "sparkle", fltCinematic, "#f59e0b", "HOT"),
+    cat("flt-cat-port", "Portrait", "smiley", fltPortrait, "#fbcfe8"),
+    cat("flt-cat-sum", "Summer", "lightbulb", fltSummer, "#fde68a"),
+    cat("flt-cat-life", "Lifestyle", "brush", fltLifestyle, "#f9a8d4"),
+    cat("flt-cat-val", "Valentine", "sparkle", fltValentine, "#fb7185"),
+    cat("flt-cat-retro", "Retro", "film", fltRetro, "#f472b6"),
+  ],
+  transitions: [
+    cat("trn-cat-trend", "Trending", "reveal", trnTrending, "#38bdf8", "HOT"),
+    cat("trn-cat-fade", "Fade & Dissolve", "reveal", trnFade, "#94a3b8"),
+    cat("trn-cat-zoom", "Zoom", "camera", trnZoom, "#818cf8"),
+    cat("trn-cat-slide", "Slides", "reveal", trnSlides, "#22d3ee"),
+    cat("trn-cat-prem", "Premium", "sparkle", trnPremium, "#fbbf24", "PRO"),
+    cat("trn-cat-3d", "3D", "shapes", trn3D, "#60a5fa"),
+    cat("trn-cat-burn", "Film Burn", "overlay", trnFilmBurn, "#fb923c"),
+    cat("trn-cat-glitch", "Glitch", "glitch", trnGlitchCat, "#22d3ee"),
+  ],
+  titles: [
+    cat("ttl-cat-trend", "Trending", "brush", ttlTrending, "#818cf8", "HOT"),
+    cat("ttl-cat-cap", "AI Captions", "brush", ttlCaptions, "#22d3ee", "AI"),
+    cat("ttl-cat-lt", "Lower Thirds", "brush", ttlLowerThirds, "#38bdf8"),
+    cat("ttl-cat-lux", "Luxury", "sparkle", ttlLuxury, "#fbbf24"),
+    cat("ttl-cat-tech", "Tech", "glitch", ttlTech, "#22d3ee"),
+    cat("ttl-cat-fun", "Graffiti & Fun", "brush", ttlFun, "#f472b6"),
+    cat("ttl-cat-sport", "Sport", "target", ttlSport, "#4ade80"),
+  ],
+  stickers: [
+    cat("stk-cat-trend", "Trending", "sparkle", stkTrending, "#f472b6", "HOT"),
+    cat("stk-cat-sub", "Subscribe", "target", stkSubscribe, "#fb7185"),
+    cat("stk-cat-arrow", "Arrow", "target", stkArrow, "#fb923c"),
+    cat("stk-cat-line", "Line", "brush", stkLine, "#22d3ee"),
+    cat("stk-cat-part", "Particle", "overlay", stkParticle, "#a5f3fc"),
+    cat("stk-cat-social", "Social Media", "layers", stkSocial, "#818cf8"),
+    cat("stk-cat-love", "Love", "sparkle", stkLove, "#fda4af"),
+  ],
+  templates: [
+    cat("tpl-cat-trend", "Trending", "layers", tplTrending, "#fb7185", "HOT"),
+    cat("tpl-cat-logo", "Logo Reveal", "sparkle", tplLogo, "#60a5fa"),
+    cat("tpl-cat-excl", "Exclusive", "sparkle", tplExclusive, "#fbbf24", "PRO"),
+    cat("tpl-cat-travel", "Travel", "camera", tplTravel, "#22d3ee"),
+    cat("tpl-cat-gal", "Gallery", "layers", tplGallery, "#a8a29e"),
+    cat("tpl-cat-sub", "Subscribe", "layers", tplSubscribe, "#f472b6"),
+  ],
+};
+
+const flat = (tab: AssetTab) => dedupe((LIB_TREES[tab] ?? []).flatMap((c) => c.items ?? []));
+
+/** Colour science only — LUTs and grades never displace pixels. */
+export const FILTERS: AssetItem[] = flat("filters");
+/** Clip-to-clip transitions. */
+export const TRANSITIONS: AssetItem[] = flat("transitions");
+/** Animated titles, lower thirds and captions. */
+export const TITLES: AssetItem[] = flat("titles");
+/** Animated stickers and overlay elements. */
+export const STICKERS: AssetItem[] = flat("stickers");
+/** Ready-to-use project templates. */
+export const TEMPLATES: AssetItem[] = flat("templates");
 
 /** Royalty-free stock footage & photos (live preview clips resolve per id). */
 export const STOCK: AssetItem[] = makeSet({

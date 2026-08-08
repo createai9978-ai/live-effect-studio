@@ -192,7 +192,7 @@ export default function Timeline(props: Props) {
       </div>
 
       {/* ============ TIMELINE ============ */}
-      <div className="flex min-w-0 flex-1 flex-col bg-[#141824]">
+      <div className="flex min-w-0 flex-1 flex-col bg-[#181B24]">
         {/* Header bar */}
         <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] px-3 py-1">
           <span className="font-mono text-[10px] text-cyan-300">{toTimecode(time)}</span>
@@ -944,10 +944,10 @@ function EffectsSubTrack({
   const [dropTarget, setDropTarget] = useState<string | null>(null);
 
   return (
-    <div className="flex h-9 shrink-0 border-b border-white/[0.04] bg-[#0B0E14]/70">
+    <div className="flex h-9 shrink-0 border-b border-white/[0.04] bg-[#0F1117]/70">
       {/* Lane header */}
       <div
-        className="sticky left-0 z-10 flex shrink-0 items-center gap-1 border-r border-white/[0.05] bg-[#141824] px-2 text-[9.5px] font-bold text-fuchsia-300"
+        className="sticky left-0 z-10 flex shrink-0 items-center gap-1 border-r border-white/[0.05] bg-[#181B24] px-2 text-[9.5px] font-bold text-fuchsia-300"
         style={{ width: HEAD_W }}
       >
         <span className="rounded bg-fuchsia-500/15 px-1.5 py-0.5 tracking-wider ring-1 ring-fuchsia-500/30">

@@ -244,7 +244,7 @@ export default function LumetriPanel({
   const isDefault = JSON.stringify(grade) === JSON.stringify(DEFAULT_GRADE);
 
   return (
-    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#141824]">
+    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#181B24]">
       <div className="flex items-center justify-between border-b border-white/[0.05] px-3 py-2">
         <span className="text-[11px] font-semibold text-zinc-200">Lumetri Color</span>
         <button

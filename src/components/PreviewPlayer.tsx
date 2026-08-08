@@ -85,6 +85,10 @@ export default function PreviewPlayer({
   const [webglSupported, setWebglSupported] = useState(true);
   const [gpuFrameReady, setGpuFrameReady] = useState(false);
   const [activeEffects, setActiveEffects] = useState<EffectParams[]>([]);
+  // Intrinsic aspect of the current source. Overlays are constrained to this
+  // letterboxed content box so a "screen" blend can never light up the black
+  // surround (that was the blue/white wash around the frame).
+  const [videoAspect, setVideoAspect] = useState<number | null>(null);
 
   // topmost audible video clip under the playhead (respects mute/solo)
   const active = useMemo(() => {
@@ -281,6 +285,27 @@ export default function PreviewPlayer({
     };
   }, [mergedEffects, playing, time]);
 
+  // Single, de-duplicated CSS grade for this frame. It is applied to BOTH the
+  // source element and the GPU canvas so switching pipelines never changes the
+  // look, and the clamped composer keeps brightness from blowing out to white.
+  const combinedFilter = useMemo(() => {
+    if (!active || !mergedEffects) return "";
+    const stacked: string[] = [];
+    active.clip.appliedEffects?.forEach((ae) => {
+      if (!ae.enabled || !ae.filter) return;
+      const startVal = active.clip.start + (ae.startOffset ?? 0);
+      const endVal = startVal + (ae.duration ?? active.clip.duration);
+      if (time >= startVal - 0.02 && time < endVal + 0.02) stacked.push(ae.filter);
+    });
+    return composeFilters([gradeFilter, mergedEffects.filter, cinematicStyles.filter, ...stacked]);
+  }, [active, mergedEffects, cinematicStyles.filter, gradeFilter, time]);
+
+  // Letterboxed content box: overlays live inside it so blend modes only touch
+  // the picture, never the black surround around it.
+  const contentBoxStyle: React.CSSProperties = videoAspect
+    ? { aspectRatio: String(videoAspect), maxWidth: "100%", maxHeight: "100%", width: "100%" }
+    : { width: "100%", height: "100%" };
+
   return (
     <main className="flex min-w-0 flex-1 flex-col bg-[#0F1117]">
       {/* Monitor header */}
@@ -311,25 +336,6 @@ export default function PreviewPlayer({
           {active && mergedEffects ? (
             <>
               {(() => {
-                // Compile all non-destructive stackable sub-layer filters on this clip (playhead-sensitive)
-                const stackedFilters: string[] = [];
-                active.clip.appliedEffects?.forEach((ae) => {
-                  if (ae.enabled && ae.filter) {
-                    const startVal = active.clip.start + (ae.startOffset ?? 0);
-                    const endVal = startVal + (ae.duration ?? active.clip.duration);
-                    if (time >= startVal - 0.02 && time < endVal + 0.02) {
-                      stackedFilters.push(ae.filter);
-                    }
-                  }
-                });
-
-                const combinedFilter = composeFilters([
-                  gradeFilter,
-                  mergedEffects.filter,
-                  cinematicStyles.filter,
-                  ...stackedFilters,
-                ]);
-
                 return active.asset.kind === "video" && active.asset.url ? (
                   <video
                     key={active.clip.id}
@@ -347,6 +353,7 @@ export default function PreviewPlayer({
                     }}
                     onLoadedMetadata={(e) => {
                       const v = e.currentTarget;
+                      if (v.videoWidth && v.videoHeight) setVideoAspect(v.videoWidth / v.videoHeight);
                       const rate = Math.max(0.1, mergedEffects.speed / 100);
                       v.playbackRate = rate;
                       v.currentTime = Math.max(0, active.clip.offset + (time - active.clip.start) * rate);
@@ -383,7 +390,7 @@ export default function PreviewPlayer({
                 <div
                   className="pointer-events-none absolute inset-0 bg-red-600 mix-blend-screen opacity-0 transition-opacity duration-200"
                   style={{
-                    opacity: (mergedEffects.halationAmount ?? 0) / 350,
+                    opacity: Math.min(0.3, (mergedEffects.halationAmount ?? 0) / 500),
                     filter: "blur(20px)",
                   }}
                 />
@@ -394,7 +401,7 @@ export default function PreviewPlayer({
                 <div
                   className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200"
                   style={{
-                    opacity: (mergedEffects.grainAmount ?? 0) / 280,
+                    opacity: Math.min(0.25, (mergedEffects.grainAmount ?? 0) / 400),
                     backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
                     mixBlendMode: "overlay",
                     animation: playing ? "nova-flicker 0.1s steps(4) infinite" : undefined,
@@ -414,39 +421,42 @@ export default function PreviewPlayer({
                   "pointer-events-none absolute inset-0 h-full w-full object-contain transition-opacity duration-200",
                   gpuFrameReady && webglSupported && activeEffects.length > 0 ? "opacity-100" : "opacity-0"
                 )}
-                style={{ mixBlendMode: "normal" }}
+                style={{ mixBlendMode: "normal", filter: combinedFilter, isolation: "isolate" }}
               />
-              {/* Preset overlay layer — light leaks, atmosphere gradients, halation glow */}
-              {mergedEffects.overlay && (
-                <div
-                  className="pointer-events-none absolute inset-0 transition-opacity"
-                  style={{
-                    backgroundImage: mergedEffects.overlay,
-                    mixBlendMode: (mergedEffects.overlayBlend as React.CSSProperties["mixBlendMode"]) ?? "screen",
-                    opacity: mergedEffects.overlayOpacity ?? 0.9,
-                  }}
-                />
-              )}
-
-              {/* Stacked Non-Destructive overlays (playhead-sensitive) */}
-              {active.clip.appliedEffects?.map((ae) => {
-                if (!ae.enabled || !ae.overlay) return null;
-                const startVal = active.clip.start + (ae.startOffset ?? 0);
-                const endVal = startVal + (ae.duration ?? active.clip.duration);
-                if (time < startVal - 0.02 || time >= endVal + 0.02) return null;
-
-                return (
-                  <div
-                    key={ae.id}
-                    className="pointer-events-none absolute inset-0 transition-opacity"
-                    style={{
-                      backgroundImage: ae.overlay,
-                      mixBlendMode: (ae.overlayBlend as React.CSSProperties["mixBlendMode"]) ?? "screen",
-                      opacity: ae.intensity / 100,
-                    }}
-                  />
-                );
-              })}
+              {/* Overlay stack — constrained to the picture area only */}
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="relative overflow-hidden" style={contentBoxStyle}>
+                  {mergedEffects.overlay && (
+                    <div
+                      className="pointer-events-none absolute inset-0 transition-opacity duration-200"
+                      style={{
+                        backgroundImage: mergedEffects.overlay,
+                        mixBlendMode:
+                          (mergedEffects.overlayBlend as React.CSSProperties["mixBlendMode"]) ?? "soft-light",
+                        opacity: Math.min(0.6, mergedEffects.overlayOpacity ?? 0.5),
+                      }}
+                    />
+                  )}
+                  {active.clip.appliedEffects?.map((ae) => {
+                    if (!ae.enabled || !ae.overlay) return null;
+                    const startVal = active.clip.start + (ae.startOffset ?? 0);
+                    const endVal = startVal + (ae.duration ?? active.clip.duration);
+                    if (time < startVal - 0.02 || time >= endVal + 0.02) return null;
+                    return (
+                      <div
+                        key={ae.id}
+                        className="pointer-events-none absolute inset-0 transition-opacity duration-200"
+                        style={{
+                          backgroundImage: ae.overlay,
+                          mixBlendMode:
+                            (ae.overlayBlend as React.CSSProperties["mixBlendMode"]) ?? "soft-light",
+                          opacity: Math.min(0.55, ae.intensity / 100),
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
               <div className="pointer-events-none absolute left-3 top-2.5 font-mono text-[10px] text-white/70 drop-shadow">
                 {toTimecode(time)}
               </div>

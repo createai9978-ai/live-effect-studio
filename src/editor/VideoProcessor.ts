@@ -720,6 +720,11 @@ const FRAGMENT_SHADER_SOURCE = `
       color = mix(color, texture2D(u_video, safeUV(p)).rgb, u_intensity);
     }
 
+    // Highlight rolloff: a soft knee compresses anything the effect pushed past
+    // 1.0 instead of hard-clipping it, so no preset can blast the frame white.
+    vec3 knee = vec3(0.86);
+    vec3 over = max(color - knee, vec3(0.0));
+    color = min(color, knee) + over / (1.0 + over / max(vec3(0.0001), 1.0 - knee)) * (1.0 - knee);
     gl_FragColor = vec4(clamp(color, 0.0, 1.0), 1.0);
   }
 `;

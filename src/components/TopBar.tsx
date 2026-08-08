@@ -29,6 +29,7 @@ export default function TopBar({
   onOpenAssetBrowser: () => void;
   onGoHome?: () => void;
 }) {
+  const { settings } = useAdmin();
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-[#181B24]/80 backdrop-blur-xl px-3">
       {/* Logo */}
@@ -36,20 +37,31 @@ export default function TopBar({
         <button
           onClick={onGoHome}
           title="Back to launcher"
-          className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 shadow-lg shadow-violet-500/30">
-          <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="5" width="20" height="14" rx="2" />
-            <path d="M2 9h20M7 5v4M12 5v4M17 5v4M7 15h4" />
-          </svg>
+          className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg shadow-lg"
+          style={{
+            background: settings.logoUrl
+              ? "transparent"
+              : `linear-gradient(135deg, ${settings.accent2}, ${settings.accent})`,
+          }}
+        >
+          {settings.logoUrl ? (
+            <img src={settings.logoUrl} alt="App logo" className="h-full w-full object-contain" />
+          ) : (
+            <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="5" width="20" height="14" rx="2" />
+              <path d="M2 9h20M7 5v4M12 5v4M17 5v4M7 15h4" />
+            </svg>
+          )}
         </button>
-        <span className="hidden text-[13px] font-semibold tracking-wide text-zinc-100 md:inline">
-          NOVA <span className="font-light text-zinc-400">Studio</span>
+        <span className="hidden items-center gap-1 text-[13px] font-semibold tracking-wide text-zinc-100 md:inline-flex">
+          <EditableText id="app.title" text="NOVA Studio" />
           <span className="ml-1.5 rounded bg-white/[0.07] px-1 py-px text-[8px] font-medium tracking-wider text-zinc-500">EDIT</span>
         </span>
       </div>
 
       {/* Menu bar */}
       <MenuBar actions={menuActions} />
+
 
       {/* Workspace tabs */}
       <div className="mx-auto flex items-center gap-0.5 rounded-lg border border-white/[0.06] bg-black/30 p-0.5">

@@ -117,16 +117,35 @@ export default function Timeline(props: Props) {
     return width / seqDur;
   };
 
-  const scrub = (e: React.MouseEvent) => {
-    onSeek(timeFromClientX(e.clientX));
-    const move = (ev: MouseEvent) => onSeek(timeFromClientX(ev.clientX));
+  /**
+   * Pointer-based scrubbing. Used by BOTH the ruler and the playhead needle so
+   * the cyan line can be grabbed and dragged anywhere across the sequence
+   * without losing the pointer (pointer capture keeps events flowing even when
+   * the cursor leaves the element or crosses the video tracks).
+   */
+  const beginScrub = (e: React.PointerEvent, seekImmediately = true) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (seekImmediately) onSeek(timeFromClientX(e.clientX));
+    setScrubbing(true);
+    const target = e.currentTarget as HTMLElement;
+    try {
+      target.setPointerCapture(e.pointerId);
+    } catch {
+      /* pointer capture unsupported — window listeners below still work */
+    }
+    const move = (ev: PointerEvent) => onSeek(timeFromClientX(ev.clientX));
     const up = () => {
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseup", up);
+      setScrubbing(false);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
     };
-    window.addEventListener("mousemove", move);
-    window.addEventListener("mouseup", up);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
   };
+
 
   return (
     <div className="flex min-w-0 flex-1">

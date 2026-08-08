@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import TopBar from "../components/TopBar";
+import { AdminProvider } from "../admin/AdminContext";
+import AdminPanel from "../admin/AdminPanel";
+
 import HomeScreen, { AspectRatio } from "./HomeScreen";
 import SpeedCurveEditor from "../components/SpeedCurveEditor";
 import MediaBin from "../components/MediaBin";
@@ -62,7 +65,7 @@ type ModalKind =
 
 
 
-export default function App() {
+function AppInner() {
   // ---- LocalStorage Keys ----
   const LOCAL_STORAGE_KEYS = {
     assets: "nova_studio.assets.v1",
@@ -1551,3 +1554,13 @@ export default function App() {
     </div>
   );
 }
+
+export default function App() {
+  return (
+    <AdminProvider>
+      <AppInner />
+      <AdminPanel />
+    </AdminProvider>
+  );
+}
+

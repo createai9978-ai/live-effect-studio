@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "../utils/cn";
+import EditableText from "../admin/EditableText";
 import {
   AUDIO_LIB,
   AssetItem,
@@ -271,7 +272,7 @@ export default function AssetBrowser({
               >
                 <TabIcon icon={t.icon} active={active} color={active ? t.color.text : undefined} />
               </span>
-              {t.label}
+              <EditableText id={`tab.${t.id}`} text={t.label} />
               {active && <span className={cn("h-1 w-1 rounded-full", t.color.dot)} />}
               {t.badge && (
                 <span className="rounded bg-gradient-to-r from-fuchsia-500 to-orange-400 px-1 py-px text-[7.5px] font-bold text-white">

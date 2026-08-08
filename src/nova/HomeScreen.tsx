@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { cn } from "../utils/cn";
+import EditableText from "../admin/EditableText";
+import AdminToggle from "../admin/AdminToggle";
+import { useAdmin } from "../admin/AdminContext";
 
 /**
  * NOVA Studio launcher — the dashboard shown before the editor opens.
@@ -50,21 +53,33 @@ export default function HomeScreen({
 }) {
   const [ratio, setRatio] = useState<AspectRatio>("16:9");
   const [nav, setNav] = useState("create");
+  const { settings } = useAdmin();
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#0F1117] font-sans text-zinc-200 antialiased">
       {/* ---------- Side rail ---------- */}
       <aside className="hidden w-[248px] shrink-0 flex-col border-r border-white/[0.06] bg-[#181B24] p-4 md:flex">
         <div className="mb-8 flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#00E5FF] via-violet-500 to-[#8A2BE2] shadow-lg shadow-violet-500/25">
+          <div
+            className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl shadow-lg shadow-violet-500/25"
+            style={{ background: settings.logoUrl ? "transparent" : `linear-gradient(135deg, ${settings.accent}, ${settings.accent2})` }}
+          >
+            {settings.logoUrl ? (
+              <img src={settings.logoUrl} alt="App logo" className="h-full w-full object-contain" />
+            ) : (
             <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="5" width="20" height="14" rx="2" />
               <path d="M2 9h20M7 5v4M12 5v4M17 5v4" />
             </svg>
+            )}
           </div>
           <div className="leading-tight">
-            <div className="text-[13.5px] font-semibold text-zinc-50">NOVA</div>
-            <div className="text-[11px] font-light text-zinc-400">Studio</div>
+            <div className="text-[13.5px] font-semibold text-zinc-50">
+              <EditableText id="home.brand" text="NOVA" />
+            </div>
+            <div className="text-[11px] font-light text-zinc-400">
+              <EditableText id="home.brandSub" text="Studio" />
+            </div>
           </div>
         </div>
 
@@ -81,7 +96,7 @@ export default function HomeScreen({
               )}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
-              {n.label}
+              <EditableText id={`home.nav.${n.id}`} text={n.label} />
             </button>
           ))}
         </nav>
@@ -126,6 +141,7 @@ export default function HomeScreen({
           >
             Open Project
           </button>
+          <AdminToggle />
         </div>
 
         <div className="mx-auto max-w-[1180px] px-6 py-6">
@@ -142,7 +158,7 @@ export default function HomeScreen({
                     <path d="M12 5v14M5 12h14" />
                   </svg>
                 </div>
-                <h1 className="text-[30px] font-semibold leading-tight text-white">New Project</h1>
+                <h1 className="text-[30px] font-semibold leading-tight text-white"><EditableText id="home.hero" text="New Project" /></h1>
                 <p className="mt-1 text-[13px] text-white/80">
                   Start a {ratio} timeline with the full effects library
                 </p>
@@ -185,7 +201,7 @@ export default function HomeScreen({
           {/* recommended strip */}
           <div className="mt-8">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-[13px] font-medium text-zinc-200">Recommended</h2>
+              <h2 className="text-[13px] font-medium text-zinc-200"><EditableText id="home.recommended" text="Recommended" /></h2>
               <span className="text-[11px] text-zinc-500">Expand</span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -208,7 +224,7 @@ export default function HomeScreen({
 
           {/* recent projects */}
           <div className="mt-8 pb-10">
-            <h2 className="mb-3 text-[13px] font-medium text-zinc-200">Local Projects</h2>
+            <h2 className="mb-3 text-[13px] font-medium text-zinc-200"><EditableText id="home.localProjects" text="Local Projects" /></h2>
             {recentProjects.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-[#181B24]/50 py-14">
                 <svg className="mb-3 h-10 w-10 text-zinc-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">

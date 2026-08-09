@@ -3,6 +3,7 @@ import { cn } from "../utils/cn";
 import EditableText from "../admin/EditableText";
 import AdminToggle from "../admin/AdminToggle";
 import { useAdmin } from "../admin/AdminContext";
+import { useAuth } from "../auth/AuthContext";
 
 /**
  * NOVA Studio launcher — the dashboard shown before the editor opens.
@@ -54,6 +55,12 @@ export default function HomeScreen({
   const [ratio, setRatio] = useState<AspectRatio>("16:9");
   const [nav, setNav] = useState("create");
   const { settings } = useAdmin();
+  const { user, profile, isAdmin } = useAuth();
+  const accountLabel = profile?.display_name || user?.email || "Guest session";
+  const accountInitials = (accountLabel.match(/\b[a-z0-9]/gi) ?? ["N"])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#0F1117] font-sans text-zinc-200 antialiased">

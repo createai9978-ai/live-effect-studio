@@ -6,14 +6,22 @@ const SURFACES = ["#0F1117", "#0B0E14", "#101826", "#161219", "#12141A"];
 
 /** Right-hand admin drawer: fonts, accent colours, surface, logo and reset. */
 export default function AdminPanel() {
-  const { adminMode, panelOpen, setPanelOpen, settings, update, reset } = useAdmin();
+  const { adminMode, panelOpen, setPanelOpen, settings, update, reset, saving } = useAdmin();
   if (!adminMode || !panelOpen) return null;
 
   return (
-    <aside className="fixed right-0 top-0 z-[80] flex h-screen w-[310px] flex-col border-l border-white/[0.08] bg-[#141824]/95 backdrop-blur-xl shadow-2xl shadow-black/50 animate-[nova-panel_.28s_cubic-bezier(.22,1,.36,1)]">
+    <aside className="fixed right-0 top-0 z-[80] flex h-screen w-[310px] max-w-[86vw] flex-col border-l border-white/[0.08] bg-[#141824]/95 backdrop-blur-xl shadow-2xl shadow-black/50 animate-[nova-panel_.28s_cubic-bezier(.22,1,.36,1)]">
       <div className="flex h-12 shrink-0 items-center gap-2 border-b border-white/[0.06] px-4">
         <span className="h-1.5 w-1.5 rounded-full" style={{ background: settings.accent }} />
         <span className="text-[12.5px] font-semibold text-zinc-100">Admin Customizer</span>
+        <span
+          className={cn(
+            "ml-1 text-[9.5px] uppercase tracking-wider transition-opacity duration-300",
+            saving ? "text-[color:var(--nova-accent)] opacity-100" : "text-emerald-400/80 opacity-70"
+          )}
+        >
+          {saving ? "Saving…" : "Saved"}
+        </span>
         <button
           onClick={() => setPanelOpen(false)}
           className="ml-auto rounded p-1 text-zinc-500 transition hover:bg-white/10 hover:text-zinc-100"
@@ -24,6 +32,7 @@ export default function AdminPanel() {
           </svg>
         </button>
       </div>
+
 
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-4">
         <Section title="Typography">

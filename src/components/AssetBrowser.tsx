@@ -746,13 +746,19 @@ function BrowserContent({
   return (
     <>
       {tab === "effects" && (
-        <div className="mb-4 flex items-center gap-2 text-[11px] text-zinc-400">
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-[11px] text-zinc-400">
           <span className="rounded-md bg-violet-500/10 px-2 py-0.5 font-medium text-violet-300 ring-1 ring-violet-500/20">
-            {currentCatLabel(activeCat)}
+            {widened ? "All effects" : currentCatLabel(activeCat)}
           </span>
           <span className="text-zinc-700">·</span>
           <span>
-            {filtered.length === items.length ? (
+            {widened ? (
+              <>
+                No match in {currentCatLabel(activeCat)} — showing{" "}
+                <span className="text-zinc-200">{widened.length}</span> result
+                {widened.length === 1 ? "" : "s"} from every category
+              </>
+            ) : filtered.length === items.length ? (
               <>
                 {items.length} unique preset{items.length === 1 ? "" : "s"}
               </>
@@ -765,18 +771,19 @@ function BrowserContent({
           </span>
         </div>
       )}
-      {filtered.length === 0 ? (
+      {shown.length === 0 ? (
         <div className="flex h-full flex-col items-center justify-center gap-2.5 py-12 text-center">
           <svg className="h-8 w-8 text-zinc-700 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
             <circle cx="11" cy="11" r="7" />
             <path d="M21 21l-4.35-4.35" />
           </svg>
-          <div className="text-[12px] text-zinc-400 font-medium">No unique results for "{query}"</div>
-          <div className="text-[10.5px] text-zinc-600">Try selecting another subcategory or clear the search tag filters</div>
+          <div className="text-[12px] text-zinc-400 font-medium">No results for "{query}"</div>
+          <div className="text-[10.5px] text-zinc-600">Try a different keyword or clear the active tag filters</div>
         </div>
       ) : (
         <div className={cn("grid gap-4 pb-6", cols)}>
-          {filtered.map((it) => {
+          {shown.map((it) => {
+
             return (
               <AssetCard
                 key={`browser-content-${it.id}`}

@@ -90,6 +90,7 @@ export default function AdminPanel() {
             value={settings.logoUrl}
             onChange={(e) => update({ logoUrl: e.target.value })}
             placeholder="https://…/logo.png"
+            maxLength={500}
             className="w-full rounded-lg border border-white/[0.08] bg-black/40 px-2.5 py-2 text-[11.5px] text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-[color:var(--nova-accent)]"
           />
           {settings.logoUrl && (
@@ -102,7 +103,7 @@ export default function AdminPanel() {
 
         <p className="rounded-lg border border-white/[0.06] bg-black/30 p-3 text-[10.5px] leading-relaxed text-zinc-500">
           Tip: with Admin Mode on, click any pencil (or double-click the text) to rename headings,
-          the app title and asset tab names. Everything is saved to this browser.
+          the app title and asset tab names. Changes save automatically and apply for every visitor.
         </p>
       </div>
 

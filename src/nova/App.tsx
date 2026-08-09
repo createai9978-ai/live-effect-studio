@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import TopBar from "../components/TopBar";
 import { AdminProvider } from "../admin/AdminContext";
+import { AuthProvider } from "../auth/AuthContext";
 import AdminPanel from "../admin/AdminPanel";
 
 import HomeScreen, { AspectRatio } from "./HomeScreen";

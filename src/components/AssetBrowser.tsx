@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { hasAllTags, searchAssets, score, tokenize } from "../editor/assetSearch";
 import { cn } from "../utils/cn";
 import EditableText from "../admin/EditableText";
 import {
@@ -69,6 +70,9 @@ export default function AssetBrowser({
   const [tab, setTab] = useState<AssetTab>(initialTab);
   const [query, setQuery] = useState("");
   const [globalQuery, setGlobalQuery] = useState("");
+  // Keep typing responsive: the (expensive) grid re-filter runs at low priority.
+  const deferredQuery = useDeferredValue(query);
+  const deferredGlobalQuery = useDeferredValue(globalQuery);
   const [catByTab, setCatByTab] = useState<Record<string, string>>({});
   const treeForTab = (t: AssetTab): EffectCategory[] | null =>
     t === "effects" ? EFFECTS_TREE : LIB_TREES[t] ?? null;
@@ -380,7 +384,7 @@ export default function AssetBrowser({
             <div className="min-h-0 flex-1 overflow-y-auto p-4">
               {globalQuery ? (
                 <GlobalSearchResults
-                  query={globalQuery}
+                  query={deferredGlobalQuery}
                   onApply={handleCardActivate}
                   onHover={handleHover}
                   previewFrameUrl={previewFrameUrl ?? null}
@@ -392,15 +396,8 @@ export default function AssetBrowser({
               ) : tab === "mine" ? (
                 <MineTab
                   items={[...myMedia, ...favoriteItems]
-                    .filter((i) => {
-                      const q = query.trim().toLowerCase();
-                      if (q && !`${i.name} ${i.tag ?? ""}`.toLowerCase().includes(q)) return false;
-                      if (activeTags.size === 0) return true;
-                      const s = new Set(i.tags ?? []);
-                      for (const t of activeTags) if (!s.has(t)) return false;
-                      return true;
-                    })
-                    .filter((i, idx, arr) => arr.findIndex((x) => x.id === i.id) === idx)}
+                    .filter((i, idx, arr) => arr.findIndex((x) => x.id === i.id) === idx)
+                    .filter((i) => hasAllTags(i, activeTags) && score(i, tokenize(deferredQuery)) >= 0)}
                   onApply={handleCardActivate}
                   onHover={handleHover}
                   previewFrameUrl={previewFrameUrl ?? null}
@@ -413,7 +410,7 @@ export default function AssetBrowser({
               ) : (
                 <BrowserContent
                   tab={tab}
-                  query={query}
+                  query={deferredQuery}
                   activeCat={activeCat}
                   onApply={handleCardActivate}
                   onHover={handleHover}
@@ -706,20 +703,18 @@ function BrowserContent({
   activeTags: Set<ContentTag>;
 }) {
   const items = useMemo(() => itemsForTab(tab, activeCat), [tab, activeCat]);
-  const filtered = useMemo(() => {
-    const q = query.toLowerCase().trim();
-    const seen = new Set<string>();
-    return items
-      .filter((i) => {
-        if (q && !i.name.toLowerCase().includes(q)) return false;
-        if (activeTags.size > 0) {
-          const itemTagSet = new Set(i.tags ?? []);
-          for (const t of activeTags) if (!itemTagSet.has(t)) return false;
-        }
-        return true;
-      })
-      .filter((i) => (seen.has(i.id) ? false : (seen.add(i.id), true)));
-  }, [items, query, activeTags]);
+  const filtered = useMemo(
+    () => searchAssets(items, query, activeTags as Set<string>),
+    [items, query, activeTags]
+  );
+  // A query that matches nothing in the open subcategory almost always has hits
+  // elsewhere in the tab — widen the search instead of showing a dead end.
+  const widened = useMemo(() => {
+    if (filtered.length > 0 || (!query.trim() && activeTags.size === 0)) return null;
+    const all = searchAssets(allItemsForTab(tab), query, activeTags as Set<string>);
+    return all.length ? all : null;
+  }, [filtered.length, query, activeTags, tab]);
+  const shown = widened ?? filtered;
 
   if (tab === "media") {
     return (
@@ -751,13 +746,19 @@ function BrowserContent({
   return (
     <>
       {tab === "effects" && (
-        <div className="mb-4 flex items-center gap-2 text-[11px] text-zinc-400">
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-[11px] text-zinc-400">
           <span className="rounded-md bg-violet-500/10 px-2 py-0.5 font-medium text-violet-300 ring-1 ring-violet-500/20">
-            {currentCatLabel(activeCat)}
+            {widened ? "All effects" : currentCatLabel(activeCat)}
           </span>
           <span className="text-zinc-700">·</span>
           <span>
-            {filtered.length === items.length ? (
+            {widened ? (
+              <>
+                No match in {currentCatLabel(activeCat)} — showing{" "}
+                <span className="text-zinc-200">{widened.length}</span> result
+                {widened.length === 1 ? "" : "s"} from every category
+              </>
+            ) : filtered.length === items.length ? (
               <>
                 {items.length} unique preset{items.length === 1 ? "" : "s"}
               </>
@@ -770,18 +771,19 @@ function BrowserContent({
           </span>
         </div>
       )}
-      {filtered.length === 0 ? (
+      {shown.length === 0 ? (
         <div className="flex h-full flex-col items-center justify-center gap-2.5 py-12 text-center">
           <svg className="h-8 w-8 text-zinc-700 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
             <circle cx="11" cy="11" r="7" />
             <path d="M21 21l-4.35-4.35" />
           </svg>
-          <div className="text-[12px] text-zinc-400 font-medium">No unique results for "{query}"</div>
-          <div className="text-[10.5px] text-zinc-600">Try selecting another subcategory or clear the search tag filters</div>
+          <div className="text-[12px] text-zinc-400 font-medium">No results for "{query}"</div>
+          <div className="text-[10.5px] text-zinc-600">Try a different keyword or clear the active tag filters</div>
         </div>
       ) : (
         <div className={cn("grid gap-4 pb-6", cols)}>
-          {filtered.map((it) => {
+          {shown.map((it) => {
+
             return (
               <AssetCard
                 key={`browser-content-${it.id}`}
@@ -1263,18 +1265,12 @@ function GlobalSearchResults({
   activeTags: Set<ContentTag>;
 }) {
   const groups = useMemo(() => {
-    const q = query.toLowerCase().trim();
+    const tokens = tokenize(query);
     const match = (i: AssetItem) => {
-      if (activeTags.size > 0) {
-        const s = new Set(i.tags ?? []);
-        for (const t of activeTags) if (!s.has(t)) return false;
-      }
-      if (!q) return activeTags.size > 0; // if only tags active, allow all matching
-      return (
-        i.name.toLowerCase().includes(q) ||
-        (i.tag?.toLowerCase().includes(q) ?? false) ||
-        (i.tags?.some((t) => t.includes(q)) ?? false)
-      );
+      if (!hasAllTags(i, activeTags as Set<string>)) return false;
+      // No text query: only show results when a tag filter is narrowing things.
+      if (tokens.length === 0) return activeTags.size > 0;
+      return score(i, tokens) >= 0;
     };
 
     // Flatten every effects category (including nested children) into named groups
@@ -1304,7 +1300,7 @@ function GlobalSearchResults({
     return buckets
       .map((b) => ({ label: b.label, items: b.items.filter((i) => (seen.has(i.id) ? false : (seen.add(i.id), true))) }))
       .filter((b) => b.items.length);
-  }, [query]);
+  }, [query, activeTags]);
 
   const total = groups.reduce((n, g) => n + g.items.length, 0);
 
@@ -1675,6 +1671,21 @@ function paramPreview(g: ThumbGlyph): { label: string; value: string }[] {
 }
 
 /* ================= Helpers ================= */
+/** Every item across all categories of a tab — used as a search fallback. */
+function allItemsForTab(tab: AssetTab): AssetItem[] {
+  const tree = tab === "effects" ? EFFECTS_TREE : LIB_TREES[tab] ?? null;
+  if (!tree) return itemsForTab(tab, "");
+  const out: AssetItem[] = [];
+  const walk = (cats: EffectCategory[]) => {
+    for (const c of cats) {
+      if (c.items) out.push(...c.items);
+      if (c.children) walk(c.children);
+    }
+  };
+  walk(tree);
+  return out.length ? out : itemsForTab(tab, "");
+}
+
 function itemsForTab(tab: AssetTab, activeCat: string): AssetItem[] {
   switch (tab) {
     case "effects":

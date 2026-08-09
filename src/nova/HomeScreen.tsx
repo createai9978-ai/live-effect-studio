@@ -3,6 +3,7 @@ import { cn } from "../utils/cn";
 import EditableText from "../admin/EditableText";
 import AdminToggle from "../admin/AdminToggle";
 import { useAdmin } from "../admin/AdminContext";
+import { useAuth } from "../auth/AuthContext";
 
 /**
  * NOVA Studio launcher — the dashboard shown before the editor opens.
@@ -54,6 +55,12 @@ export default function HomeScreen({
   const [ratio, setRatio] = useState<AspectRatio>("16:9");
   const [nav, setNav] = useState("create");
   const { settings } = useAdmin();
+  const { user, profile, isAdmin } = useAuth();
+  const accountLabel = profile?.display_name || user?.email || "Guest session";
+  const accountInitials = (accountLabel.match(/\b[a-z0-9]/gi) ?? ["N"])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#0F1117] font-sans text-zinc-200 antialiased">
@@ -103,15 +110,23 @@ export default function HomeScreen({
 
         <div className="mt-auto rounded-xl border border-white/[0.06] bg-black/30 p-3">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 text-[11px] font-bold text-white">
-              AK
+            <div
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+              style={{
+                background: `linear-gradient(135deg, var(--nova-accent,#00E5FF), var(--nova-accent-2,#8A2BE2))`,
+              }}
+            >
+              {accountInitials}
             </div>
             <div className="min-w-0">
-              <div className="truncate text-[11.5px] text-zinc-200">studio@nova.app</div>
-              <div className="text-[10px] text-zinc-500">AI Credits: 250</div>
+              <div className="truncate text-[11.5px] text-zinc-200">{accountLabel}</div>
+              <div className="text-[10px] text-zinc-500">
+                {user ? (isAdmin ? "Administrator" : "Signed in") : "Not signed in"}
+              </div>
             </div>
           </div>
         </div>
+
       </aside>
 
       {/* ---------- Main ---------- */}

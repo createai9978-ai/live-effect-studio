@@ -707,6 +707,14 @@ function BrowserContent({
     () => searchAssets(items, query, activeTags as Set<string>),
     [items, query, activeTags]
   );
+  // A query that matches nothing in the open subcategory almost always has hits
+  // elsewhere in the tab — widen the search instead of showing a dead end.
+  const widened = useMemo(() => {
+    if (filtered.length > 0 || (!query.trim() && activeTags.size === 0)) return null;
+    const all = searchAssets(allItemsForTab(tab), query, activeTags as Set<string>);
+    return all.length ? all : null;
+  }, [filtered.length, query, activeTags, tab]);
+  const shown = widened ?? filtered;
 
   if (tab === "media") {
     return (
@@ -1656,6 +1664,21 @@ function paramPreview(g: ThumbGlyph): { label: string; value: string }[] {
 }
 
 /* ================= Helpers ================= */
+/** Every item across all categories of a tab — used as a search fallback. */
+function allItemsForTab(tab: AssetTab): AssetItem[] {
+  const tree = tab === "effects" ? EFFECTS_TREE : LIB_TREES[tab] ?? null;
+  if (!tree) return itemsForTab(tab, "");
+  const out: AssetItem[] = [];
+  const walk = (cats: EffectCategory[]) => {
+    for (const c of cats) {
+      if (c.items) out.push(...c.items);
+      if (c.children) walk(c.children);
+    }
+  };
+  walk(tree);
+  return out.length ? out : itemsForTab(tab, "");
+}
+
 function itemsForTab(tab: AssetTab, activeCat: string): AssetItem[] {
   switch (tab) {
     case "effects":

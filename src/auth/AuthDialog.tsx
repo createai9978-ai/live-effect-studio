@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { cn } from "../utils/cn";
 import { useAuth } from "./AuthContext";
@@ -75,15 +76,17 @@ export default function AuthDialog({ open, onClose }: { open: boolean; onClose: 
     }
   };
 
-  return (
+  // Portalled to <body>: ancestors in the studio use backdrop-blur, which creates a
+  // containing block and would otherwise clip this `fixed` overlay.
+  return createPortal(
     <div
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md animate-[nova-fade_.2s_ease-out]"
+      className="fixed inset-0 z-[120] flex items-center justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-md animate-[nova-fade_.2s_ease-out]"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
       role="dialog"
       aria-modal="true"
       aria-label="Sign in to NOVA Studio"
     >
-      <div className="w-full max-w-[380px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#141824]/95 shadow-2xl shadow-black/60 animate-[nova-pop_.28s_cubic-bezier(.22,1,.36,1)]">
+      <div className="my-auto w-full max-w-[380px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#141824]/95 shadow-2xl shadow-black/60 animate-[nova-pop_.28s_cubic-bezier(.22,1,.36,1)]">
         <div className="relative border-b border-white/[0.06] px-5 py-4">
           <div
             className="absolute inset-x-0 top-0 h-px"
@@ -179,7 +182,8 @@ export default function AuthDialog({ open, onClose }: { open: boolean; onClose: 
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

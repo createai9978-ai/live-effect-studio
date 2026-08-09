@@ -1557,10 +1557,12 @@ function AppInner() {
 
 export default function App() {
   return (
-    <AdminProvider>
-      <AppInner />
-      <AdminPanel />
-    </AdminProvider>
+    <AuthProvider>
+      <AdminProvider>
+        <AppInner />
+        <AdminPanel />
+      </AdminProvider>
+    </AuthProvider>
   );
 }
 

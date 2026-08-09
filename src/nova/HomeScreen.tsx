@@ -103,15 +103,23 @@ export default function HomeScreen({
 
         <div className="mt-auto rounded-xl border border-white/[0.06] bg-black/30 p-3">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 text-[11px] font-bold text-white">
-              AK
+            <div
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+              style={{
+                background: `linear-gradient(135deg, var(--nova-accent,#00E5FF), var(--nova-accent-2,#8A2BE2))`,
+              }}
+            >
+              {accountInitials}
             </div>
             <div className="min-w-0">
-              <div className="truncate text-[11.5px] text-zinc-200">studio@nova.app</div>
-              <div className="text-[10px] text-zinc-500">AI Credits: 250</div>
+              <div className="truncate text-[11.5px] text-zinc-200">{accountLabel}</div>
+              <div className="text-[10px] text-zinc-500">
+                {user ? (isAdmin ? "Administrator" : "Signed in") : "Not signed in"}
+              </div>
             </div>
           </div>
         </div>
+
       </aside>
 
       {/* ---------- Main ---------- */}

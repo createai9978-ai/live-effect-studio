@@ -194,7 +194,7 @@ function Field({
   value: string;
   onChange: (v: string) => void;
   type?: string;
-} & React.InputHTMLAttributes<HTMLInputElement>) {
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value" | "type">) {
   return (
     <label className="block">
       <span className="mb-1 block text-[10.5px] uppercase tracking-wider text-zinc-500">{label}</span>

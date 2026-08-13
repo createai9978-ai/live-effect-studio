@@ -180,20 +180,8 @@ export default function HomeScreen({
               </div>
             </button>
 
-            <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#181B24] p-5">
-              <span className="absolute right-4 top-4 rounded-full bg-[#00E5FF]/20 px-2 py-0.5 text-[10px] font-semibold text-[#8DF3FF] ring-1 ring-[#00E5FF]/30">
-                New
-              </span>
-              <div className="mb-3 grid grid-cols-4 gap-1.5">
-                {["from-violet-600 to-indigo-900", "from-cyan-600 to-slate-900", "from-amber-500 to-rose-900", "from-emerald-500 to-slate-900"].map((g) => (
-                  <div key={g} className={cn("h-16 rounded-lg bg-gradient-to-br", g)} />
-                ))}
-              </div>
-              <div className="text-[13px] font-medium text-zinc-100">Idea to Video Agent</div>
-              <p className="mt-1 text-[11.5px] leading-relaxed text-zinc-400">
-                Describe a concept and NOVA assembles a rough cut with grades, transitions and captions.
-              </p>
-            </div>
+            <HeroPreview />
+
           </div>
 
           {/* quick tools */}

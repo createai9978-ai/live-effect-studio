@@ -4,6 +4,8 @@ import EditableText from "../admin/EditableText";
 import AdminToggle from "../admin/AdminToggle";
 import { useAdmin } from "../admin/AdminContext";
 import { useAuth } from "../auth/AuthContext";
+import HeroPreview from "./HeroPreview";
+
 
 /**
  * NOVA Studio launcher — the dashboard shown before the editor opens.

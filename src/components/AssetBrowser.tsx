@@ -716,6 +716,14 @@ function BrowserContent({
   }, [filtered.length, query, activeTags, tab]);
   const shown = widened ?? filtered;
 
+  // Catalog collections run into the hundreds — render them in pages so the
+  // grid (and its live video previews) stays buttery smooth.
+  const PAGE = 60;
+  const [visible, setVisible] = useState(PAGE);
+  useEffect(() => setVisible(PAGE), [tab, activeCat, query, activeTags]);
+  const page = shown.slice(0, visible);
+
+
   if (tab === "media") {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 text-center">

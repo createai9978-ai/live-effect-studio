@@ -301,7 +301,41 @@ type SetSpec = {
   /** Default effect primitive for every entry that does not declare its own. */
   fx?: FxType;
   kind?: "grade" | "effect" | "media";
+  /**
+   * Expand the authored core names into a full production-size collection by
+   * deriving named studio variants (Ultra / Cine / Vintage …). Every derived
+   * name stays unique, keeps its parent's GPU primitive and gets its own seeded
+   * render program.
+   */
+  target?: number;
 };
+
+/** Studio variant prefixes used to grow a core collection to catalog size. */
+const VARIANT_WORDS = [
+  "Cine", "Ultra", "Soft", "Deep", "Neo", "Studio", "Vintage", "Micro",
+  "Heavy", "Pro", "Nova", "Halo", "Prism", "Hyper", "Lumen", "Onyx",
+  "Aurora", "Quantum", "Velvet", "Titan",
+];
+
+function expandNames(
+  names: (string | [string, FxType])[],
+  target?: number
+): (string | [string, FxType])[] {
+  if (!target || target <= names.length) return names;
+  const out = [...names];
+  let i = 0;
+  const max = names.length * VARIANT_WORDS.length;
+  while (out.length < target && i < max) {
+    const base = names[i % names.length];
+    const word = VARIANT_WORDS[Math.floor(i / names.length) % VARIANT_WORDS.length];
+    const label = Array.isArray(base) ? base[0] : base;
+    const fx = Array.isArray(base) ? base[1] : undefined;
+    const derived = `${word} ${label}`;
+    out.push(fx ? ([derived, fx] as [string, FxType]) : derived);
+    i++;
+  }
+  return out;
+}
 
 /**
  * Build a preset set. Every entry is generated from an explicit, unique name —
@@ -313,7 +347,8 @@ const GLOBAL_NAMES = new Set<string>();
 
 function makeSet(spec: SetSpec): AssetItem[] {
   const out: AssetItem[] = [];
-  spec.names.forEach((entry, i) => {
+  expandNames(spec.names, spec.target).forEach((entry, i) => {
+
     const name = Array.isArray(entry) ? entry[0] : entry;
     const fx = Array.isArray(entry) ? entry[1] : spec.fx;
     const key = name.trim().toLowerCase();

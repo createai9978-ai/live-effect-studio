@@ -85,6 +85,22 @@ export default function AssetBrowser({
     "neural-fx": true,
   });
   const [hovered, setHovered] = useState<string | null>(null);
+  const [showSuggest, setShowSuggest] = useState(false);
+  // Live auto-suggestions across the entire catalog.
+  const suggestions = useMemo<AssetItem[]>(() => {
+    const q = deferredGlobalQuery.trim();
+    if (q.length < 2) return [];
+    const pool = [
+      ...allItemsForTab("effects"),
+      ...allItemsForTab("filters"),
+      ...allItemsForTab("transitions"),
+      ...allItemsForTab("titles"),
+      ...allItemsForTab("stickers"),
+      ...allItemsForTab("templates"),
+    ];
+    return searchAssets(pool, q, new Set<string>()).slice(0, 7);
+  }, [deferredGlobalQuery]);
+
 
   const handleHover = (id: string | null) => {
     setHovered(id);

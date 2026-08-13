@@ -789,10 +789,9 @@ function BrowserContent({
           <div className="text-[10.5px] text-zinc-600">Try a different keyword or clear the active tag filters</div>
         </div>
       ) : (
-        <div className={cn("grid gap-4 pb-6", cols)}>
-          {shown.map((it) => {
-
-            return (
+        <>
+          <div className={cn("grid gap-4 pb-6", cols)}>
+            {page.map((it) => (
               <AssetCard
                 key={`browser-content-${it.id}`}
                 item={it}
@@ -805,10 +804,24 @@ function BrowserContent({
                 onToggleFavorite={() => onToggleFavorite(it.id)}
                 size={thumbSize}
               />
-            );
-          })}
-        </div>
+            ))}
+          </div>
+          {visible < shown.length && (
+            <div className="flex flex-col items-center gap-2 pb-8">
+              <button
+                onClick={() => setVisible((v) => v + PAGE * 2)}
+                className="rounded-xl bg-gradient-to-r from-[#00E5FF]/20 to-[#8A2BE2]/25 px-5 py-2 text-[12px] font-medium text-zinc-100 ring-1 ring-white/10 backdrop-blur transition hover:from-[#00E5FF]/30 hover:to-[#8A2BE2]/40 hover:ring-[#00E5FF]/40"
+              >
+                Load more presets
+              </button>
+              <span className="text-[10.5px] text-zinc-500">
+                Showing {page.length} of {shown.length}
+              </span>
+            </div>
+          )}
+        </>
       )}
+
     </>
   );
 }

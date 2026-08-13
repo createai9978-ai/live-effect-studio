@@ -163,7 +163,7 @@ export default function HomeScreen({
 
         <div className="mx-auto max-w-[1180px] px-6 py-6">
           {/* hero row */}
-          <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+          <div className="grid gap-4 lg:grid-cols-[1fr_1.5fr]">
             <button
               onClick={() => onCreateProject(ratio)}
               className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#00E5FF] via-[#3AA7FF] to-[#8A2BE2] p-8 text-left shadow-2xl shadow-cyan-500/10 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:scale-[1.01]"

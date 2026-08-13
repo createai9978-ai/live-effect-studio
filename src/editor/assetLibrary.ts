@@ -405,7 +405,7 @@ function dedupe(items: AssetItem[]): AssetItem[] {
 /* ---------- Suite A — Cinema Grade ---------- */
 
 const cgSignature = makeSet({
-  prefix: "cg-sig", glyph: "star", tag: "GRADE",
+  prefix: "cg-sig", target: 120, glyph: "star", tag: "GRADE",
   gradient: ["#0b1220", "#2563eb"],
   tags: ["cinematic", "travel", "corporate"],
   names: [
@@ -419,7 +419,7 @@ const cgSignature = makeSet({
 });
 
 const cgLight = makeSet({
-  prefix: "cg-light", glyph: "flare", tag: "LIGHT",
+  prefix: "cg-light", target: 160, glyph: "flare", tag: "LIGHT",
   gradient: ["#3b0764", "#f59e0b"],
   tags: ["cinematic", "wedding", "music"],
   names: [
@@ -432,7 +432,7 @@ const cgLight = makeSet({
 });
 
 const cgAtmosphere = makeSet({
-  prefix: "cg-atmo", glyph: "leak", tag: "ATMOS",
+  prefix: "cg-atmo", target: 40, glyph: "leak", tag: "ATMOS",
   gradient: ["#082f49", "#22d3ee"],
   tags: ["cinematic", "travel", "wedding"],
   names: [
@@ -445,7 +445,7 @@ const cgAtmosphere = makeSet({
 });
 
 const cgTexture = makeSet({
-  prefix: "cg-tex", glyph: "film", tag: "TEXTURE",
+  prefix: "cg-tex", target: 60, glyph: "film", tag: "TEXTURE",
   gradient: ["#1c1917", "#a8a29e"],
   tags: ["retro", "cinematic", "minimal"],
   names: [
@@ -460,7 +460,7 @@ const cinemaAll = dedupe([...cgSignature, ...cgLight, ...cgAtmosphere, ...cgText
 /* ---------- Suite B — Motion Lab ---------- */
 
 const mlTransitions = makeSet({
-  prefix: "ml-trans", glyph: "wipe", tag: "TRANSITION",
+  prefix: "ml-trans", target: 100, glyph: "wipe", tag: "TRANSITION",
   gradient: ["#0c4a6e", "#38bdf8"],
   tags: ["music", "gaming", "travel"],
   names: [
@@ -473,7 +473,7 @@ const mlTransitions = makeSet({
 });
 
 const mlCamera = makeSet({
-  prefix: "ml-cam", glyph: "zoomin", tag: "CAMERA",
+  prefix: "ml-cam", target: 80, glyph: "zoomin", tag: "CAMERA",
   gradient: ["#111827", "#60a5fa"],
   tags: ["cinematic", "vlog", "gaming"],
   names: [
@@ -485,7 +485,7 @@ const mlCamera = makeSet({
 });
 
 const mlTime = makeSet({
-  prefix: "ml-time", glyph: "trend", tag: "SPEED",
+  prefix: "ml-time", target: 70, glyph: "trend", tag: "SPEED",
   gradient: ["#064e3b", "#10b981"],
   tags: ["music", "gaming", "vlog"],
   names: [
@@ -497,7 +497,7 @@ const mlTime = makeSet({
 });
 
 const mlType = makeSet({
-  prefix: "ml-type", glyph: "text", tag: "TYPE",
+  prefix: "ml-type", target: 90, glyph: "text", tag: "TYPE",
   gradient: ["#1e1b4b", "#818cf8"],
   tags: ["corporate", "music", "vlog"],
   names: [
@@ -513,7 +513,7 @@ const motionAll = dedupe([...mlTransitions, ...mlCamera, ...mlTime, ...mlType]);
 /* ---------- Suite C — Neural FX ---------- */
 
 const nxSubject = makeSet({
-  prefix: "nx-sub", glyph: "portrait", tag: "AI", ai: true,
+  prefix: "nx-sub", target: 45, glyph: "portrait", tag: "AI", ai: true,
   gradient: ["#2e1065", "#a855f7"],
   tags: ["ai", "music", "vlog"],
   names: [
@@ -525,7 +525,7 @@ const nxSubject = makeSet({
 });
 
 const nxDepth = makeSet({
-  prefix: "nx-depth", glyph: "orbit", tag: "DEPTH", ai: true,
+  prefix: "nx-depth", target: 35, glyph: "orbit", tag: "DEPTH", ai: true,
   gradient: ["#083344", "#06b6d4"],
   tags: ["ai", "cinematic", "travel"],
   names: [
@@ -536,7 +536,7 @@ const nxDepth = makeSet({
 });
 
 const nxAudio = makeSet({
-  prefix: "nx-audio", glyph: "wave", tag: "REACTIVE", ai: true,
+  prefix: "nx-audio", target: 30, glyph: "wave", tag: "REACTIVE", ai: true,
   gradient: ["#4a044e", "#e879f9"],
   tags: ["music", "gaming", "ai"],
   names: [
@@ -547,7 +547,7 @@ const nxAudio = makeSet({
 });
 
 const nxStylize = makeSet({
-  prefix: "nx-style", glyph: "vhs", tag: "STYLIZE",
+  prefix: "nx-style", target: 40, glyph: "vhs", tag: "STYLIZE",
   gradient: ["#4c1d95", "#8b5cf6"],
   tags: ["retro", "gaming", "ai"],
   names: [
@@ -563,7 +563,7 @@ const neuralAll = dedupe([...nxSubject, ...nxDepth, ...nxAudio, ...nxStylize]);
 /* ---------- Suite D — Visual FX (real image-altering primitives) ---------- */
 
 const vfxBlur = makeSet({
-  prefix: "vfx-blur", glyph: "bokeh", tag: "BLUR",
+  prefix: "vfx-blur", target: 80, glyph: "bokeh", tag: "BLUR",
   gradient: ["#0f172a", "#64748b"],
   tags: ["cinematic", "minimal", "corporate"],
   names: [
@@ -579,7 +579,7 @@ const vfxBlur = makeSet({
 });
 
 const vfxDistort = makeSet({
-  prefix: "vfx-dist", glyph: "shake", tag: "DISTORT",
+  prefix: "vfx-dist", target: 80, glyph: "shake", tag: "DISTORT",
   gradient: ["#1e1b4b", "#f43f5e"],
   tags: ["gaming", "music", "vlog"],
   names: [
@@ -595,7 +595,7 @@ const vfxDistort = makeSet({
 });
 
 const vfxGlitch = makeSet({
-  prefix: "vfx-glitch", glyph: "vhs", tag: "GLITCH",
+  prefix: "vfx-glitch", target: 80, glyph: "vhs", tag: "GLITCH",
   gradient: ["#4c1d95", "#22d3ee"],
   tags: ["gaming", "retro", "music"],
   names: [
@@ -611,7 +611,7 @@ const vfxGlitch = makeSet({
 });
 
 const vfxLight = makeSet({
-  prefix: "vfx-light", glyph: "flare", tag: "LIGHT FX",
+  prefix: "vfx-light", target: 80, glyph: "flare", tag: "LIGHT FX",
   gradient: ["#7c2d12", "#fbbf24"],
   tags: ["cinematic", "wedding", "travel"],
   names: [
@@ -706,7 +706,7 @@ export const EFFECTS_TREE: EffectCategory[] = [
 
 /* ---------- FILTERS ---------- */
 const fltBasic = makeSet({
-  prefix: "flt-basic", glyph: "star", tag: "FILTER", kind: "grade", fx: "colorGrade",
+  prefix: "flt-basic", target: 40, glyph: "star", tag: "FILTER", kind: "grade", fx: "colorGrade",
   gradient: ["#0f172a", "#38bdf8"], tags: ["minimal", "vlog"],
   names: [
     "AI Colour Enhance", "AI White Balance", "Sunny Days", "Teal & Orange",
@@ -714,44 +714,44 @@ const fltBasic = makeSet({
   ],
 });
 const fltMono = makeSet({
-  prefix: "flt-mono", glyph: "film", tag: "MONO", kind: "grade", fx: "colorGrade",
+  prefix: "flt-mono", target: 30, glyph: "film", tag: "MONO", kind: "grade", fx: "colorGrade",
   gradient: ["#0a0a0a", "#a8a29e"], tags: ["cinematic", "minimal"],
   names: ["Noir High Contrast", "Silver Print Mono", "Charcoal Fade Mono", "Ink Wash Mono", "Platinum Soft Mono", "Street Grit Mono"],
 });
 const fltCinematic = makeSet({
-  prefix: "flt-cine", glyph: "star", tag: "CINEMATIC", kind: "grade", fx: "colorGrade",
+  prefix: "flt-cine", target: 36, glyph: "star", tag: "CINEMATIC", kind: "grade", fx: "colorGrade",
   gradient: ["#0f172a", "#f59e0b"], tags: ["cinematic"],
   names: ["Moody Dark Teal", "Bleach Bypass Steel", "Blockbuster Amber", "Cold Thriller Blue", "Desaturated Drama", "Anamorphic Night"],
 });
 const fltPortrait = makeSet({
-  prefix: "flt-port", glyph: "beauty", tag: "PORTRAIT", kind: "grade", fx: "colorGrade",
+  prefix: "flt-port", target: 25, glyph: "beauty", tag: "PORTRAIT", kind: "grade", fx: "colorGrade",
   gradient: ["#3f1d38", "#fbcfe8"], tags: ["wedding", "vlog"],
   names: ["Clean Natural Skin", "Soft Beauty Glow Tone", "Studio Ivory Portrait", "Warm Editorial Skin", "Matte Fashion Portrait"],
 });
 const fltSummer = makeSet({
-  prefix: "flt-sum", glyph: "flare", tag: "SUMMER", kind: "grade", fx: "colorGrade",
+  prefix: "flt-sum", target: 25, glyph: "flare", tag: "SUMMER", kind: "grade", fx: "colorGrade",
   gradient: ["#0369a1", "#fde68a"], tags: ["travel"],
   names: ["Coral Beach Summer", "Tropical Aqua Pop", "Golden Hour Warmth", "Poolside Bright", "Sun Kissed Sand"],
 });
 const fltLifestyle = makeSet({
-  prefix: "flt-life", glyph: "star", tag: "LIFESTYLE", kind: "grade", fx: "colorGrade",
+  prefix: "flt-life", target: 25, glyph: "star", tag: "LIFESTYLE", kind: "grade", fx: "colorGrade",
   gradient: ["#1f2937", "#f9a8d4"], tags: ["vlog", "minimal"],
   names: ["Soft Pastel Dream", "Cafe Morning Tone", "Urban Everyday", "Nordic Cool Mist", "Muted Journal"],
 });
 const fltValentine = makeSet({
-  prefix: "flt-val", glyph: "sparkle", tag: "VALENTINE", kind: "grade", fx: "colorGrade",
+  prefix: "flt-val", target: 20, glyph: "sparkle", tag: "VALENTINE", kind: "grade", fx: "colorGrade",
   gradient: ["#4c0519", "#fb7185"], tags: ["wedding"],
   names: ["Rose Blush Romance", "Candlelit Crimson", "Soft Pink Diffusion", "Velvet Love Tone"],
 });
 const fltRetro = makeSet({
-  prefix: "flt-retro", glyph: "vhs", tag: "RETRO", kind: "grade", fx: "colorGrade",
+  prefix: "flt-retro", target: 30, glyph: "vhs", tag: "RETRO", kind: "grade", fx: "colorGrade",
   gradient: ["#3b0764", "#f472b6"], tags: ["retro"],
   names: ["Vintage Film Fade", "Retro VHS Colour", "Faded Polaroid", "Cyber Magenta Wash", "Super 8 Sunwash", "Tokyo Night Neon"],
 });
 
 /* ---------- TRANSITIONS ---------- */
 const trnTrending = makeSet({
-  prefix: "trn-trend", glyph: "wipe", tag: "TRENDING",
+  prefix: "trn-trend", target: 30, glyph: "wipe", tag: "TRENDING",
   gradient: ["#0c4a6e", "#38bdf8"], tags: ["music", "gaming"],
   names: [
     ["Tropical Waves Sweep", "transitionWarp"],
@@ -762,7 +762,7 @@ const trnTrending = makeSet({
   ],
 });
 const trnFade = makeSet({
-  prefix: "trn-fade", glyph: "wipe", tag: "FADE",
+  prefix: "trn-fade", target: 25, glyph: "wipe", tag: "FADE",
   gradient: ["#111827", "#94a3b8"], tags: ["cinematic"],
   names: [
     ["Fade To Black", "transitionWarp"],
@@ -773,7 +773,7 @@ const trnFade = makeSet({
   ],
 });
 const trnZoom = makeSet({
-  prefix: "trn-zoom", glyph: "zoomin", tag: "ZOOM",
+  prefix: "trn-zoom", target: 24, glyph: "zoomin", tag: "ZOOM",
   gradient: ["#1e1b4b", "#818cf8"], tags: ["gaming", "music"],
   names: [
     ["Zoom In Punch", "zoomPulse"],
@@ -783,7 +783,7 @@ const trnZoom = makeSet({
   ],
 });
 const trnSlides = makeSet({
-  prefix: "trn-slide", glyph: "wipe", tag: "SLIDE",
+  prefix: "trn-slide", target: 25, glyph: "wipe", tag: "SLIDE",
   gradient: ["#0f172a", "#22d3ee"], tags: ["corporate", "travel"],
   names: [
     ["Slide Left Push", "directionalBlur"],
@@ -794,7 +794,7 @@ const trnSlides = makeSet({
   ],
 });
 const trnPremium = makeSet({
-  prefix: "trn-prem", glyph: "sparkle", tag: "PREMIUM",
+  prefix: "trn-prem", target: 24, glyph: "sparkle", tag: "PREMIUM",
   gradient: ["#3b0764", "#fbbf24"], tags: ["wedding", "cinematic"],
   names: [
     ["Luxury Light Burst", "glow"],
@@ -804,7 +804,7 @@ const trnPremium = makeSet({
   ],
 });
 const trn3D = makeSet({
-  prefix: "trn-3d", glyph: "wipe", tag: "3D",
+  prefix: "trn-3d", target: 20, glyph: "wipe", tag: "3D",
   gradient: ["#082f49", "#60a5fa"], tags: ["corporate", "gaming"],
   names: [
     ["Cube Rotate 3D", "transitionWarp"],
@@ -814,7 +814,7 @@ const trn3D = makeSet({
   ],
 });
 const trnFilmBurn = makeSet({
-  prefix: "trn-burn", glyph: "leak", tag: "FILM BURN",
+  prefix: "trn-burn", target: 20, glyph: "leak", tag: "FILM BURN",
   gradient: ["#7c2d12", "#fbbf24"], tags: ["retro", "cinematic"],
   names: [
     ["Film Burn Roll", "lightLeakFx"],
@@ -824,7 +824,7 @@ const trnFilmBurn = makeSet({
   ],
 });
 const trnGlitchCat = makeSet({
-  prefix: "trn-glitch", glyph: "vhs", tag: "GLITCH",
+  prefix: "trn-glitch", target: 25, glyph: "vhs", tag: "GLITCH",
   gradient: ["#4c1d95", "#22d3ee"], tags: ["gaming", "retro"],
   names: [
     ["Glitch Cut Transition", "glitchBlock"],
@@ -837,81 +837,81 @@ const trnGlitchCat = makeSet({
 
 /* ---------- TITLES ---------- */
 const ttlTrending = makeSet({
-  prefix: "ttl-trend", glyph: "text", tag: "TRENDING", fx: "textMotion",
+  prefix: "ttl-trend", target: 30, glyph: "text", tag: "TRENDING", fx: "textMotion",
   gradient: ["#1e1b4b", "#818cf8"], tags: ["music", "vlog"],
   names: ["Wintertime Frost Title", "Infernal Wild Metal Title", "Melting Candle Script", "Neon Graffiti Title", "Voltage Surge Title", "Groovy Disco Title"],
 });
 const ttlCaptions = makeSet({
-  prefix: "ttl-cap", glyph: "text", tag: "CAPTIONS", fx: "textMotion",
+  prefix: "ttl-cap", target: 30, glyph: "text", tag: "CAPTIONS", fx: "textMotion",
   gradient: ["#0f172a", "#22d3ee"], tags: ["vlog", "music"],
   names: ["Auto Caption Karaoke", "Word Pop Caption", "Bold Subtitle Bar", "Highlight Word Caption", "Bounce Caption Stack"],
 });
 const ttlLowerThirds = makeSet({
-  prefix: "ttl-lt", glyph: "text", tag: "LOWER THIRD", fx: "textMotion",
+  prefix: "ttl-lt", target: 30, glyph: "text", tag: "LOWER THIRD", fx: "textMotion",
   gradient: ["#082f49", "#38bdf8"], tags: ["corporate", "minimal"],
   names: ["Clean Lower Third", "Bold Broadcast Lower Third", "Minimal Name Card", "Glass Panel Title", "Social Handle Bar"],
 });
 const ttlLuxury = makeSet({
-  prefix: "ttl-lux", glyph: "sparkle", tag: "LUXURY", fx: "textMotion",
+  prefix: "ttl-lux", target: 20, glyph: "sparkle", tag: "LUXURY", fx: "textMotion",
   gradient: ["#3b0764", "#fbbf24"], tags: ["wedding", "corporate"],
   names: ["Gold Serif Reveal", "Champagne Script Title", "Marble Editorial Title", "Diamond Shine Headline"],
 });
 const ttlTech = makeSet({
-  prefix: "ttl-tech", glyph: "vhs", tag: "TECH", fx: "textMotion",
+  prefix: "ttl-tech", target: 20, glyph: "vhs", tag: "TECH", fx: "textMotion",
   gradient: ["#0b1220", "#22d3ee"], tags: ["gaming", "corporate"],
   names: ["Typewriter Terminal Title", "HUD Data Readout", "Glitch Scramble Title", "Circuit Trace Reveal"],
 });
 const ttlFun = makeSet({
-  prefix: "ttl-fun", glyph: "star", tag: "GRAFFITI & FUN", fx: "textMotion",
+  prefix: "ttl-fun", target: 16, glyph: "star", tag: "GRAFFITI & FUN", fx: "textMotion",
   gradient: ["#4a044e", "#f472b6"], tags: ["vlog", "music"],
   names: ["Spray Tag Pop", "Comic Slam Title", "Sticker Doodle Title", "Bubble Cartoon Title"],
 });
 const ttlSport = makeSet({
-  prefix: "ttl-sport", glyph: "logo", tag: "SPORT", fx: "textMotion",
+  prefix: "ttl-sport", target: 16, glyph: "logo", tag: "SPORT", fx: "textMotion",
   gradient: ["#052e16", "#4ade80"], tags: ["gaming", "corporate"],
   names: ["Stadium Scoreline Title", "Match Day Slam", "Kickoff Countdown Title", "Trophy Reveal Title"],
 });
 
 /* ---------- STICKERS ---------- */
 const stkTrending = makeSet({
-  prefix: "stk-trend", glyph: "sparkle", tag: "TRENDING", fx: "opticalOverlay",
+  prefix: "stk-trend", target: 20, glyph: "sparkle", tag: "TRENDING", fx: "opticalOverlay",
   gradient: ["#4a044e", "#f472b6"], tags: ["vlog", "music"],
   names: ["Sparkle Burst Sticker", "Emoji Reaction Burst", "Fire Emoji Pop", "Confetti Rain Overlay"],
 });
 const stkSubscribe = makeSet({
-  prefix: "stk-sub", glyph: "logo", tag: "SUBSCRIBE", fx: "opticalOverlay",
+  prefix: "stk-sub", target: 16, glyph: "logo", tag: "SUBSCRIBE", fx: "opticalOverlay",
   gradient: ["#7f1d1d", "#fb7185"], tags: ["vlog"],
   names: ["Subscribe Button Pop", "Subscribed Bell Ring", "Follow Button Slide", "Like & Share Bar"],
 });
 const stkArrow = makeSet({
-  prefix: "stk-arrow", glyph: "logo", tag: "ARROW", fx: "opticalOverlay",
+  prefix: "stk-arrow", target: 16, glyph: "logo", tag: "ARROW", fx: "opticalOverlay",
   gradient: ["#7c2d12", "#fb923c"], tags: ["corporate", "vlog"],
   names: ["Curved Hand Arrow", "Straight Pointer Arrow", "Dashed Path Arrow", "Circle Highlight Arrow"],
 });
 const stkLine = makeSet({
-  prefix: "stk-line", glyph: "star", tag: "LINE", fx: "opticalOverlay",
+  prefix: "stk-line", target: 16, glyph: "star", tag: "LINE", fx: "opticalOverlay",
   gradient: ["#0f172a", "#22d3ee"], tags: ["minimal"],
   names: ["Underline Sweep", "Scribble Circle Line", "Divider Draw Line", "Speed Line Frame"],
 });
 const stkParticle = makeSet({
-  prefix: "stk-part", glyph: "leak", tag: "PARTICLE", fx: "opticalOverlay",
+  prefix: "stk-part", target: 20, glyph: "leak", tag: "PARTICLE", fx: "opticalOverlay",
   gradient: ["#082f49", "#a5f3fc"], tags: ["cinematic", "wedding"],
   names: ["Star Twinkle Overlay", "Snow Fall Overlay", "Rain Drop Overlay", "Bokeh Circles Overlay", "Light Dust Overlay"],
 });
 const stkSocial = makeSet({
-  prefix: "stk-social", glyph: "grid", tag: "SOCIAL", fx: "opticalOverlay",
+  prefix: "stk-social", target: 16, glyph: "grid", tag: "SOCIAL", fx: "opticalOverlay",
   gradient: ["#1e1b4b", "#818cf8"], tags: ["vlog", "music"],
   names: ["Story Progress Bar", "Chat Bubble Pop", "Poll Sticker", "Location Tag Sticker"],
 });
 const stkLove = makeSet({
-  prefix: "stk-love", glyph: "sparkle", tag: "LOVE", fx: "opticalOverlay",
+  prefix: "stk-love", target: 16, glyph: "sparkle", tag: "LOVE", fx: "opticalOverlay",
   gradient: ["#4c0519", "#fda4af"], tags: ["wedding"],
   names: ["Heart Float Overlay", "Kiss Mark Pop", "Love Frame Border", "Petal Drift Hearts"],
 });
 
 /* ---------- TEMPLATES ---------- */
 const tplTrending = makeSet({
-  prefix: "tpl-trend", glyph: "grid", tag: "TRENDING",
+  prefix: "tpl-trend", target: 20, glyph: "grid", tag: "TRENDING",
   gradient: ["#7f1d1d", "#fb7185"], tags: ["vlog", "music"],
   names: [
     ["Minimalist Thanks End Screen", "textMotion"],
@@ -922,7 +922,7 @@ const tplTrending = makeSet({
   ],
 });
 const tplLogo = makeSet({
-  prefix: "tpl-logo", glyph: "sparkle", tag: "LOGO", 
+  prefix: "tpl-logo", target: 16, glyph: "sparkle", tag: "LOGO", 
   gradient: ["#0b1220", "#60a5fa"], tags: ["corporate"],
   names: [
     ["Particle Logo Reveal", "glow"],
@@ -932,7 +932,7 @@ const tplLogo = makeSet({
   ],
 });
 const tplExclusive = makeSet({
-  prefix: "tpl-excl", glyph: "star", tag: "EXCLUSIVE",
+  prefix: "tpl-excl", target: 16, glyph: "star", tag: "EXCLUSIVE",
   gradient: ["#3b0764", "#fbbf24"], tags: ["cinematic", "corporate"],
   names: [
     ["Cinematic Trailer Kit", "directionalBlur"],
@@ -942,7 +942,7 @@ const tplExclusive = makeSet({
   ],
 });
 const tplTravel = makeSet({
-  prefix: "tpl-travel", glyph: "pan", tag: "TRAVEL",
+  prefix: "tpl-travel", target: 12, glyph: "pan", tag: "TRAVEL",
   gradient: ["#083344", "#22d3ee"], tags: ["travel"],
   names: [
     ["Travel Vlog Opener", "zoomPulse"],
@@ -951,7 +951,7 @@ const tplTravel = makeSet({
   ],
 });
 const tplGallery = makeSet({
-  prefix: "tpl-gal", glyph: "grid", tag: "GALLERY",
+  prefix: "tpl-gal", target: 12, glyph: "grid", tag: "GALLERY",
   gradient: ["#1c1917", "#a8a29e"], tags: ["wedding", "minimal"],
   names: [
     ["Wedding Story Reel", "glow"],
@@ -960,7 +960,7 @@ const tplGallery = makeSet({
   ],
 });
 const tplSubscribe = makeSet({
-  prefix: "tpl-sub", glyph: "grid", tag: "SUBSCRIBE",
+  prefix: "tpl-sub", target: 16, glyph: "grid", tag: "SUBSCRIBE",
   gradient: ["#4a044e", "#f472b6"], tags: ["vlog", "gaming"],
   names: [
     ["Subscribe Outro Kit", "textMotion"],
@@ -1044,7 +1044,7 @@ export const TEMPLATES: AssetItem[] = flat("templates");
 
 /** Royalty-free stock footage & photos (live preview clips resolve per id). */
 export const STOCK: AssetItem[] = makeSet({
-  prefix: "stock", glyph: "film", tag: "STOCK", kind: "media",
+  prefix: "stock", target: 48, glyph: "film", tag: "STOCK", kind: "media",
   gradient: ["#083344", "#22d3ee"],
   tags: ["travel", "cinematic", "corporate", "minimal"],
   names: [

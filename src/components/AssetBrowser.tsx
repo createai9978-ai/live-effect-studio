@@ -85,6 +85,22 @@ export default function AssetBrowser({
     "neural-fx": true,
   });
   const [hovered, setHovered] = useState<string | null>(null);
+  const [showSuggest, setShowSuggest] = useState(false);
+  // Live auto-suggestions across the entire catalog.
+  const suggestions = useMemo<AssetItem[]>(() => {
+    const q = deferredGlobalQuery.trim();
+    if (q.length < 2) return [];
+    const pool = [
+      ...allItemsForTab("effects"),
+      ...allItemsForTab("filters"),
+      ...allItemsForTab("transitions"),
+      ...allItemsForTab("titles"),
+      ...allItemsForTab("stickers"),
+      ...allItemsForTab("templates"),
+    ];
+    return searchAssets(pool, q, new Set<string>()).slice(0, 7);
+  }, [deferredGlobalQuery]);
+
 
   const handleHover = (id: string | null) => {
     setHovered(id);
@@ -157,17 +173,22 @@ export default function AssetBrowser({
           <span className="text-[12px] font-semibold text-zinc-100">Asset Library</span>
         </div>
 
-        {/* Sleek command-palette-style search bar */}
+        {/* Sleek command-palette-style search bar with live suggestions */}
         <div className="relative mx-auto w-full max-w-2xl">
-          <div className="flex items-center gap-2 rounded-xl bg-black/45 px-3.5 py-2 shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_8px_24px_-12px_rgba(139,92,246,0.5)] ring-1 ring-white/[0.07] transition focus-within:shadow-[0_0_0_1px_rgba(217,70,239,0.35),0_10px_32px_-10px_rgba(217,70,239,0.55)] focus-within:ring-fuchsia-400/50">
-            <svg className="h-4 w-4 shrink-0 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+          <div className="flex items-center gap-2 rounded-xl bg-black/45 px-3.5 py-2 shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_8px_24px_-12px_rgba(139,92,246,0.5)] ring-1 ring-white/[0.07] transition focus-within:shadow-[0_0_0_1px_rgba(0,229,255,0.35),0_10px_32px_-10px_rgba(0,229,255,0.45)] focus-within:ring-cyan-400/50">
+            <svg className="h-4 w-4 shrink-0 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
               <circle cx="11" cy="11" r="7" />
               <path d="M21 21l-4.35-4.35" />
             </svg>
             <input
               autoFocus
               value={globalQuery}
-              onChange={(e) => setGlobalQuery(e.target.value)}
+              onChange={(e) => {
+                setGlobalQuery(e.target.value);
+                setShowSuggest(true);
+              }}
+              onFocus={() => setShowSuggest(true)}
+              onBlur={() => window.setTimeout(() => setShowSuggest(false), 120)}
               placeholder="Search effects, transitions, filters, titles… or type a tag like  cinematic"
               className="flex-1 bg-transparent text-[13px] text-zinc-100 outline-none placeholder-zinc-500"
             />
@@ -191,7 +212,30 @@ export default function AssetBrowser({
               </button>
             )}
           </div>
+
+          {showSuggest && suggestions.length > 0 && (
+            <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 overflow-hidden rounded-xl border border-white/[0.08] bg-[#141824]/95 shadow-2xl shadow-black/50 backdrop-blur-xl">
+              {suggestions.map((s) => (
+                <button
+                  key={s.id}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setGlobalQuery(s.name);
+                    setShowSuggest(false);
+                  }}
+                  className="nova-suggest-item flex w-full items-center gap-2.5 px-3.5 py-2 text-left transition hover:bg-white/[0.06]"
+                >
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300 shadow-[0_0_6px] shadow-cyan-300/70" />
+                  <span className="flex-1 truncate text-[12px] text-zinc-200">{s.name}</span>
+                  <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-zinc-400">
+                    {s.tag ?? "preset"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
+
 
         <div className="flex shrink-0 items-center gap-2">
           <button className="hidden items-center gap-1 rounded-md border border-white/[0.08] px-2 py-1 text-[10px] text-zinc-400 transition hover:bg-white/[0.05] sm:flex">
@@ -716,6 +760,14 @@ function BrowserContent({
   }, [filtered.length, query, activeTags, tab]);
   const shown = widened ?? filtered;
 
+  // Catalog collections run into the hundreds — render them in pages so the
+  // grid (and its live video previews) stays buttery smooth.
+  const PAGE = 60;
+  const [visible, setVisible] = useState(PAGE);
+  useEffect(() => setVisible(PAGE), [tab, activeCat, query, activeTags]);
+  const page = shown.slice(0, visible);
+
+
   if (tab === "media") {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
@@ -781,10 +833,9 @@ function BrowserContent({
           <div className="text-[10.5px] text-zinc-600">Try a different keyword or clear the active tag filters</div>
         </div>
       ) : (
-        <div className={cn("grid gap-4 pb-6", cols)}>
-          {shown.map((it) => {
-
-            return (
+        <>
+          <div className={cn("grid gap-4 pb-6", cols)}>
+            {page.map((it) => (
               <AssetCard
                 key={`browser-content-${it.id}`}
                 item={it}
@@ -797,10 +848,24 @@ function BrowserContent({
                 onToggleFavorite={() => onToggleFavorite(it.id)}
                 size={thumbSize}
               />
-            );
-          })}
-        </div>
+            ))}
+          </div>
+          {visible < shown.length && (
+            <div className="flex flex-col items-center gap-2 pb-8">
+              <button
+                onClick={() => setVisible((v) => v + PAGE * 2)}
+                className="rounded-xl bg-gradient-to-r from-[#00E5FF]/20 to-[#8A2BE2]/25 px-5 py-2 text-[12px] font-medium text-zinc-100 ring-1 ring-white/10 backdrop-blur transition hover:from-[#00E5FF]/30 hover:to-[#8A2BE2]/40 hover:ring-[#00E5FF]/40"
+              >
+                Load more presets
+              </button>
+              <span className="text-[10.5px] text-zinc-500">
+                Showing {page.length} of {shown.length}
+              </span>
+            </div>
+          )}
+        </>
       )}
+
     </>
   );
 }
@@ -1337,7 +1402,7 @@ function GlobalSearchResults({
             <span className="text-[9px] text-zinc-600">{g.items.length}</span>
           </div>
           <div className={cn("grid gap-3", gridColsFor("effects", thumbSize))}>
-            {g.items.map((it) => (
+            {g.items.slice(0, 36).map((it) => (
               <AssetCard
                 key={it.id}
                 item={it}

@@ -1358,7 +1358,7 @@ function GlobalSearchResults({
             <span className="text-[9px] text-zinc-600">{g.items.length}</span>
           </div>
           <div className={cn("grid gap-3", gridColsFor("effects", thumbSize))}>
-            {g.items.map((it) => (
+            {g.items.slice(0, 36).map((it) => (
               <AssetCard
                 key={it.id}
                 item={it}

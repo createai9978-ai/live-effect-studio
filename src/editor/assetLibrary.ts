@@ -455,7 +455,7 @@ const cgTexture = makeSet({
   ],
 });
 
-const cinemaAll = dedupe([...cgSignature, ...cgLight, ...cgAtmosphere, ...cgTexture]);
+void cgSignature;
 
 /* ---------- Suite B — Motion Lab ---------- */
 

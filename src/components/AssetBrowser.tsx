@@ -528,7 +528,7 @@ function EffectsSidebar({
   onToggleExpand: (id: string) => void;
 }) {
   return (
-    <aside className="flex w-[240px] shrink-0 flex-col border-r border-white/[0.06] bg-[#10141F]">
+    <aside className="flex w-[240px] shrink-0 flex-col border-r border-white/[0.06] bg-[#10141F]/80 backdrop-blur-xl">
       <div className="border-b border-white/[0.05] p-3">
         <div className="flex items-center gap-2 rounded-md bg-black/40 px-2 py-1.5 ring-1 ring-white/[0.06] focus-within:ring-violet-500/50">
           <svg className="h-3 w-3 text-zinc-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">

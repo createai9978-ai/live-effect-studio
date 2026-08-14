@@ -628,44 +628,188 @@ const vfxLight = makeSet({
 
 const visualAll = dedupe([...vfxBlur, ...vfxDistort, ...vfxGlitch, ...vfxLight]);
 
-/* ================= EFFECTS TREE ================= */
+/* ---------- Suite E — Light & Lens Flares (dedicated optics collection) ---------- */
+
+const lensFlares = makeSet({
+  prefix: "lens-flare", target: 90, glyph: "flare", tag: "FLARE",
+  gradient: ["#312e81", "#f472b6"],
+  tags: ["cinematic", "music", "wedding"],
+  names: [
+    ["Anamorphic 2x Streak Optic", "glow"],
+    ["Cooke Warm Veiling Flare", "glow"],
+    ["Helios Swirl Bokeh Optic", "glow"],
+    ["Petzval Ring Flare", "glow"],
+    ["Hexagonal Iris Ghosting", "lightLeakFx"],
+    ["Solar Corona Burst Optic", "glow"],
+    ["Streetlamp Halation Optic", "glow"],
+    ["Prismatic Edge Dispersion", "chromaticAberration"],
+    ["Rainbow Refraction Sweep", "chromaticAberration"],
+    ["Stage Spotlight Shaft", "lightLeakFx"],
+    ["Headlight Glare Wash", "glow"],
+    ["Diamond Sparkle Highlight", "glow"],
+    ["Cine Star 8-Point Filter", "glow"],
+    ["Lantern Warm Halo Optic", "glow"],
+    ["Cyan Streak Night Optic", "glow"],
+    ["Backlit Hair Rim Bloom", "glow"],
+    ["Fresnel Beam Fall-Off", "lightLeakFx"],
+    ["Aperture Blade Ghost Trail", "lightLeakFx"],
+  ],
+});
+
+/* ---------- Suite F — VHS Glitch (tape + signal damage) ---------- */
+
+const vhsGlitchSet = makeSet({
+  prefix: "vhs-glitch", target: 90, glyph: "vhs", tag: "VHS",
+  gradient: ["#1e1b4b", "#22d3ee"],
+  tags: ["retro", "gaming", "music"],
+  names: [
+    ["VHS Tracking Error Roll", "vhs"],
+    ["Head Switching Noise Bar", "vhs"],
+    ["Betamax Chroma Bleed", "vhs"],
+    ["Broadcast Dropout Static", "glitchBlock"],
+    ["Analog Tape Warble Warp", "vhs"],
+    ["CRT Curvature Scanline", "vhs"],
+    ["Interlace Comb Tear", "glitchBlock"],
+    ["Signal Loss Snow Burst", "glitchBlock"],
+    ["Datamosh Pixel Bloom", "glitchBlock"],
+    ["Chroma Key Ghost Echo", "rgbSplit"],
+    ["RGB Misregistration Drift", "rgbSplit"],
+    ["Macroblock Compression Crush", "glitchBlock"],
+    ["Sync Roll Vertical Slip", "glitchBlock"],
+    ["Camcorder Timestamp Jitter", "vhs"],
+    ["Corrupted Frame Stutter", "glitchBlock"],
+    ["Neon Cyber Signal Bleed", "rgbSplit"],
+    ["Tape Rewind Streak Smear", "directionalBlur"],
+    ["Static Shock Flash Cut", "glitchBlock"],
+  ],
+});
+
+/* ---------- Suite G — Film Grain (emulsion + texture) ---------- */
+
+const filmGrainSet = makeSet({
+  prefix: "film-grain", target: 70, glyph: "film", tag: "GRAIN",
+  gradient: ["#1c1917", "#d6d3d1"],
+  tags: ["cinematic", "retro", "minimal"],
+  names: [
+    ["Kodak 5219 Fine Grain", "grain"],
+    ["Kodak 5207 Daylight Grain", "grain"],
+    ["Fuji 8543 Soft Grain", "grain"],
+    ["Ilford HP5 Push Grain", "grain"],
+    ["Tri-X 400 Coarse Grain", "grain"],
+    ["16mm Reversal Grain Plate", "grain"],
+    ["Super 8 Chunk Grain", "grain"],
+    ["65mm Ultra Fine Grain", "grain"],
+    ["Dupe Negative Grain Wash", "grain"],
+    ["Silver Halide Sparkle", "grain"],
+    ["Projector Gate Weave Grain", "grain"],
+    ["Print Emulsion Speckle", "grain"],
+    ["Low Light ISO Noise Plate", "grain"],
+    ["Digital Sensor Fixed Noise", "grain"],
+    ["Vintage Archive Dust Grain", "grain"],
+    ["Halation Grain Blend", "grain"],
+  ],
+});
+
+/* ---------- Suite H — Atmospheric FX (weather, particles, air) ---------- */
+
+const atmosphericSet = makeSet({
+  prefix: "atmo-fx", target: 70, glyph: "leak", tag: "ATMOSPHERE",
+  gradient: ["#0c4a6e", "#94a3b8"],
+  tags: ["cinematic", "travel", "wedding"],
+  names: [
+    ["Low Ground Mist Layer", "glow"],
+    ["Heavy Storm Rain Sheet", "grain"],
+    ["Drizzle Window Beads", "grain"],
+    ["Blizzard Snow Drive", "grain"],
+    ["Soft Snowfall Depth Layer", "grain"],
+    ["Sandstorm Grit Wall", "grain"],
+    ["Volcanic Ember Swarm", "glow"],
+    ["Campfire Spark Rise", "glow"],
+    ["Dust Motes Sunbeam", "glow"],
+    ["Ocean Spray Mist Veil", "glow"],
+    ["Swamp Fog Creep Layer", "glow"],
+    ["Cold Breath Vapour Puff", "glow"],
+    ["Neon Rain Reflection Haze", "glow"],
+    ["Pollen Golden Drift Layer", "glow"],
+    ["Smoke Machine Room Haze", "glow"],
+    ["Aurora Sky Curtain Layer", "glow"],
+  ],
+});
+
+/* ================= EFFECTS TREE =================
+   Seven professional collections, Filmora-Pro style: Cinema Grade,
+   Light & Lens Flares, VHS Glitch, Neural AI FX, Kinetic Motion,
+   Film Grain and Atmospheric FX — plus the core Visual Effects lab.
+   ================================================================= */
+
+const lightAll = dedupe([...lensFlares, ...cgLight, ...vfxLight]);
+const glitchAll = dedupe([...vhsGlitchSet, ...vfxGlitch, ...nxStylize]);
+const grainAll = dedupe([...filmGrainSet, ...cgTexture]);
+const atmoAll = dedupe([...atmosphericSet, ...cgAtmosphere]);
 
 export const EFFECTS_TREE: EffectCategory[] = [
-  {
-    id: "visual-fx",
-    label: "Visual Effects",
-    icon: "glitch",
-    count: visualAll.length,
-    items: visualAll,
-    accent: "#f43f5e",
-    gradient: ["#f43f5e", "#22d3ee"],
-    badge: "FX",
-    children: [
-      { id: "vfx-blur-cat", label: "Blur & Focus", icon: "distort", count: vfxBlur.length, items: vfxBlur, accent: "#94a3b8", badge: "BLUR" },
-      { id: "vfx-distort-cat", label: "Distort & Shake", icon: "distort", count: vfxDistort.length, items: vfxDistort, accent: "#f43f5e", badge: "WARP" },
-      { id: "vfx-glitch-cat", label: "Glitch & VHS", icon: "glitch", count: vfxGlitch.length, items: vfxGlitch, accent: "#22d3ee", badge: "GLITCH" },
-      { id: "vfx-light-cat", label: "Glow, Grain & Leaks", icon: "lightbulb", count: vfxLight.length, items: vfxLight, accent: "#fbbf24", badge: "LIGHT" },
-    ],
-  },
   {
     id: "cinema-grade",
     label: "Cinema Grade",
     icon: "film",
-    count: cinemaAll.length,
-    items: cinemaAll,
+    count: cgSignature.length,
+    items: cgSignature,
     accent: "#60a5fa",
     gradient: ["#2563eb", "#f59e0b"],
-    badge: "NEW",
+    badge: "LUT",
     children: [
       { id: "cg-signature", label: "Signature Looks", icon: "brush", count: cgSignature.length, items: cgSignature, accent: "#60a5fa", badge: "LUT" },
-      { id: "cg-light", label: "Light & Flares", icon: "lightbulb", count: cgLight.length, items: cgLight, accent: "#f59e0b", badge: "LIGHT" },
-      { id: "cg-atmosphere", label: "Atmosphere", icon: "overlay", count: cgAtmosphere.length, items: cgAtmosphere, accent: "#22d3ee", badge: "FX" },
-      { id: "cg-texture", label: "Film Texture", icon: "film", count: cgTexture.length, items: cgTexture, accent: "#a8a29e", badge: "GRAIN" },
+      { id: "cg-texture", label: "Print & Emulsion", icon: "film", count: cgTexture.length, items: cgTexture, accent: "#a8a29e", badge: "FILM" },
+    ],
+  },
+  {
+    id: "light-flares",
+    label: "Light & Lens Flares",
+    icon: "lightbulb",
+    count: lightAll.length,
+    items: lightAll,
+    accent: "#f59e0b",
+    gradient: ["#f59e0b", "#f472b6"],
+    badge: "OPTIC",
+    children: [
+      { id: "lf-anamorphic", label: "Anamorphic & Streaks", icon: "lightbulb", count: lensFlares.length, items: lensFlares, accent: "#f472b6", badge: "FLARE" },
+      { id: "cg-light", label: "Cinematic Light", icon: "lightbulb", count: cgLight.length, items: cgLight, accent: "#f59e0b", badge: "LIGHT" },
+      { id: "vfx-light-cat", label: "Glow & Leaks", icon: "lightbulb", count: vfxLight.length, items: vfxLight, accent: "#fbbf24", badge: "GLOW" },
+    ],
+  },
+  {
+    id: "vhs-glitch",
+    label: "VHS Glitch",
+    icon: "glitch",
+    count: glitchAll.length,
+    items: glitchAll,
+    accent: "#22d3ee",
+    gradient: ["#4c1d95", "#22d3ee"],
+    badge: "RETRO",
+    children: [
+      { id: "vhs-tape", label: "Tape & Signal", icon: "glitch", count: vhsGlitchSet.length, items: vhsGlitchSet, accent: "#22d3ee", badge: "VHS" },
+      { id: "vfx-glitch-cat", label: "Digital Glitch", icon: "glitch", count: vfxGlitch.length, items: vfxGlitch, accent: "#a855f7", badge: "GLITCH" },
+      { id: "nx-stylize", label: "Stylize & Datamosh", icon: "glitch", count: nxStylize.length, items: nxStylize, accent: "#8b5cf6", badge: "STYLE" },
+    ],
+  },
+  {
+    id: "neural-fx",
+    label: "Neural AI FX",
+    icon: "ai",
+    count: neuralAll.length,
+    items: neuralAll,
+    accent: "#a855f7",
+    gradient: ["#a855f7", "#e879f9"],
+    badge: "AI",
+    children: [
+      { id: "nx-subject", label: "Subject & Body AI", icon: "ai", count: nxSubject.length, items: nxSubject, accent: "#a855f7", badge: "AI" },
+      { id: "nx-depth", label: "Depth & Space", icon: "layers", count: nxDepth.length, items: nxDepth, accent: "#06b6d4", badge: "3D" },
+      { id: "nx-audio", label: "Audio Reactive", icon: "audio", count: nxAudio.length, items: nxAudio, accent: "#e879f9", badge: "SYNC" },
     ],
   },
   {
     id: "motion-lab",
-    label: "Motion Lab",
+    label: "Kinetic Motion",
     icon: "target",
     count: motionAll.length,
     items: motionAll,
@@ -680,22 +824,49 @@ export const EFFECTS_TREE: EffectCategory[] = [
     ],
   },
   {
-    id: "neural-fx",
-    label: "Neural FX",
-    icon: "ai",
-    count: neuralAll.length,
-    items: neuralAll,
-    accent: "#a855f7",
-    gradient: ["#a855f7", "#e879f9"],
-    badge: "AI",
+    id: "film-grain",
+    label: "Film Grain",
+    icon: "film",
+    count: grainAll.length,
+    items: grainAll,
+    accent: "#d6d3d1",
+    gradient: ["#78716c", "#d6d3d1"],
+    badge: "GRAIN",
     children: [
-      { id: "nx-subject", label: "Subject & Body AI", icon: "ai", count: nxSubject.length, items: nxSubject, accent: "#a855f7", badge: "AI" },
-      { id: "nx-depth", label: "Depth & Space", icon: "layers", count: nxDepth.length, items: nxDepth, accent: "#06b6d4", badge: "3D" },
-      { id: "nx-audio", label: "Audio Reactive", icon: "audio", count: nxAudio.length, items: nxAudio, accent: "#e879f9", badge: "SYNC" },
-      { id: "nx-stylize", label: "Stylize & Glitch", icon: "glitch", count: nxStylize.length, items: nxStylize, accent: "#8b5cf6", badge: "STYLE" },
+      { id: "fg-stocks", label: "Film Stocks", icon: "film", count: filmGrainSet.length, items: filmGrainSet, accent: "#d6d3d1", badge: "STOCK" },
+      { id: "fg-texture", label: "Texture Grades", icon: "brush", count: cgTexture.length, items: cgTexture, accent: "#a8a29e", badge: "TEX" },
+    ],
+  },
+  {
+    id: "atmospheric-fx",
+    label: "Atmospheric FX",
+    icon: "overlay",
+    count: atmoAll.length,
+    items: atmoAll,
+    accent: "#7dd3fc",
+    gradient: ["#0284c7", "#94a3b8"],
+    badge: "AIR",
+    children: [
+      { id: "af-weather", label: "Weather & Particles", icon: "overlay", count: atmosphericSet.length, items: atmosphericSet, accent: "#7dd3fc", badge: "WEATHER" },
+      { id: "cg-atmosphere", label: "Haze & Overlays", icon: "overlay", count: cgAtmosphere.length, items: cgAtmosphere, accent: "#22d3ee", badge: "HAZE" },
+    ],
+  },
+  {
+    id: "visual-fx",
+    label: "Visual Effects",
+    icon: "glitch",
+    count: visualAll.length,
+    items: visualAll,
+    accent: "#f43f5e",
+    gradient: ["#f43f5e", "#22d3ee"],
+    badge: "FX",
+    children: [
+      { id: "vfx-blur-cat", label: "Blur & Focus", icon: "distort", count: vfxBlur.length, items: vfxBlur, accent: "#94a3b8", badge: "BLUR" },
+      { id: "vfx-distort-cat", label: "Distort & Shake", icon: "distort", count: vfxDistort.length, items: vfxDistort, accent: "#f43f5e", badge: "WARP" },
     ],
   },
 ];
+
 
 
 /* ================= Standalone library tabs =================

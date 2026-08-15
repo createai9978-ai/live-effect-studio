@@ -975,7 +975,7 @@ function AssetCard({
     }
 
     return result;
-  }, [item.name, item.tag]);
+  }, [item.id, item.name, item.tag]);
 
   const preview = previewStyleFor(item.glyph);
   const renderProgram = useMemo(() => item.renderProgram ?? compileRenderProgram(item), [item]);

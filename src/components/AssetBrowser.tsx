@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { hasAllTags, searchAssets, score, tokenize } from "../editor/assetSearch";
 import { cn } from "../utils/cn";
+import { cssEase, motionSignatureFor, type MotionFlavor } from "../editor/motionEngine";
 import EditableText from "../admin/EditableText";
 import {
   AUDIO_LIB,
@@ -896,24 +897,41 @@ function AssetCard({
 }) {
   const [localHovered, setLocalHovered] = useState(false);
 
-  // Map the effect's name to real-time grades/transforms applied to the looping video.
-  // Deliberately hue-rotation-free: rotations were what pushed warm footage blue.
+  // Map the effect to a *unique* deterministic camera move + grade.
+  // The motion signature is derived from the preset id so no two cards ever
+  // animate identically — no shared template loop, no repeated timing.
   const cardStyles = useMemo(() => {
     const lower = item.name.toLowerCase();
-    const result = { filter: "", transform: "", animateClass: "" };
+    const result = { filter: "", transform: "", animation: "" };
 
-    // Motion character — matches how the real effect behaves on the timeline
-    if (lower.includes("shake") || lower.includes("jitter") || lower.includes("impact") || lower.includes("bounce")) {
-      result.animateClass = "animate-[nova-shake_0.24s_ease-in-out_infinite]";
-    } else if (lower.includes("zoom") || lower.includes("ramp") || lower.includes("curve") || lower.includes("punch") || lower.includes("freeze")) {
-      result.animateClass = "animate-[nova-zoom_2.4s_cubic-bezier(0.45,0,0.55,1)_infinite_alternate]";
-    } else if (lower.includes("whip") || lower.includes("pan") || lower.includes("slide") || lower.includes("wipe") || lower.includes("split")) {
-      result.animateClass = "animate-[nova-pan_2.6s_cubic-bezier(0.45,0,0.55,1)_infinite_alternate]";
-    } else if (lower.includes("spin") || lower.includes("drift") || lower.includes("flip") || lower.includes("orbit") || lower.includes("warp")) {
-      result.animateClass = "animate-[nova-orbit_3s_cubic-bezier(0.45,0,0.55,1)_infinite_alternate]";
-    } else if (lower.includes("flicker") || lower.includes("leak") || lower.includes("flash") || lower.includes("glow") || lower.includes("static")) {
-      result.animateClass = "animate-[nova-flicker_1.6s_ease-in-out_infinite]";
-    }
+    const flavor: MotionFlavor =
+      item.tag === "GLITCH" ? "glitch"
+      : item.tag === "AI" || item.tag === "BODY" ? "ai"
+      : item.tag === "OVERLAY" || item.tag === "LUT" ? "atmosphere"
+      : /whip|zoom|shake|spin|ramp|slide|punch|impact|kinetic/.test(lower) ? "kinetic"
+      : "cinematic";
+
+    const sig = motionSignatureFor(item.id, flavor);
+    const keyframes: Record<string, string> = {
+      dollyPush: "nova-mo-dolly",
+      arcSweep: "nova-mo-arc",
+      handheldBreath: "nova-mo-handheld",
+      pendulumSwing: "nova-mo-pendulum",
+      whipPan: "nova-mo-whip",
+      spiralPush: "nova-mo-spiral",
+      parallaxSlide: "nova-mo-parallax",
+      vertigoZoom: "nova-mo-vertigo",
+      riseFloat: "nova-mo-rise",
+      shutterPulse: "nova-mo-shutter",
+    };
+    const name = keyframes[sig.trajectory] ?? "nova-mo-dolly";
+    // Slow the signature period down a touch for browsing comfort, keep the
+    // per-preset variance (period, phase, direction) fully intact.
+    const duration = (sig.period * 1.35).toFixed(2);
+    const delay = (-sig.phase * sig.period).toFixed(2);
+    const direction = sig.pingPong ? "alternate" : "normal";
+    result.animation = `${name} ${duration}s ${cssEase(sig.curve)} ${delay}s infinite ${direction} both`;
+
 
     // Colour treatment per category — contrast/saturation/soft-light only,
     // deliberately hue-rotation-free so footage never turns blue.
@@ -957,7 +975,7 @@ function AssetCard({
     }
 
     return result;
-  }, [item.name, item.tag]);
+  }, [item.id, item.name, item.tag]);
 
   const preview = previewStyleFor(item.glyph);
   const renderProgram = useMemo(() => item.renderProgram ?? compileRenderProgram(item), [item]);
@@ -1075,10 +1093,9 @@ function AssetCard({
           startOffset={previewOffsetFor(item.id)}
           hovered={localHovered}
           effect={previewEffect}
-          animateClass={cardStyles.animateClass}
           style={{
             filter: uniqueLook || undefined,
-            transform: preview.transform,
+            animation: cardStyles.animation || undefined,
             transformOrigin: "center center",
           }}
         />
@@ -1487,16 +1504,27 @@ function ReferenceMonitor({
   onToggleFavorite: () => void;
 }) {
   const preview = item ? previewStyleFor(item.glyph) : null;
-  // Faster animation timings than the small card previews for a "reference-grade" feel
-  const animName = !preview
-    ? undefined
-    : preview.animate === "shake" ? "nova-shake 0.22s ease-in-out infinite"
-    : preview.animate === "pan"     ? "nova-pan 1.4s ease-in-out infinite alternate"
-    : preview.animate === "zoom"    ? "nova-zoom 1.3s ease-in-out infinite alternate"
-    : preview.animate === "orbit"   ? "nova-orbit 1.6s ease-in-out infinite alternate"
-    : preview.animate === "flicker" ? "nova-flicker 0.9s ease-in-out infinite"
-    : preview.animate === "pulse"   ? "nova-pulse 1.1s ease-in-out infinite"
-    : undefined;
+  // Reference-grade playback: the monitor runs the preset's own motion
+  // signature, just tighter than the browsing cards so the move reads clearly.
+  const animName = useMemo(() => {
+    if (!item) return undefined;
+    const sig = motionSignatureFor(item.id, "cinematic");
+    const map: Record<string, string> = {
+      dollyPush: "nova-mo-dolly",
+      arcSweep: "nova-mo-arc",
+      handheldBreath: "nova-mo-handheld",
+      pendulumSwing: "nova-mo-pendulum",
+      whipPan: "nova-mo-whip",
+      spiralPush: "nova-mo-spiral",
+      parallaxSlide: "nova-mo-parallax",
+      vertigoZoom: "nova-mo-vertigo",
+      riseFloat: "nova-mo-rise",
+      shutterPulse: "nova-mo-shutter",
+    };
+    const name = map[sig.trajectory] ?? "nova-mo-dolly";
+    return `${name} ${(sig.period * 0.8).toFixed(2)}s ${cssEase(sig.curve)} ${(-sig.phase * sig.period).toFixed(2)}s infinite ${sig.pingPong ? "alternate" : "normal"} both`;
+  }, [item]);
+
 
   return (
     <aside className="hidden w-[320px] shrink-0 flex-col border-l border-white/[0.06] bg-[#10141F] xl:flex">

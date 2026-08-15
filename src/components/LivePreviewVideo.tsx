@@ -88,7 +88,14 @@ export default function LivePreviewVideo({
   }, [hovered, effect, decodeEpoch]);
 
   return (
-    <div ref={hostRef} className="absolute inset-0 overflow-hidden">
+    <div
+      ref={hostRef}
+      className={cn(
+        "absolute inset-0 overflow-hidden transform-gpu",
+        "transition-transform duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
+        hovered ? "scale-[1.045]" : "scale-100"
+      )}
+    >
       {inView && (
         <video
           ref={videoRef}
@@ -116,10 +123,12 @@ export default function LivePreviewVideo({
             "transform-gpu [backface-visibility:hidden] [transform:translateZ(0)]",
             "transition-[opacity,transform,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
             ready ? "opacity-100" : "opacity-0",
-            hovered ? "scale-[1.08]" : "scale-100",
             animateClass
           )}
-          style={style}
+          style={{
+            ...style,
+            animationPlayState: inView ? "running" : "paused",
+          }}
         />
       )}
       <canvas

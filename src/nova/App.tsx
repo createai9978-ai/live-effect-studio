@@ -1126,7 +1126,7 @@ function AppInner() {
         // so the user can drag more effects without reopening.
         if (!targetClipId && !opts?.keepBrowserOpen) setBrowserOpen(false);
         if (!opts?.silent)
-          showToast(needsAnalysis ? `Analyzing “${item.name}” locally…` : `Applied "${item.name}" — Effect Controls updated`, needsAnalysis ? "info" : "success");
+          showToast(needsAnalysis ? `Analyzing “${item.name}” locally…` : `Applied "${item.name}" — Effect Controls ready`, needsAnalysis ? "info" : "success");
       } else if (!opts?.silent) {
         showToast(`"${item.name}" copied — drop it on a timeline clip`, "info");
       }
@@ -1524,7 +1524,7 @@ function AppInner() {
         <EffectControlPanel
           open
           title={fxSelection.ae.name}
-          subtitle={`Timeline instance on ${fxSelection.clip.track} · ${fxSelection.ae.duration.toFixed(1)}s — parameters update the program monitor live.`}
+          subtitle={`Timeline instance on ${fxSelection.clip.track} · ${fxSelection.ae.duration.toFixed(1)}s — parameters render live on the program monitor.`}
           tag={fxSelection.ae.enabled ? "ACTIVE" : "BYPASSED"}
           family={fxSelection.family}
           values={fxSelection.params}
@@ -1544,7 +1544,7 @@ function AppInner() {
           onApply={() => {
             updateAppliedEffect(fxSelection.clip.id, fxSelection.ae.id, { enabled: true });
             setSelectedFx(null);
-            showToast(`"${fxSelection.ae.name}" updated`, "success");
+            showToast(`"${fxSelection.ae.name}" applied`, "success");
           }}
           applyLabel="Done"
         />

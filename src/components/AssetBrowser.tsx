@@ -1504,16 +1504,27 @@ function ReferenceMonitor({
   onToggleFavorite: () => void;
 }) {
   const preview = item ? previewStyleFor(item.glyph) : null;
-  // Faster animation timings than the small card previews for a "reference-grade" feel
-  const animName = !preview
-    ? undefined
-    : preview.animate === "shake" ? "nova-shake 0.22s ease-in-out infinite"
-    : preview.animate === "pan"     ? "nova-pan 1.4s ease-in-out infinite alternate"
-    : preview.animate === "zoom"    ? "nova-zoom 1.3s ease-in-out infinite alternate"
-    : preview.animate === "orbit"   ? "nova-orbit 1.6s ease-in-out infinite alternate"
-    : preview.animate === "flicker" ? "nova-flicker 0.9s ease-in-out infinite"
-    : preview.animate === "pulse"   ? "nova-pulse 1.1s ease-in-out infinite"
-    : undefined;
+  // Reference-grade playback: the monitor runs the preset's own motion
+  // signature, just tighter than the browsing cards so the move reads clearly.
+  const animName = useMemo(() => {
+    if (!item) return undefined;
+    const sig = motionSignatureFor(item.id, "cinematic");
+    const map: Record<string, string> = {
+      dollyPush: "nova-mo-dolly",
+      arcSweep: "nova-mo-arc",
+      handheldBreath: "nova-mo-handheld",
+      pendulumSwing: "nova-mo-pendulum",
+      whipPan: "nova-mo-whip",
+      spiralPush: "nova-mo-spiral",
+      parallaxSlide: "nova-mo-parallax",
+      vertigoZoom: "nova-mo-vertigo",
+      riseFloat: "nova-mo-rise",
+      shutterPulse: "nova-mo-shutter",
+    };
+    const name = map[sig.trajectory] ?? "nova-mo-dolly";
+    return `${name} ${(sig.period * 0.8).toFixed(2)}s ${cssEase(sig.curve)} ${(-sig.phase * sig.period).toFixed(2)}s infinite ${sig.pingPong ? "alternate" : "normal"} both`;
+  }, [item]);
+
 
   return (
     <aside className="hidden w-[320px] shrink-0 flex-col border-l border-white/[0.06] bg-[#10141F] xl:flex">

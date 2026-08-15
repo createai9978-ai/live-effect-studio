@@ -422,7 +422,7 @@ input[type="range"]::-moz-range-thumb {
   0%   { transform: translate3d(0, 0, 0) scale(1.07) rotate(0deg) }
   22%  { transform: translate3d(-0.9%, 0.7%, 0) scale(1.085) rotate(-0.35deg) }
   47%  { transform: translate3d(0.8%, -0.6%, 0) scale(1.075) rotate(0.3deg) }
-  71%  { transform: translate3d(-0.5%, -0.9%, 0) scale(1.09) rotate(-0.２deg) }
+  71%  { transform: translate3d(-0.5%, -0.9%, 0) scale(1.09) rotate(-0.2deg) }
   100% { transform: translate3d(0, 0, 0) scale(1.07) rotate(0deg) }
 }
 @keyframes nova-mo-pendulum {

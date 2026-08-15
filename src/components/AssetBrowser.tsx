@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { hasAllTags, searchAssets, score, tokenize } from "../editor/assetSearch";
 import { cn } from "../utils/cn";
+import { cssEase, motionSignatureFor, type MotionFlavor } from "../editor/motionEngine";
 import EditableText from "../admin/EditableText";
 import {
   AUDIO_LIB,
@@ -1092,10 +1093,9 @@ function AssetCard({
           startOffset={previewOffsetFor(item.id)}
           hovered={localHovered}
           effect={previewEffect}
-          animateClass={cardStyles.animateClass}
           style={{
             filter: uniqueLook || undefined,
-            transform: preview.transform,
+            animation: cardStyles.animation || undefined,
             transformOrigin: "center center",
           }}
         />

@@ -128,7 +128,6 @@ export default function LivePreviewVideo({
           style={{
             ...style,
             animationPlayState: inView ? "running" : "paused",
-            animationDuration: hovered && style?.animation ? undefined : undefined,
           }}
         />
       )}

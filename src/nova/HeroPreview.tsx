@@ -46,7 +46,7 @@ export default function HeroPreview() {
   }, [intensity, contrast, temp, tint]);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#141824] shadow-2xl shadow-black/40">
+    <div className="nova-rise relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#141824] shadow-2xl shadow-black/40 transition-shadow duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-[0_30px_80px_-30px_rgba(0,229,255,0.45)]">
       <div className="relative aspect-video w-full overflow-hidden bg-black">
         <video
           src={HERO_CLIP}
@@ -57,8 +57,8 @@ export default function HeroPreview() {
           preload="auto"
           disablePictureInPicture
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover transition-[filter] duration-300 ease-out"
-          style={{ filter }}
+          className="absolute inset-0 h-full w-full object-cover transform-gpu transition-[filter] duration-[560ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{ filter, animation: "nova-ken-burns 22s var(--ease-drift) infinite alternate" }}
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
 
@@ -81,7 +81,7 @@ export default function HeroPreview() {
                 key={l.id}
                 onClick={() => applyLook(l)}
                 className={cn(
-                  "rounded-full px-2.5 py-1 text-[10.5px] transition-all duration-200",
+                  "rounded-full px-2.5 py-1 text-[10.5px] transition-all duration-[420ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-px",
                   look.id === l.id
                     ? "bg-gradient-to-r from-[#00E5FF]/25 to-[#8A2BE2]/30 text-white ring-1 ring-[#00E5FF]/40"
                     : "bg-white/[0.05] text-zinc-400 ring-1 ring-white/[0.06] hover:bg-white/[0.1] hover:text-zinc-100"

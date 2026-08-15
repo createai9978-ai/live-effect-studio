@@ -231,7 +231,7 @@ export default function EffectControlPanel({
                 Hold to compare
               </button>
               <span className="text-[10px] text-zinc-600">
-                Real-time render on {videoSrc ? "your selected clip" : "demo footage"} — all parameters update live.
+                Real-time render on {videoSrc ? "your selected clip" : "demo footage"} — every parameter renders live.
               </span>
             </div>
           </div>

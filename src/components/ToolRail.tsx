@@ -1,8 +1,9 @@
+import type { ReactNode } from "react";
 import { cn } from "../utils/cn";
 
 export type RailKey = "media" | "text" | "transitions" | "effects" | "filters" | "audio" | "ai";
 
-const ITEMS: { key: RailKey; label: string; badge?: string; icon: JSX.Element }[] = [
+const ITEMS: { key: RailKey; label: string; badge?: string; icon: ReactNode }[] = [
   {
     key: "media",
     label: "Media",

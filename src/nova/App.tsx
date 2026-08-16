@@ -7,6 +7,8 @@ import AdminPanel from "../admin/AdminPanel";
 import HomeScreen, { AspectRatio } from "./HomeScreen";
 import SpeedCurveEditor from "../components/SpeedCurveEditor";
 import MediaBin from "../components/MediaBin";
+import ToolRail, { RailKey } from "../components/ToolRail";
+import InspectorPanel from "../components/InspectorPanel";
 import LeftMonitorPanel from "../components/LeftMonitorPanel";
 import PreviewPlayer from "../components/PreviewPlayer";
 import LumetriPanel from "../components/LumetriPanel";
@@ -207,6 +209,8 @@ function AppInner() {
   // Asset browser state
   const [browserOpen, setBrowserOpen] = useState(false);
   const [browserTab, setBrowserTab] = useState<AssetTab>("effects");
+  const [rail, setRail] = useState<RailKey>("media");
+  const [inspectorOpen, setInspectorOpen] = useState(true);
   const [hoveredEffectId, setHoveredEffectId] = useState<string | null>(null);
   const [audioReactiveLevel, setAudioReactiveLevel] = useState(0);
   const openAssetBrowser = useCallback((t: AssetTab = "effects") => {

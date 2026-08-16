@@ -28,7 +28,7 @@ export default function MediaBin({
   return (
     <aside
       className={cn(
-        "relative flex w-64 shrink-0 flex-col border-r border-white/[0.06] bg-[#0B0F19] transition",
+        "relative flex w-[268px] shrink-0 flex-col border-r border-white/[0.06] bg-[#0B0F19] transition",
         dragOver && "ring-2 ring-inset ring-[#00F0FF]/60"
       )}
       onDragOver={(e) => {
@@ -50,7 +50,7 @@ export default function MediaBin({
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/[0.05] px-3 py-2">
-        <span className="text-[11px] font-semibold text-zinc-200">Project</span>
+        <span className="text-[11px] font-semibold text-zinc-200">Project Media</span>
         <span className="text-[9px] text-zinc-600">
           {assets.length} item{assets.length === 1 ? "" : "s"}
         </span>
@@ -84,10 +84,10 @@ export default function MediaBin({
 
       {/* Content */}
       {assets.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 p-5 text-center">
+        <div className="flex flex-col items-center gap-3 p-3 text-center">
           <div
             onClick={onOpenImport}
-            className="flex w-full cursor-pointer flex-col items-center gap-3 rounded-xl border border-dashed border-white/[0.12] px-4 py-10 transition hover:border-[#00F0FF]/50 hover:bg-white/[0.02]"
+            className="flex w-full cursor-pointer flex-col items-center gap-3 rounded-xl border border-dashed border-white/[0.12] px-3 py-6 transition hover:border-[#00F0FF]/50 hover:bg-white/[0.02]"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.05]">
               {importing ? (

@@ -26,9 +26,9 @@ export default function AudioMeters({ playing, hasAudio }: { playing: boolean; h
   const marks = [0, -6, -12, -18, -24, -36, -48];
 
   return (
-    <aside className="flex w-[72px] shrink-0 flex-col border-l border-white/[0.06] bg-[#181B24]">
+    <aside className="flex w-[92px] shrink-0 flex-col border-l border-white/[0.06] bg-[#0B0F19]">
       <div className="border-b border-white/[0.05] px-2 py-2 text-center text-[9px] font-semibold uppercase tracking-widest text-zinc-500">
-        Audio
+        Audio Mixer
       </div>
 
       <div className="flex flex-1 justify-center gap-1.5 px-2 py-3">

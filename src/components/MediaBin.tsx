@@ -28,8 +28,8 @@ export default function MediaBin({
   return (
     <aside
       className={cn(
-        "relative flex w-64 shrink-0 flex-col border-r border-white/[0.06] bg-[#181B24] transition",
-        dragOver && "ring-2 ring-inset ring-violet-500/60"
+        "relative flex w-[268px] shrink-0 flex-col border-r border-white/[0.06] bg-[#0B0F19] transition",
+        dragOver && "ring-2 ring-inset ring-[#00F0FF]/60"
       )}
       onDragOver={(e) => {
         if (e.dataTransfer.types.includes("Files")) {
@@ -50,7 +50,7 @@ export default function MediaBin({
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/[0.05] px-3 py-2">
-        <span className="text-[11px] font-semibold text-zinc-200">Project</span>
+        <span className="text-[11px] font-semibold text-zinc-200">Project Media</span>
         <span className="text-[9px] text-zinc-600">
           {assets.length} item{assets.length === 1 ? "" : "s"}
         </span>
@@ -73,7 +73,7 @@ export default function MediaBin({
         <button
           onClick={onOpenImport}
           title="Import media from your computer"
-          className="flex h-7 shrink-0 items-center gap-1 rounded-md bg-gradient-to-br from-violet-600 to-fuchsia-600 px-2 text-[10px] font-medium text-white shadow-md shadow-violet-600/25 transition hover:brightness-110"
+          className="flex h-7 shrink-0 items-center gap-1 rounded-md bg-gradient-to-br from-[#00F0FF] to-[#5B7CFF] px-2 text-[10px] font-medium text-[#04121a] shadow-md shadow-[#00F0FF]/25 transition hover:brightness-110"
         >
           <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
@@ -84,14 +84,14 @@ export default function MediaBin({
 
       {/* Content */}
       {assets.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 p-5 text-center">
+        <div className="flex flex-col items-center gap-3 p-3 text-center">
           <div
             onClick={onOpenImport}
-            className="flex w-full cursor-pointer flex-col items-center gap-3 rounded-xl border border-dashed border-white/[0.12] px-4 py-10 transition hover:border-violet-500/50 hover:bg-white/[0.02]"
+            className="flex w-full cursor-pointer flex-col items-center gap-3 rounded-xl border border-dashed border-white/[0.12] px-3 py-6 transition hover:border-[#00F0FF]/50 hover:bg-white/[0.02]"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.05]">
               {importing ? (
-                <svg className="h-5 w-5 animate-spin text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                <svg className="h-5 w-5 animate-spin text-[#00F0FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
                   <path d="M21 12a9 9 0 11-6.2-8.56" />
                 </svg>
               ) : (
@@ -116,7 +116,7 @@ export default function MediaBin({
       ) : (
         <div className="flex-1 overflow-y-auto px-2.5 pb-2">
           {importing && (
-            <div className="mb-2 flex items-center gap-2 rounded-md bg-violet-500/10 px-2 py-1.5 text-[10px] text-violet-300">
+            <div className="mb-2 flex items-center gap-2 rounded-md bg-[#00F0FF]/10 px-2 py-1.5 text-[10px] text-[#00F0FF]">
               <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
                 <path d="M21 12a9 9 0 11-6.2-8.56" />
               </svg>
@@ -148,8 +148,8 @@ export default function MediaBin({
       </div>
 
       {dragOver && (
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[#181B24]/80">
-          <div className="rounded-lg border border-dashed border-violet-400 px-4 py-3 text-[12px] text-violet-300">
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[#0B0F19]/85">
+          <div className="rounded-lg border border-dashed border-[#00F0FF] px-4 py-3 text-[12px] text-[#00F0FF]">
             Drop files to import
           </div>
         </div>
@@ -177,7 +177,7 @@ function AssetCard({
         e.dataTransfer.effectAllowed = "copy";
       }}
       onDoubleClick={onOpenSource}
-      className="group relative cursor-grab overflow-hidden rounded-lg border border-white/[0.06] bg-black/20 transition hover:border-violet-500/50 active:cursor-grabbing"
+      className="group relative cursor-grab overflow-hidden rounded-lg border border-white/[0.06] bg-black/20 transition hover:border-[#00F0FF]/60 hover:shadow-[0_0_18px_-6px_#00F0FF] active:cursor-grabbing"
       title={`${asset.name} — drag to timeline, double-click for Source Monitor`}
     >
       <div className="relative aspect-video overflow-hidden bg-black">
@@ -204,7 +204,7 @@ function AssetCard({
           className={cn(
             "absolute left-1 top-1 rounded px-1 py-px text-[8px] font-semibold",
             asset.kind === "video"
-              ? "bg-violet-500/80 text-white"
+              ? "bg-[#00F0FF]/80 text-[#04121a]"
               : asset.kind === "image"
               ? "bg-sky-500/80 text-white"
               : "bg-emerald-500/80 text-white"

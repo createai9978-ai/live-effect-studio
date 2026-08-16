@@ -541,3 +541,26 @@ input[type="range"]::-moz-range-thumb {
   opacity: 1;
   animation: nova-sheen 900ms var(--ease-expo) both;
 }
+
+/* Inspector range sliders — neon cyan thumb */
+.nova-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 9999px;
+  background: #ffffff;
+  box-shadow: 0 0 8px #00f0ff, 0 0 0 2px rgba(0, 240, 255, 0.5);
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nova-range::-webkit-slider-thumb:hover { transform: scale(1.25); }
+.nova-range::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: none;
+  border-radius: 9999px;
+  background: #ffffff;
+  box-shadow: 0 0 8px #00f0ff;
+  cursor: pointer;
+}

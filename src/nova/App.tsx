@@ -7,6 +7,8 @@ import AdminPanel from "../admin/AdminPanel";
 import HomeScreen, { AspectRatio } from "./HomeScreen";
 import SpeedCurveEditor from "../components/SpeedCurveEditor";
 import MediaBin from "../components/MediaBin";
+import ToolRail, { RailKey } from "../components/ToolRail";
+import InspectorPanel from "../components/InspectorPanel";
 import LeftMonitorPanel from "../components/LeftMonitorPanel";
 import PreviewPlayer from "../components/PreviewPlayer";
 import LumetriPanel from "../components/LumetriPanel";
@@ -207,6 +209,8 @@ function AppInner() {
   // Asset browser state
   const [browserOpen, setBrowserOpen] = useState(false);
   const [browserTab, setBrowserTab] = useState<AssetTab>("effects");
+  const [rail, setRail] = useState<RailKey>("media");
+  const [inspectorOpen, setInspectorOpen] = useState(true);
   const [hoveredEffectId, setHoveredEffectId] = useState<string | null>(null);
   const [audioReactiveLevel, setAudioReactiveLevel] = useState(0);
   const openAssetBrowser = useCallback((t: AssetTab = "effects") => {
@@ -1328,7 +1332,7 @@ function AppInner() {
     : null;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#0F1117] font-sans text-zinc-200 antialiased selection:bg-violet-500/30">
+    <div className="flex h-screen flex-col overflow-hidden bg-[#0B0F19] font-sans text-zinc-200 antialiased selection:bg-[#00F0FF]/25">
       <input
         ref={fileInputRef}
         type="file"
@@ -1360,9 +1364,37 @@ function AppInner() {
         onOpenAssetBrowser={() => openAssetBrowser("effects")}
       />
 
-      {/* ===== Upper row ===== */}
+      {/* ===== Upper row: rail · media pool · program monitor · inspector ===== */}
       <div className="flex min-h-0 flex-1">
-        {(panels.sourceMonitor || panels.effectControls) && (
+        <ToolRail
+          active={rail}
+          onSelect={(k) => {
+            setRail(k);
+            if (k === "media") return;
+            const map: Record<string, AssetTab> = {
+              text: "titles",
+              transitions: "transitions",
+              effects: "effects",
+              filters: "filters",
+              audio: "audio",
+              ai: "stock",
+            };
+            openAssetBrowser(map[k] ?? "effects");
+          }}
+        />
+
+        {panels.projectBin && (
+          <MediaBin
+            assets={assets}
+            importing={importing}
+            onOpenImport={openImport}
+            onImportFiles={importFiles}
+            onDeleteAsset={deleteAsset}
+            onOpenSource={setSourceAssetId}
+          />
+        )}
+
+        {panels.sourceMonitor && sourceAsset && (
           <LeftMonitorPanel
             sourceAsset={sourceAsset}
             selectedClip={selectedClipObj}
@@ -1371,6 +1403,7 @@ function AppInner() {
             onUpdateClipEffects={updateClipEffects}
           />
         )}
+
         <PreviewPlayer
           assets={assets}
           clips={clips}
@@ -1385,35 +1418,37 @@ function AppInner() {
           hoveredEffectId={hoveredEffectId}
           audioLevel={audioReactiveLevel}
         />
-        {workspace === "color" && panels.lumetri && (
+
+        {workspace === "color" && panels.lumetri ? (
           <div key="ws-color" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
             <LumetriPanel grade={grade} onGradeChange={(g) => { pushHistory(); setGrade(g); }} />
           </div>
-        )}
-        {workspace === "audio" && (
+        ) : workspace === "audio" ? (
           <div key="ws-audio" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
             <AudioMixerPanel />
           </div>
-        )}
-        {workspace === "graphics" && (
+        ) : workspace === "graphics" ? (
           <div key="ws-graphics" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
             <GraphicsPanel />
           </div>
+        ) : (
+          inspectorOpen && (
+            <div key="ws-inspector" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+              <InspectorPanel
+                clip={selectedClipObj}
+                clipName={selectedAsset?.name ?? null}
+                grade={grade}
+                onGradeChange={(g) => setGrade(g)}
+                onUpdateEffects={(id, p) => updateClipEffects(id, p)}
+                onClose={() => setInspectorOpen(false)}
+              />
+            </div>
+          )
         )}
       </div>
 
-      {/* ===== Lower row ===== */}
-      <div className="flex h-[290px] shrink-0 border-t border-white/[0.06]">
-        {panels.projectBin && (
-          <MediaBin
-            assets={assets}
-            importing={importing}
-            onOpenImport={openImport}
-            onImportFiles={importFiles}
-            onDeleteAsset={deleteAsset}
-            onOpenSource={setSourceAssetId}
-          />
-        )}
+      {/* ===== Lower row: timeline + audio mixer ===== */}
+      <div className="flex h-[290px] shrink-0 border-t border-white/[0.06] bg-[#0B0F19]">
         <Timeline
           assets={assets}
           clips={clips}
@@ -1462,6 +1497,7 @@ function AppInner() {
         )}
         {panels.audioMeters && <AudioMeters playing={playing} hasAudio={clips.length > 0} />}
       </div>
+
 
       <AudioEngine assets={assets} clips={clips} time={time} playing={playing} audibleTracks={audibleTracks} onLevel={setAudioReactiveLevel} />
 

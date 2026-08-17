@@ -83,16 +83,16 @@ const ITEMS: { key: RailKey; label: string; badge?: string; icon: ReactNode }[] 
     ),
   },
   {
-    key: "audio",
-    label: "Audio",
+    key: "ai",
+    label: "AI Tools",
+    badge: "NEW",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 18V5l10-2v13" />
-        <circle cx="6.5" cy="18" r="2.5" />
-        <circle cx="16.5" cy="16" r="2.5" />
+        <path d="M12 4l1.4 3.6L17 9l-3.6 1.4L12 14l-1.4-3.6L7 9l3.6-1.4L12 4zM18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z" />
       </svg>
     ),
   },
+
   {
     key: "ai",
     label: "AI Tools",

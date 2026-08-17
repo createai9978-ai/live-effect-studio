@@ -358,8 +358,10 @@ export default function AssetBrowser({
       <div
         className={cn(
           "flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-white/[0.06] bg-[#181B24]/80 backdrop-blur-xl px-3 py-1.5 transition",
+          embedded && "hidden",
           globalQuery && "pointer-events-none opacity-40"
         )}
+
       >
         {TAB_META.map((t) => {
           const active = tab === t.id;

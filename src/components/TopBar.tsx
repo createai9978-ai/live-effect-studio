@@ -65,7 +65,7 @@ export default function TopBar({
 
 
       {/* Workspace tabs */}
-      <div className="mx-auto flex items-center gap-0.5 rounded-lg border border-white/[0.06] bg-black/30 p-0.5">
+      <div className="mx-auto flex items-center gap-1 rounded-xl border border-white/[0.07] bg-black/35 p-1">
         {WORKSPACES.map((w) => (
           <Tooltip key={w.id} label={`${w.label} workspace`} hint={w.hint} side="bottom">
             <button
@@ -74,22 +74,34 @@ export default function TopBar({
               style={
                 workspace === w.id
                   ? {
-                      background: `linear-gradient(90deg, ${settings.accent}22, ${settings.accent2}33)`,
+                      background: `linear-gradient(90deg, ${settings.accent}33, ${settings.accent2}44)`,
                       color: settings.accent,
-                      boxShadow: `0 0 0 1px ${settings.accent}55`,
+                      boxShadow: `0 0 0 1px ${settings.accent}66, 0 0 22px -8px ${settings.accent}`,
                     }
                   : undefined
               }
               className={cn(
-                "rounded-md px-3 py-1 text-[11px] transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] active:scale-95",
-                workspace !== w.id && "text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-200"
+                "rounded-lg px-4 py-1.5 text-[12px] font-medium transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] active:scale-95",
+                workspace !== w.id && "text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-100"
               )}
             >
               <EditableText id={`workspace.${w.id}`} text={w.label} />
             </button>
           </Tooltip>
         ))}
+        <Tooltip label="AI Tools" hint="Neural effects, auto-cut and generative assets" side="bottom">
+          <button
+            onClick={onOpenAssetBrowser}
+            className="flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-[12px] font-medium text-zinc-400 transition-all duration-300 hover:bg-white/[0.05] hover:text-zinc-100"
+          >
+            AI Tools
+            <svg className="h-3.5 w-3.5 text-fuchsia-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 3l1.6 4L18 8.6l-3.7 2.6.6 4.4-2.9-2-2.9 2 .6-4.4L6 8.6 10.4 7 12 3z" />
+            </svg>
+          </button>
+        </Tooltip>
       </div>
+
 
 
       {/* Save status + project name */}

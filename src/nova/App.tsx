@@ -1482,7 +1482,10 @@ function AppInner() {
       </div>
 
       {/* ===== Lower row: timeline + audio mixer ===== */}
-      <div className="flex h-[290px] shrink-0 border-t border-white/[0.06] bg-[#0A0D14]">
+      <div
+        className="flex min-w-0 shrink-0 overflow-hidden border-t border-white/[0.06] bg-[#0A0D14]"
+        style={{ height: "clamp(280px, 31vh, 350px)" }}
+      >
         <Timeline
           assets={assets}
           clips={clips}

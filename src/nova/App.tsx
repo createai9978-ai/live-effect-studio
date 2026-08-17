@@ -294,8 +294,9 @@ function AppInner() {
 
   // ---- playback clock ----
   // The frame-accurate value lives in the playhead store (read by the timeline
-  // needle and timecode readouts). React state is committed at ~12 Hz so the
-  // monitor/effect logic stays in sync without re-rendering the editor 60×/s.
+  // needle and timecode readouts). React state is committed at ~30 Hz, which is
+  // enough for the monitor's frame logic while halving the render load.
+
   useEffect(() => {
     if (!playing) {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);

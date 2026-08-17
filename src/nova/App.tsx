@@ -1525,8 +1525,14 @@ function AppInner() {
             }}
           />
         )}
-        {panels.audioMeters && <AudioMeters playing={playing} hasAudio={clips.length > 0} />}
+        </div>
+        {panels.audioMeters && (
+          <div className="nova-panel-card flex min-h-0 min-w-0">
+            <AudioMeters playing={playing} hasAudio={clips.length > 0} />
+          </div>
+        )}
       </section>
+
       </div>
 
 

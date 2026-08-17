@@ -1389,7 +1389,7 @@ function AppInner() {
         />
 
         {browserOpen && (
-          <div className="flex h-full w-[430px] min-w-[340px] max-w-[46vw] shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#0F1117] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]">
+          <div className="flex h-full w-[300px] min-w-[280px] max-w-[32vw] shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#0F1117] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]">
           <AssetBrowser
             open={browserOpen}
             initialTab={browserTab}

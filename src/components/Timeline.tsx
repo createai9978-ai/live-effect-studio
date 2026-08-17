@@ -103,52 +103,74 @@ function Timeline(props: Props) {
    * timeFromClientX call was shifted right by ~148px, causing the razor to
    * silently reject cuts (rel > duration - 0.1) and drops to land off-target.
    */
-  const laneMetrics = () => {
+  const laneMetrics = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return { left: 0, width: 1 };
     const inner = el.firstElementChild as HTMLElement;
     const r = inner.getBoundingClientRect();
     return { left: r.left + HEAD_W, width: Math.max(1, r.width - HEAD_W) };
-  };
+  }, []);
 
-  const timeFromClientX = (clientX: number) => {
-    const { left, width } = laneMetrics();
-    return Math.min(seqDur, Math.max(0, ((clientX - left) / width) * seqDur));
-  };
+  const timeFromClientX = useCallback(
+    (clientX: number) => {
+      const { left, width } = laneMetrics();
+      return Math.min(seqDur, Math.max(0, ((clientX - left) / width) * seqDur));
+    },
+    [laneMetrics, seqDur]
+  );
 
-  const pxPerSec = () => {
-    const { width } = laneMetrics();
-    return width / seqDur;
-  };
+  const pxPerSec = useCallback(() => laneMetrics().width / seqDur, [laneMetrics, seqDur]);
 
   /**
    * Pointer-based scrubbing. Used by BOTH the ruler and the playhead needle so
    * the cyan line can be grabbed and dragged anywhere across the sequence
    * without losing the pointer (pointer capture keeps events flowing even when
    * the cursor leaves the element or crosses the video tracks).
+   *
+   * Geometry is measured once at gesture start and pointer moves are coalesced
+   * to one seek per animation frame, so dragging stays glued to the cursor
+   * instead of thrashing layout on every event.
    */
-  const beginScrub = (e: React.PointerEvent, seekImmediately = true) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (seekImmediately) onSeek(timeFromClientX(e.clientX));
-    setScrubbing(true);
-    const target = e.currentTarget as HTMLElement;
-    try {
-      target.setPointerCapture(e.pointerId);
-    } catch {
-      /* pointer capture unsupported — window listeners below still work */
-    }
-    const move = (ev: PointerEvent) => onSeek(timeFromClientX(ev.clientX));
-    const up = () => {
-      setScrubbing(false);
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-      window.removeEventListener("pointercancel", up);
-    };
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
-    window.addEventListener("pointercancel", up);
-  };
+  const beginScrub = useCallback(
+    (e: React.PointerEvent, seekImmediately = true) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const { left, width } = laneMetrics();
+      const at = (clientX: number) =>
+        Math.min(seqDur, Math.max(0, ((clientX - left) / width) * seqDur));
+
+      if (seekImmediately) onSeek(at(e.clientX));
+      setScrubbing(true);
+      const target = e.currentTarget as HTMLElement;
+      try {
+        target.setPointerCapture(e.pointerId);
+      } catch {
+        /* pointer capture unsupported — window listeners below still work */
+      }
+      const move = rafThrottle((clientX: number) => onSeek(at(clientX)));
+      const onMove = (ev: PointerEvent) => move(ev.clientX);
+      const up = () => {
+        move.flush();
+        setScrubbing(false);
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", up);
+        window.removeEventListener("pointercancel", up);
+      };
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", up);
+      window.addEventListener("pointercancel", up);
+    },
+    [laneMetrics, onSeek, seqDur]
+  );
+
+  // Razor guide follows the pointer through a ref-driven rAF write, so moving
+  // the mouse across the lanes never re-renders the whole timeline.
+  const setRazorHover = useMemo(
+    () => rafThrottle((x: number | null) => setRazorHoverX(x)),
+    []
+  );
+  useEffect(() => () => setRazorHover.cancel(), [setRazorHover]);
+
 
 
   return (

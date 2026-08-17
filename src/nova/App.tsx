@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { playhead } from "../editor/playhead";
+
 import TopBar from "../components/TopBar";
 import { AdminProvider } from "../admin/AdminContext";
 import { AuthProvider } from "../auth/AuthContext";
@@ -259,7 +261,9 @@ function AppInner() {
   const timeRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const endRef = useRef(0);
-  timeRef.current = time;
+  // NOTE: timeRef is owned by the transport (playback clock + seek), never by
+  // render, so a throttled state commit can't drag the clock backwards.
+
 
   // ---- derived ----
   const contentEnd = useMemo(

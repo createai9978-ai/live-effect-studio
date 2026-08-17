@@ -48,17 +48,31 @@ export default function MediaBin({
         setDragOver(false);
       }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/[0.05] px-3 py-2">
-        <span className="text-[11px] font-semibold text-zinc-200">Project Media</span>
-        <span className="text-[9px] text-zinc-600">
+      {/* Header tabs */}
+      <div className="flex items-center gap-3 border-b border-white/[0.05] px-3">
+        {(["Project Media", "Stock", "Favorites"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={cn(
+              "relative py-2.5 text-[11px] font-semibold transition-colors",
+              tab === t ? "text-[#00F0FF]" : "text-zinc-500 hover:text-zinc-300"
+            )}
+          >
+            {t}
+            {tab === t && (
+              <span className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-[#00F0FF] shadow-[0_0_8px_#00F0FF]" />
+            )}
+          </button>
+        ))}
+        <span className="ml-auto text-[9px] text-zinc-600">
           {assets.length} item{assets.length === 1 ? "" : "s"}
         </span>
       </div>
 
-      {/* Search + import */}
-      <div className="flex items-center gap-1.5 p-2.5 pb-2">
-        <div className="flex flex-1 items-center gap-1.5 rounded-md bg-black/30 px-2 py-1.5">
+      {/* Search */}
+      <div className="p-2.5 pb-1.5">
+        <div className="flex items-center gap-1.5 rounded-lg bg-black/35 px-2 py-1.5 ring-1 ring-white/[0.05] transition focus-within:ring-[#00F0FF]/40">
           <svg className="h-3 w-3 text-zinc-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
             <circle cx="11" cy="11" r="7" />
             <path d="M21 21l-4.35-4.35" />
@@ -66,19 +80,44 @@ export default function MediaBin({
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search media…"
+            placeholder="Search media, images, audio…"
             className="w-full bg-transparent text-[11px] text-zinc-300 placeholder-zinc-600 outline-none"
           />
         </div>
+      </div>
+
+      {/* Action row */}
+      <div className="flex items-center gap-1.5 px-2.5 pb-2">
         <button
           onClick={onOpenImport}
           title="Import media from your computer"
-          className="flex h-7 shrink-0 items-center gap-1 rounded-md bg-gradient-to-br from-[#00F0FF] to-[#5B7CFF] px-2 text-[10px] font-medium text-[#04121a] shadow-md shadow-[#00F0FF]/25 transition hover:brightness-110"
+          className="flex h-7 flex-1 items-center justify-center gap-1 rounded-md bg-white/[0.05] text-[10px] font-medium text-zinc-200 ring-1 ring-white/[0.07] transition hover:bg-white/[0.09] hover:ring-[#00F0FF]/40"
         >
           <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
           Import
+        </button>
+        <button
+          onClick={onOpenImport}
+          title="Record from camera or screen"
+          className="flex h-7 flex-1 items-center justify-center gap-1 rounded-md bg-white/[0.05] text-[10px] font-medium text-zinc-200 ring-1 ring-white/[0.07] transition hover:bg-white/[0.09] hover:ring-[#00F0FF]/40"
+        >
+          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+            <circle cx="12" cy="12" r="8" />
+            <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+          </svg>
+          Record
+        </button>
+        <button
+          onClick={onOpenImport}
+          title="Generate media with AI"
+          className="flex h-7 flex-1 items-center justify-center gap-1 rounded-md bg-gradient-to-br from-[#00F0FF] to-[#5B7CFF] text-[10px] font-medium text-[#04121a] shadow-md shadow-[#00F0FF]/25 transition hover:brightness-110"
+        >
+          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 4l1.3 3.4L17 9l-3.7 1.3L12 14l-1.3-3.7L7 9l3.7-1.6L12 4z" />
+          </svg>
+          AI Generate
         </button>
       </div>
 

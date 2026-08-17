@@ -20,6 +20,7 @@ export default function MediaBin({
   onOpenSource,
 }: Props) {
   const [query, setQuery] = useState("");
+  const [tab, setTab] = useState<"Project Media" | "Stock" | "Favorites">("Project Media");
   const [dragOver, setDragOver] = useState(false);
 
   const filtered = assets.filter((a) => a.name.toLowerCase().includes(query.toLowerCase()));

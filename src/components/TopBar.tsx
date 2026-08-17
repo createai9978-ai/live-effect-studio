@@ -37,7 +37,7 @@ export default function TopBar({
         <button
           onClick={onGoHome}
           title="Back to launcher"
-          className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg shadow-lg"
+          className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl shadow-lg"
           style={{
             background: settings.logoUrl
               ? "transparent"
@@ -47,16 +47,17 @@ export default function TopBar({
           {settings.logoUrl ? (
             <img src={settings.logoUrl} alt="App logo" className="h-full w-full object-contain" />
           ) : (
-            <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <svg className="h-[18px] w-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="5" width="20" height="14" rx="2" />
               <path d="M2 9h20M7 5v4M12 5v4M17 5v4M7 15h4" />
             </svg>
           )}
         </button>
-        <span className="hidden items-center gap-1 text-[13px] font-semibold tracking-wide text-zinc-100 md:inline-flex">
+        <span className="hidden items-center gap-1.5 text-[15px] font-semibold tracking-wide text-zinc-50 md:inline-flex">
           <EditableText id="app.title" text="NOVA Studio" />
-          <span className="ml-1.5 rounded bg-white/[0.07] px-1 py-px text-[8px] font-medium tracking-wider text-zinc-500">EDIT</span>
+          <span className="rounded-md bg-gradient-to-r from-violet-500 to-fuchsia-500 px-1.5 py-px text-[8.5px] font-bold tracking-wider text-white">PRO</span>
         </span>
+
       </div>
 
       {/* Menu bar */}

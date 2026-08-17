@@ -176,6 +176,27 @@ export default function MediaBin({
               />
             ))}
           </div>
+
+          {/* Folders */}
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {[
+              { name: "My Clips", count: assets.filter((a) => a.kind === "video").length },
+              { name: "B-Roll", count: assets.filter((a) => a.kind === "image").length },
+              { name: "Audio", count: assets.filter((a) => a.kind === "audio").length },
+            ].map((f) => (
+              <button
+                key={f.name}
+                onClick={onOpenImport}
+                className="flex flex-col items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.02] py-3 transition hover:border-[#00F0FF]/40 hover:bg-white/[0.05]"
+              >
+                <svg className="h-5 w-5 text-[#5B7CFF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinejoin="round">
+                  <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+                </svg>
+                <span className="text-[9.5px] text-zinc-300">{f.name}</span>
+                <span className="text-[8px] text-zinc-600">{f.count} items</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

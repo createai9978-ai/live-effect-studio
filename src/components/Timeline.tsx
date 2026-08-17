@@ -80,9 +80,9 @@ const CURSOR: Record<Tool, string> = {
   zoom: "cursor-zoom-in",
 };
 
-export default function Timeline(props: Props) {
+function Timeline(props: Props) {
   const {
-    clips, videoTracks, audioTracks, time, seqDur, contentEnd, tool, zoom,
+    clips, videoTracks, audioTracks, seqDur, contentEnd, tool, zoom,
     onSetZoom, onSetTool, selected, onSeek, onDeleteSelected, onSelectClip, onUpdateAppliedEffect,
     selectedEffect, onSelectEffect, onDeleteAppliedEffect, onApplyEffectPreset,
     rampOpen, onToggleRamp,
@@ -92,8 +92,8 @@ export default function Timeline(props: Props) {
   const [razorHoverX, setRazorHoverX] = useState<number | null>(null);
   const [scrubbing, setScrubbing] = useState(false);
 
-
   const step = niceStep(seqDur / zoom);
+
   const tickCount = Math.floor(seqDur / step) + 1;
 
   /**

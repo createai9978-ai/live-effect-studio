@@ -289,39 +289,68 @@ function AppInner() {
   }, [trackStates, videoTracks, audioTracks]);
 
   // ---- playback clock ----
+  // The frame-accurate value lives in the playhead store (read by the timeline
+  // needle and timecode readouts). React state is committed at ~12 Hz so the
+  // monitor/effect logic stays in sync without re-rendering the editor 60×/s.
   useEffect(() => {
     if (!playing) {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
       return;
     }
     let last = performance.now();
+    let lastCommit = 0;
     const tick = (now: number) => {
       const dt = (now - last) / 1000;
       last = now;
       const end = endRef.current;
       const nt = timeRef.current + dt;
       if (end > 0 && nt >= end) {
+        timeRef.current = end;
+        playhead.set(end);
         setTime(end);
         setPlaying(false);
         return;
       }
-      setTime(nt);
+      timeRef.current = nt;
+      playhead.set(nt);
+      if (now - lastCommit >= 80) {
+        lastCommit = now;
+        setTime(nt);
+      }
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     };
   }, [playing]);
 
+  // Keep the store aligned whenever React state moves the playhead (seek, undo…).
+  useEffect(() => {
+    playhead.set(time);
+  }, [time]);
+
   const togglePlay = useCallback(() => {
     setPlaying((p) => {
-      if (!p && endRef.current > 0 && timeRef.current >= endRef.current - 0.05) setTime(0);
+      if (!p && endRef.current > 0 && timeRef.current >= endRef.current - 0.05) {
+        timeRef.current = 0;
+        playhead.set(0);
+        setTime(0);
+      }
       return !p;
     });
   }, []);
 
-  const seek = useCallback((t: number) => setTime(Math.max(0, t)), []);
+  const seek = useCallback((t: number) => {
+    const next = Math.max(0, t);
+    timeRef.current = next;
+    // Move the needle this frame; React catches up on the next commit.
+    playhead.set(next);
+    setTime(next);
+  }, []);
+
 
   // ---- import ----
   const importFiles = useCallback(async (files: FileList | File[]) => {

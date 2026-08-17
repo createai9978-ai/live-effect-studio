@@ -80,6 +80,88 @@ const CURSOR: Record<Tool, string> = {
   zoom: "cursor-zoom-in",
 };
 
+/** Running timecode — repaints on its own at 20 Hz, never the whole timeline. */
+const LiveTimecode = memo(function LiveTimecode() {
+  const t = usePlayheadValue(20);
+  return (
+    <span className="font-mono text-[10px] tabular-nums text-cyan-300">{toTimecode(t)}</span>
+  );
+});
+
+/**
+ * The cyan needle. It subscribes to the clock store and writes a `translate3d`
+ * on every frame, so playback and scrubbing move it on the compositor without
+ * a single React render or layout pass.
+ */
+const PlayheadNeedle = memo(function PlayheadNeedle({
+  seqDur,
+  scrubbing,
+  onSeek,
+  beginScrub,
+}: {
+  seqDur: number;
+  scrubbing: boolean;
+  onSeek: (t: number) => void;
+  beginScrub: (e: React.PointerEvent, seekImmediately?: boolean) => void;
+}) {
+  const railRef = useRef<HTMLDivElement>(null);
+  const durRef = useRef(seqDur);
+  durRef.current = seqDur;
+
+  useEffect(() => {
+    const apply = (t: number) => {
+      const el = railRef.current;
+      if (!el) return;
+      const pct = Math.min(1, Math.max(0, t / (durRef.current || 1))) * 100;
+      el.style.transform = `translate3d(${pct}%,0,0)`;
+    };
+    return playhead.subscribe(apply);
+  }, [seqDur]);
+
+  return (
+    <div
+      className="pointer-events-none absolute top-0 bottom-0 z-[60]"
+      style={{ left: HEAD_W, right: 0 }}
+    >
+      <div ref={railRef} className="absolute inset-y-0 left-0 w-full will-change-transform">
+        <div
+          className={cn(
+            "absolute inset-y-0 left-0 w-px bg-cyan-300 transition-shadow duration-150",
+            scrubbing ? "shadow-[0_0_14px] shadow-cyan-300" : "shadow-[0_0_8px] shadow-cyan-400/70"
+          )}
+        />
+        {/* Wide invisible grab strip so the thin line is easy to catch */}
+        <div
+          role="slider"
+          aria-label="Timeline playhead"
+          aria-valuemin={0}
+          aria-valuemax={seqDur}
+          aria-valuenow={Math.round(playhead.get() * 100) / 100}
+          tabIndex={0}
+          onPointerDown={(e) => beginScrub(e, false)}
+          onKeyDown={(e) => {
+            const nudge = e.shiftKey ? 1 : 1 / 30;
+            const now = playhead.get();
+            if (e.key === "ArrowLeft") { e.preventDefault(); onSeek(Math.max(0, now - nudge)); }
+            if (e.key === "ArrowRight") { e.preventDefault(); onSeek(Math.min(seqDur, now + nudge)); }
+          }}
+          className="pointer-events-auto absolute inset-y-0 left-0 w-3 -translate-x-1/2 cursor-ew-resize touch-none outline-none"
+        />
+        <div
+          onPointerDown={(e) => beginScrub(e, false)}
+          className={cn(
+            "pointer-events-auto absolute -top-6 left-0 flex h-6 w-4 -translate-x-1/2 cursor-ew-resize touch-none items-end justify-center rounded-b-[3px] bg-gradient-to-b from-cyan-200 to-cyan-500 shadow-[0_2px_10px] shadow-cyan-500/50 transition-transform duration-150 ease-[cubic-bezier(.22,1,.36,1)] hover:scale-110",
+            scrubbing && "scale-110"
+          )}
+        >
+          <span className="mb-0.5 h-2 w-px bg-cyan-900/60" />
+        </div>
+      </div>
+    </div>
+  );
+});
+
+
 function Timeline(props: Props) {
   const {
     clips, videoTracks, audioTracks, seqDur, contentEnd, tool, zoom,

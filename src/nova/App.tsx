@@ -1410,10 +1410,9 @@ function AppInner() {
             myMedia={myMediaItems}
             onHoverEffect={setHoveredEffectId}
           />
-          </div>
         )}
 
-        {panels.projectBin && !browserOpen && (
+        {!browserOpen && (
           <MediaBin
             assets={assets}
             importing={importing}
@@ -1423,6 +1422,7 @@ function AppInner() {
             onOpenSource={setSourceAssetId}
           />
         )}
+        </div>
 
         {panels.sourceMonitor && sourceAsset && (
           <LeftMonitorPanel

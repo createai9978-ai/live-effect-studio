@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { Asset, fmtDuration, fmtSize, waveformBars } from "../editor/types";
 import { cn } from "../utils/cn";
 
@@ -11,7 +11,7 @@ type Props = {
   onOpenSource: (id: string) => void;
 };
 
-export default function MediaBin({
+function MediaBin({
   assets,
   importing,
   onOpenImport,
@@ -294,3 +294,6 @@ function AssetCard({
     </div>
   );
 }
+
+/** Memoized: this panel only re-renders when its own props change. */
+export default memo(MediaBin);

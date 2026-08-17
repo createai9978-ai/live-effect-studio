@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { Clip, ClipEffects, Grade, WheelVal } from "../editor/types";
 import { cn } from "../utils/cn";
 
@@ -13,7 +13,7 @@ type Props = {
   onClose?: () => void;
 };
 
-export default function InspectorPanel({
+function InspectorPanel({
   clip,
   clipName,
   grade,
@@ -333,3 +333,6 @@ function Wheel({
     </div>
   );
 }
+
+/** Memoized: this panel only re-renders when its own props change. */
+export default memo(InspectorPanel);

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { cn } from "../utils/cn";
 
 export type RailKey =
@@ -95,7 +95,7 @@ const ITEMS: { key: RailKey; label: string; badge?: string; icon: ReactNode }[] 
 ];
 
 /** Far-left vertical quick-tool strip. */
-export default function ToolRail({
+function ToolRail({
   active,
   onSelect,
 }: {
@@ -135,3 +135,5 @@ export default function ToolRail({
   );
 }
 
+/** Memoized: this panel only re-renders when its own props change. */
+export default memo(ToolRail);

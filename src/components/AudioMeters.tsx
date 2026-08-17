@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { cn } from "../utils/cn";
 
 const CHANNELS = ["A1", "A2", "A3", "Master"] as const;
 
 /** Vertical multi-channel audio mixer, animated during playback. */
-export default function AudioMeters({ playing, hasAudio }: { playing: boolean; hasAudio: boolean }) {
+function AudioMeters({ playing, hasAudio }: { playing: boolean; hasAudio: boolean }) {
   const [levels, setLevels] = useState<number[]>([0, 0, 0, 0]);
   const [peaks, setPeaks] = useState<number[]>([0, 0, 0, 0]);
 
@@ -81,3 +81,6 @@ export default function AudioMeters({ playing, hasAudio }: { playing: boolean; h
     </aside>
   );
 }
+
+/** Memoized: this panel only re-renders when its own props change. */
+export default memo(AudioMeters);

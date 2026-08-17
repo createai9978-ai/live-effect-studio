@@ -31,13 +31,13 @@ export default function TopBar({
 }) {
   const { settings } = useAdmin();
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-[#131824]/80 backdrop-blur-xl px-3">
+    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-white/[0.07] bg-gradient-to-r from-[#0d1224]/90 via-[#111634]/85 to-[#0d1224]/90 backdrop-blur-xl px-3.5">
       {/* Logo */}
       <div className="flex shrink-0 items-center gap-2.5">
         <button
           onClick={onGoHome}
           title="Back to launcher"
-          className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg shadow-lg"
+          className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl shadow-lg"
           style={{
             background: settings.logoUrl
               ? "transparent"
@@ -47,16 +47,17 @@ export default function TopBar({
           {settings.logoUrl ? (
             <img src={settings.logoUrl} alt="App logo" className="h-full w-full object-contain" />
           ) : (
-            <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <svg className="h-[18px] w-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="5" width="20" height="14" rx="2" />
               <path d="M2 9h20M7 5v4M12 5v4M17 5v4M7 15h4" />
             </svg>
           )}
         </button>
-        <span className="hidden items-center gap-1 text-[13px] font-semibold tracking-wide text-zinc-100 md:inline-flex">
+        <span className="hidden items-center gap-1.5 text-[15px] font-semibold tracking-wide text-zinc-50 md:inline-flex">
           <EditableText id="app.title" text="NOVA Studio" />
-          <span className="ml-1.5 rounded bg-white/[0.07] px-1 py-px text-[8px] font-medium tracking-wider text-zinc-500">EDIT</span>
+          <span className="rounded-md bg-gradient-to-r from-violet-500 to-fuchsia-500 px-1.5 py-px text-[8.5px] font-bold tracking-wider text-white">PRO</span>
         </span>
+
       </div>
 
       {/* Menu bar */}
@@ -64,7 +65,7 @@ export default function TopBar({
 
 
       {/* Workspace tabs */}
-      <div className="mx-auto flex items-center gap-0.5 rounded-lg border border-white/[0.06] bg-black/30 p-0.5">
+      <div className="mx-auto flex items-center gap-1 rounded-xl border border-white/[0.07] bg-black/35 p-1">
         {WORKSPACES.map((w) => (
           <Tooltip key={w.id} label={`${w.label} workspace`} hint={w.hint} side="bottom">
             <button
@@ -73,22 +74,34 @@ export default function TopBar({
               style={
                 workspace === w.id
                   ? {
-                      background: `linear-gradient(90deg, ${settings.accent}22, ${settings.accent2}33)`,
+                      background: `linear-gradient(90deg, ${settings.accent}33, ${settings.accent2}44)`,
                       color: settings.accent,
-                      boxShadow: `0 0 0 1px ${settings.accent}55`,
+                      boxShadow: `0 0 0 1px ${settings.accent}66, 0 0 22px -8px ${settings.accent}`,
                     }
                   : undefined
               }
               className={cn(
-                "rounded-md px-3 py-1 text-[11px] transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] active:scale-95",
-                workspace !== w.id && "text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-200"
+                "rounded-lg px-4 py-1.5 text-[12px] font-medium transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] active:scale-95",
+                workspace !== w.id && "text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-100"
               )}
             >
               <EditableText id={`workspace.${w.id}`} text={w.label} />
             </button>
           </Tooltip>
         ))}
+        <Tooltip label="AI Tools" hint="Neural effects, auto-cut and generative assets" side="bottom">
+          <button
+            onClick={onOpenAssetBrowser}
+            className="flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-[12px] font-medium text-zinc-400 transition-all duration-300 hover:bg-white/[0.05] hover:text-zinc-100"
+          >
+            AI Tools
+            <svg className="h-3.5 w-3.5 text-fuchsia-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 3l1.6 4L18 8.6l-3.7 2.6.6 4.4-2.9-2-2.9 2 .6-4.4L6 8.6 10.4 7 12 3z" />
+            </svg>
+          </button>
+        </Tooltip>
       </div>
+
 
 
       {/* Save status + project name */}

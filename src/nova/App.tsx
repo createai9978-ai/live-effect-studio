@@ -1332,7 +1332,7 @@ function AppInner() {
     : null;
 
   return (
-    <div className="flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#0A0D14] font-sans text-zinc-200 antialiased selection:bg-[#00F0FF]/25">
+    <div className="nova-desk flex h-[100dvh] w-screen flex-col overflow-hidden font-sans text-zinc-200 antialiased selection:bg-[#00F0FF]/25">
       <input
         ref={fileInputRef}
         type="file"
@@ -1390,7 +1390,7 @@ function AppInner() {
           }}
         />
 
-        <div className="nova-editor-media flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#111621] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]">
+        <div className="nova-editor-media nova-panel-card flex h-full min-h-0 min-w-0 flex-col">
         {browserOpen && (
           <AssetBrowser
             open={browserOpen}
@@ -1461,7 +1461,7 @@ function AppInner() {
           </div>
         ) : (
           inspectorOpen && (
-            <div key="ws-inspector" className="nova-editor-inspector flex h-full min-h-0 min-w-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+            <div key="ws-inspector" className="nova-editor-inspector nova-panel-card flex h-full min-h-0 min-w-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
               <InspectorPanel
                 clip={selectedClipObj}
                 clipName={selectedAsset?.name ?? null}
@@ -1476,8 +1476,10 @@ function AppInner() {
       </section>
 
       {/* ===== Lower row: timeline + audio mixer ===== */}
-      <section className="nova-editor-timeline flex min-h-0 min-w-0 overflow-hidden border-t border-white/[0.06] bg-[#0A0D14]">
+      <section className="nova-editor-timeline min-h-0 min-w-0">
+        <div className="nova-panel-card flex min-h-0 min-w-0">
         <Timeline
+
           assets={assets}
           clips={clips}
           videoTracks={videoTracks}
@@ -1523,8 +1525,14 @@ function AppInner() {
             }}
           />
         )}
-        {panels.audioMeters && <AudioMeters playing={playing} hasAudio={clips.length > 0} />}
+        </div>
+        {panels.audioMeters && (
+          <div className="nova-panel-card flex min-h-0 min-w-0">
+            <AudioMeters playing={playing} hasAudio={clips.length > 0} />
+          </div>
+        )}
       </section>
+
       </div>
 
 

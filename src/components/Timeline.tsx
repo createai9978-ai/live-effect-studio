@@ -150,11 +150,12 @@ export default function Timeline(props: Props) {
 
 
   return (
-    <div className="flex min-w-0 flex-1">
+    <div className="flex min-w-0 flex-1 flex-col">
       {/* ============ TOOL RAIL ============ */}
-      <div className="flex w-11 shrink-0 flex-col items-center gap-1 border-r border-white/[0.06] bg-[#171C29] py-2">
+      <div className="flex shrink-0 items-center gap-1 border-b border-white/[0.06] bg-white/[0.02] px-2 py-1.5">
+
         {TOOLS.map((t) => (
-          <Tooltip key={t.id} label={t.label.split(" — ")[0]} hint={`Shortcut ${t.key}${t.label.includes(" — ") ? ` · ${t.label.split(" — ")[1]}` : ""}`} side="right">
+          <Tooltip key={t.id} label={t.label.split(" — ")[0]} hint={`Shortcut ${t.key}${t.label.includes(" — ") ? ` · ${t.label.split(" — ")[1]}` : ""}`} side="bottom">
             <button
               type="button"
               aria-label={t.label}
@@ -173,13 +174,13 @@ export default function Timeline(props: Props) {
             </button>
           </Tooltip>
         ))}
-        <Tooltip label="Speed Ramping & Curve Editor" hint="Draw velocity curves, bullet time, beat-drop ramps" side="right">
+        <Tooltip label="Speed Ramping & Curve Editor" hint="Draw velocity curves, bullet time, beat-drop ramps" side="bottom">
           <button
             type="button"
             aria-pressed={!!rampOpen}
             onClick={onToggleRamp}
             className={cn(
-              "mt-1 flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ease-[cubic-bezier(.22,1,.36,1)] hover:scale-105 active:scale-95",
+              "flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ease-[cubic-bezier(.22,1,.36,1)] hover:scale-105 active:scale-95",
               rampOpen
                 ? "bg-gradient-to-br from-fuchsia-600 to-orange-500 text-white shadow-lg shadow-fuchsia-600/40 ring-1 ring-white/20"
                 : "text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-100"
@@ -192,7 +193,7 @@ export default function Timeline(props: Props) {
           </button>
         </Tooltip>
 
-        <div className="mt-auto flex flex-col items-center gap-0.5 pt-2">
+        <div className="ml-auto flex items-center gap-0.5">
           <button
             type="button"
             title="Zoom in (+)"

@@ -103,9 +103,7 @@ export default function ToolRail({
   onSelect: (key: RailKey) => void;
 }) {
   return (
-    <nav className="nova-scroll-thin flex h-full min-h-0 w-full min-w-0 flex-col items-center gap-0.5 overflow-y-auto overflow-x-hidden border-r border-white/[0.06] bg-[#0A0D14] px-1 py-2">
-
-
+    <nav className="nova-scroll-thin nova-panel-card flex h-full min-h-0 w-full min-w-0 flex-col items-center gap-1.5 overflow-y-auto overflow-x-hidden px-1.5 py-3">
       {ITEMS.map((it) => {
         const on = active === it.key;
         return (
@@ -114,19 +112,16 @@ export default function ToolRail({
             onClick={() => onSelect(it.key)}
             title={it.label}
             className={cn(
-              "group relative flex w-[50px] shrink-0 flex-col items-center gap-1 rounded-lg px-0.5 py-2 transition-all duration-300",
+              "group relative flex w-full shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 py-2.5 transition-all duration-300",
               on
-                ? "bg-[#00F0FF]/10 text-[#00F0FF] shadow-[0_0_20px_-6px_#00F0FF]"
-                : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200"
+                ? "bg-gradient-to-b from-[#00F0FF]/20 to-[#5B7CFF]/10 text-[#00F0FF] ring-1 ring-[#00F0FF]/40 shadow-[0_0_24px_-8px_#00F0FF]"
+                : "text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-200"
             )}
           >
-            {on && (
-              <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-[#00F0FF] shadow-[0_0_10px_#00F0FF]" />
-            )}
-            <span className="h-5 w-5 transition-transform duration-300 group-hover:scale-110">
+            <span className="h-[22px] w-[22px] transition-transform duration-300 group-hover:scale-110">
               {it.icon}
             </span>
-            <span className="max-w-full truncate text-[9px] font-medium leading-none tracking-tight">{it.label}</span>
+            <span className="max-w-full truncate text-[10px] font-medium leading-none tracking-tight">{it.label}</span>
             {it.badge && (
               <span className="absolute right-1 top-1 rounded-[3px] bg-fuchsia-500 px-1 text-[7px] font-bold text-white">
                 {it.badge}
@@ -135,7 +130,8 @@ export default function ToolRail({
           </button>
         );
       })}
-      <div className="mt-auto shrink-0 pt-2 text-[9px] text-zinc-700">More</div>
+      <div className="mt-auto shrink-0 pt-2 text-[10px] text-zinc-600">More</div>
     </nav>
   );
 }
+

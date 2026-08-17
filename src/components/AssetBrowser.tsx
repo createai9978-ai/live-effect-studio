@@ -175,6 +175,7 @@ export default function AssetBrowser({
     >
       {/* ============ Header row 1: brand + global search + close ============ */}
       <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] bg-[#181B24]/80 backdrop-blur-xl px-3 py-2">
+        {!embedded && (
         <div className="flex shrink-0 items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 shadow shadow-violet-500/30">
             <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
@@ -183,6 +184,8 @@ export default function AssetBrowser({
           </div>
           <span className="text-[12px] font-semibold text-zinc-100">Asset Library</span>
         </div>
+        )}
+
 
         {/* Sleek command-palette-style search bar with live suggestions */}
         <div className="relative mx-auto w-full max-w-2xl">

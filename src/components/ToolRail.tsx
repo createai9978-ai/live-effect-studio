@@ -1,7 +1,16 @@
 import type { ReactNode } from "react";
 import { cn } from "../utils/cn";
 
-export type RailKey = "media" | "text" | "transitions" | "effects" | "filters" | "audio" | "ai";
+export type RailKey =
+  | "media"
+  | "text"
+  | "transitions"
+  | "effects"
+  | "filters"
+  | "elements"
+  | "music"
+  | "audio"
+  | "ai";
 
 const ITEMS: { key: RailKey; label: string; badge?: string; icon: ReactNode }[] = [
   {

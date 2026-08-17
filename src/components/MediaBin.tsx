@@ -59,9 +59,12 @@ function MediaBin({
       {/* Header tabs — the accent bar slides between tabs on the compositor */}
       <div className="flex items-center gap-3 border-b border-white/[0.05] px-3">
         <div className="relative grid auto-cols-max grid-flow-col gap-3">
-          {(["Project Media", "Stock", "Favorites"] as const).map((t) => (
+          {(["Project Media", "Stock", "Favorites"] as const).map((t, i) => (
             <button
               key={t}
+              ref={(el) => {
+                tabRefs.current[i] = el;
+              }}
               onClick={() => setTab(t)}
               className={cn(
                 "relative py-2.5 text-[11px] font-semibold transition-colors duration-200 ease-[cubic-bezier(.22,1,.36,1)]",
@@ -73,17 +76,15 @@ function MediaBin({
           ))}
           <span
             aria-hidden
-            className="pointer-events-none absolute bottom-0 left-0 h-[2px] rounded-full bg-[#00F0FF] shadow-[0_0_8px_#00F0FF] transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] will-change-transform"
-            style={{
-              width: `calc((100% - 1.5rem) / 3)`,
-              transform: `translate3d(calc(${tabIndex} * (100% + 0.75rem)),0,0)`,
-            }}
+            className="pointer-events-none absolute bottom-0 left-0 h-[2px] rounded-full bg-[#00F0FF] shadow-[0_0_8px_#00F0FF] transition-[transform,width] duration-300 ease-[cubic-bezier(.22,1,.36,1)] will-change-transform"
+            style={{ width: indicator.width, transform: `translate3d(${indicator.x}px,0,0)` }}
           />
         </div>
         <span className="ml-auto text-[9px] text-zinc-600">
           {assets.length} item{assets.length === 1 ? "" : "s"}
         </span>
       </div>
+
 
 
       {/* Search */}

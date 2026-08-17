@@ -31,7 +31,7 @@ export default function InspectorPanel({
   const patch = (p: Partial<ClipEffects>) => clip && onUpdateEffects(clip.id, p);
 
   return (
-    <aside className="flex w-[320px] shrink-0 flex-col border-l border-white/[0.06] bg-[#0B0F19]">
+    <aside className="flex w-[320px] shrink-0 flex-col border-l border-white/[0.06] bg-[#0A0D14]">
       <header className="flex items-center justify-between border-b border-white/[0.06] px-3.5 py-2.5">
         <div className="flex items-center gap-1.5">
           <span className="text-[12px] font-semibold text-zinc-100">Inspector</span>

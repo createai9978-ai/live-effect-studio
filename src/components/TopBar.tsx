@@ -31,7 +31,7 @@ export default function TopBar({
 }) {
   const { settings } = useAdmin();
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-[#181B24]/80 backdrop-blur-xl px-3">
+    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-[#131824]/80 backdrop-blur-xl px-3">
       {/* Logo */}
       <div className="flex shrink-0 items-center gap-2.5">
         <button

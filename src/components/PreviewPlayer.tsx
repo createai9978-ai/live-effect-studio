@@ -307,7 +307,7 @@ export default function PreviewPlayer({
     : { width: "100%", height: "100%" };
 
   return (
-    <main className="flex min-w-0 flex-1 flex-col bg-[#0F1117]">
+    <main className="flex min-w-0 flex-1 flex-col bg-[#111621]">
       {/* Monitor header */}
       <div className="flex items-center justify-between border-b border-white/[0.05] px-4 py-1.5">
         <div className="flex items-center gap-2 text-[11px]">

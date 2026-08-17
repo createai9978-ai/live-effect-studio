@@ -78,7 +78,7 @@ export default function HomeScreen({
     .toUpperCase();
 
   return (
-    <div className="relative flex h-screen overflow-hidden bg-[#0F1117] font-sans text-zinc-200 antialiased">
+    <div className="relative flex h-screen overflow-hidden bg-[#111621] font-sans text-zinc-200 antialiased">
       {/* Ambient cinematic wash behind the whole launcher */}
       <div
         aria-hidden
@@ -98,7 +98,7 @@ export default function HomeScreen({
       />
 
       {/* ---------- Side rail ---------- */}
-      <aside className="relative z-10 hidden w-[248px] shrink-0 flex-col border-r border-white/[0.06] bg-[#181B24]/85 p-4 backdrop-blur-xl md:flex">
+      <aside className="relative z-10 hidden w-[248px] shrink-0 flex-col border-r border-white/[0.06] bg-[#131824]/85 p-4 backdrop-blur-xl md:flex">
         <div className="nova-rise mb-8 flex items-center gap-2.5">
           <div
             className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl shadow-lg shadow-violet-500/25"
@@ -205,7 +205,7 @@ export default function HomeScreen({
       {/* ---------- Main ---------- */}
       <main className="relative z-10 min-w-0 flex-1 overflow-y-auto">
         {/* top strip */}
-        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-white/[0.06] bg-[#0F1117]/80 px-6 py-3 backdrop-blur-xl">
+        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-white/[0.06] bg-[#111621]/80 px-6 py-3 backdrop-blur-xl">
           <div className="relative flex items-center gap-1 rounded-lg border border-white/[0.06] bg-black/30 p-0.5">
             {RATIOS.map((r) => (
               <button
@@ -263,7 +263,7 @@ export default function HomeScreen({
               <button
                 key={t.id}
                 onClick={() => onCreateProject(ratio)}
-                className="nova-lift nova-sheen-host group rounded-xl border border-white/[0.07] bg-[#181B24] p-4 text-left hover:border-[#00E5FF]/30 hover:bg-[#1c2030] hover:shadow-[0_18px_40px_-20px_rgba(0,229,255,0.55)]"
+                className="nova-lift nova-sheen-host group rounded-xl border border-white/[0.07] bg-[#131824] p-4 text-left hover:border-[#00E5FF]/30 hover:bg-[#1c2030] hover:shadow-[0_18px_40px_-20px_rgba(0,229,255,0.55)]"
               >
                 <svg
                   className="mb-2.5 h-5 w-5 text-[#8DF3FF] transition-transform duration-[520ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-y-0.5 group-hover:scale-110"
@@ -293,7 +293,7 @@ export default function HomeScreen({
                 <button
                   key={r.id}
                   onClick={() => onCreateProject(ratio)}
-                  className="nova-lift relative rounded-lg border border-white/[0.06] bg-[#181B24] px-4 py-2.5 text-[11.5px] text-zinc-300 hover:border-[#8A2BE2]/40 hover:text-white"
+                  className="nova-lift relative rounded-lg border border-white/[0.06] bg-[#131824] px-4 py-2.5 text-[11.5px] text-zinc-300 hover:border-[#8A2BE2]/40 hover:text-white"
                 >
                   {r.label}
                   {r.badge && (
@@ -310,7 +310,7 @@ export default function HomeScreen({
           <div className="mt-8 pb-10">
             <h2 className="mb-3 text-[13px] font-medium text-zinc-200"><EditableText id="home.localProjects" text="Local Projects" /></h2>
             {recentProjects.length === 0 ? (
-              <div className="nova-rise flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-[#181B24]/50 py-14">
+              <div className="nova-rise flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-[#131824]/50 py-14">
                 <svg
                   className="mb-3 h-10 w-10 text-zinc-700"
                   viewBox="0 0 24 24"
@@ -337,7 +337,7 @@ export default function HomeScreen({
                   <button
                     key={p.id}
                     onClick={() => onCreateProject(ratio)}
-                    className="nova-lift nova-sheen-host rounded-xl border border-white/[0.07] bg-[#181B24] p-3 text-left hover:border-[#00E5FF]/30"
+                    className="nova-lift nova-sheen-host rounded-xl border border-white/[0.07] bg-[#131824] p-3 text-left hover:border-[#00E5FF]/30"
                   >
                     <div className="mb-2 h-20 overflow-hidden rounded-lg bg-gradient-to-br from-slate-800 to-slate-900" />
                     <div className="truncate text-[12px] text-zinc-100">{p.name}</div>

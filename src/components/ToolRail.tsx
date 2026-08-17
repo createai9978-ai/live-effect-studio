@@ -103,7 +103,7 @@ export default function ToolRail({
   onSelect: (key: RailKey) => void;
 }) {
   return (
-    <nav className="nova-scroll-thin flex h-full min-h-0 w-[68px] shrink-0 flex-col items-center gap-0.5 overflow-y-auto overflow-x-hidden border-r border-white/[0.06] bg-[#0B0F19] px-1 py-2">
+    <nav className="nova-scroll-thin flex h-full min-h-0 w-[68px] shrink-0 flex-col items-center gap-0.5 overflow-y-auto overflow-x-hidden border-r border-white/[0.06] bg-[#0A0D14] px-1 py-2">
 
       {ITEMS.map((it) => {
         const on = active === it.key;

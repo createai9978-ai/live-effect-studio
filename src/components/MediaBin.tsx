@@ -23,8 +23,15 @@ function MediaBin({
   const [tab, setTab] = useState<"Project Media" | "Stock" | "Favorites">("Project Media");
   const [dragOver, setDragOver] = useState(false);
 
-  const filtered = assets.filter((a) => a.name.toLowerCase().includes(query.toLowerCase()));
-  const totalBytes = assets.reduce((s, a) => s + a.size, 0);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q ? assets.filter((a) => a.name.toLowerCase().includes(q)) : assets;
+  }, [assets, query]);
+  const totalBytes = useMemo(() => assets.reduce((s, a) => s + a.size, 0), [assets]);
+
+  // Animated tab underline: slides between tabs instead of popping.
+  const tabIndex = ["Project Media", "Stock", "Favorites"].indexOf(tab);
+
 
   return (
     <aside

@@ -1437,6 +1437,8 @@ function AppInner() {
 
         <div className="nova-editor-media nova-panel-card flex h-full min-h-0 min-w-0 flex-col">
         {browserOpen && (
+          <div key={browserTab} className="nova-panel-enter flex h-full min-h-0 flex-col">
+
           <AssetBrowser
             open={browserOpen}
             initialTab={browserTab}

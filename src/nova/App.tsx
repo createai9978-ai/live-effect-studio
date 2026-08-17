@@ -1461,7 +1461,7 @@ function AppInner() {
           </div>
         ) : (
           inspectorOpen && (
-            <div key="ws-inspector" className="nova-editor-inspector flex h-full min-h-0 min-w-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+            <div key="ws-inspector" className="nova-editor-inspector nova-panel-card flex h-full min-h-0 min-w-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
               <InspectorPanel
                 clip={selectedClipObj}
                 clipName={selectedAsset?.name ?? null}

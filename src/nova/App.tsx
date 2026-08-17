@@ -1376,6 +1376,8 @@ function AppInner() {
               transitions: "transitions",
               effects: "effects",
               filters: "filters",
+              elements: "stickers",
+              music: "audio",
               audio: "audio",
               ai: "stock",
             };

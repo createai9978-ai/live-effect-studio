@@ -1388,8 +1388,12 @@ function AppInner() {
           }}
         />
 
+        {/* ===== Media / asset column — medium width, ~17% of viewport ===== */}
+        <div
+          className="flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#111621] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]"
+          style={{ width: "clamp(280px, 17vw, 340px)" }}
+        >
         {browserOpen && (
-          <div className="flex h-full w-[292px] min-w-[292px] max-w-[292px] shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#111621] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]">
           <AssetBrowser
             open={browserOpen}
             initialTab={browserTab}

@@ -1450,20 +1450,24 @@ function AppInner() {
         />
 
         {workspace === "color" && panels.lumetri ? (
-          <div key="ws-color" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+          <div key="ws-color" className="flex h-full min-h-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
             <LumetriPanel grade={grade} onGradeChange={(g) => { pushHistory(); setGrade(g); }} />
           </div>
         ) : workspace === "audio" ? (
-          <div key="ws-audio" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+          <div key="ws-audio" className="flex h-full min-h-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
             <AudioMixerPanel />
           </div>
         ) : workspace === "graphics" ? (
-          <div key="ws-graphics" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+          <div key="ws-graphics" className="flex h-full min-h-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
             <GraphicsPanel />
           </div>
         ) : (
           inspectorOpen && (
-            <div key="ws-inspector" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+            <div
+              key="ws-inspector"
+              className="flex h-full min-h-0 shrink-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]"
+              style={{ width: "clamp(264px, 16.5vw, 320px)" }}
+            >
               <InspectorPanel
                 clip={selectedClipObj}
                 clipName={selectedAsset?.name ?? null}

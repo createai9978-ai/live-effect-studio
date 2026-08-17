@@ -137,6 +137,13 @@ export default function TopBar({
       </Tooltip>
       <AdminToggle />
 
+      {/* Profile */}
+      <Tooltip label="Account" hint="Profile, preferences and sync status" side="bottom">
+        <button className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#5B7CFF] text-[10px] font-bold text-[#04121a] ring-1 ring-white/20 transition hover:brightness-110 md:flex">
+          NS
+        </button>
+      </Tooltip>
+
 
     </header>
   );

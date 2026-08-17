@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from "react";
+import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Asset,
   Clip,
@@ -11,9 +11,11 @@ import {
   toTimecode,
   waveformBars,
 } from "../editor/types";
+import { playhead, rafThrottle, usePlayheadValue } from "../editor/playhead";
 import { EFFECT_DRAG_MIME } from "../editor/assetLibrary";
 import { cn } from "../utils/cn";
 import Tooltip from "./Tooltip";
+
 
 
 const HEAD_W = 148;

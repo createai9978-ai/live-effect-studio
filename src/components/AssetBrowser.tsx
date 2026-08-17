@@ -300,6 +300,7 @@ export default function AssetBrowser({
           </button>
           )}
 
+          {!embedded && (
           <button
             onClick={onClose}
             title="Close Asset Library (Esc)"
@@ -309,6 +310,8 @@ export default function AssetBrowser({
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
+          )}
+
         </div>
       </div>
 

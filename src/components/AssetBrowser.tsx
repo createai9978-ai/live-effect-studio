@@ -306,6 +306,8 @@ export default function AssetBrowser({
           </button>
         )}
       </div>
+      )}
+
 
       {/* ============ Header row 2: colour-coded category tabs ============ */}
       <div

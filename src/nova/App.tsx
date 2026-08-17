@@ -359,6 +359,13 @@ function AppInner() {
     setTime(next);
   }, []);
 
+  // Stable identities so the memoized Timeline doesn't re-render on every commit.
+  const handleSelectEffect = useCallback((clipId: string | null, effectId: string | null) => {
+    setSelectedFx(clipId && effectId ? { clipId, effectId } : null);
+  }, []);
+  const handleToggleRamp = useCallback(() => setRampOpen((v) => !v), []);
+
+
 
   // ---- import ----
   const importFiles = useCallback(async (files: FileList | File[]) => {
@@ -1521,7 +1528,6 @@ function AppInner() {
           clips={clips}
           videoTracks={videoTracks}
           audioTracks={audioTracks}
-          time={time}
           seqDur={seqDur}
           contentEnd={contentEnd}
           tool={tool}
@@ -1544,12 +1550,11 @@ function AppInner() {
           onApplyEffectPreset={applyEffectToClip}
           onUpdateAppliedEffect={updateAppliedEffect}
           selectedEffect={selectedFx}
-          onSelectEffect={(clipId, effectId) =>
-            setSelectedFx(clipId && effectId ? { clipId, effectId } : null)
-          }
+          onSelectEffect={handleSelectEffect}
           onDeleteAppliedEffect={deleteAppliedEffect}
           rampOpen={rampOpen}
-          onToggleRamp={() => setRampOpen((v) => !v)}
+          onToggleRamp={handleToggleRamp}
+
         />
         {rampOpen && (
           <SpeedCurveEditor

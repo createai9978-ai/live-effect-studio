@@ -61,6 +61,28 @@ const ITEMS: { key: RailKey; label: string; badge?: string; icon: ReactNode }[] 
     ),
   },
   {
+    key: "elements",
+    label: "Elements",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="8" cy="8" r="4" />
+        <rect x="13" y="13" width="7.5" height="7.5" rx="1.5" />
+        <path d="M13 4h7.5v7.5H13z" />
+      </svg>
+    ),
+  },
+  {
+    key: "music",
+    label: "Music",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 18V6l9-2v12" />
+        <circle cx="6.5" cy="18" r="2.5" />
+        <circle cx="15.5" cy="16" r="2.5" />
+      </svg>
+    ),
+  },
+  {
     key: "audio",
     label: "Audio",
     icon: (

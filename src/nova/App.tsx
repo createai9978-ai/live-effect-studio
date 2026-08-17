@@ -1390,7 +1390,7 @@ function AppInner() {
           }}
         />
 
-        <div className="nova-editor-media flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#111621] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]">
+        <div className="nova-editor-media nova-panel-card flex h-full min-h-0 min-w-0 flex-col">
         {browserOpen && (
           <AssetBrowser
             open={browserOpen}

@@ -318,7 +318,7 @@ function AppInner() {
       }
       timeRef.current = nt;
       playhead.set(nt);
-      if (now - lastCommit >= 80) {
+      if (now - lastCommit >= 33) {
         lastCommit = now;
         setTime(nt);
       }

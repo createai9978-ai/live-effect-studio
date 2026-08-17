@@ -114,7 +114,7 @@ export default function ToolRail({
   onSelect: (key: RailKey) => void;
 }) {
   return (
-    <nav className="flex w-[78px] shrink-0 flex-col items-center gap-1 border-r border-white/[0.06] bg-[#0B0F19] py-3">
+    <nav className="nova-scroll-thin flex h-full min-h-0 w-[78px] shrink-0 flex-col items-center gap-1 overflow-y-auto overflow-x-hidden border-r border-white/[0.06] bg-[#0B0F19] py-3">
       {ITEMS.map((it) => {
         const on = active === it.key;
         return (

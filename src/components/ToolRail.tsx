@@ -1,7 +1,16 @@
 import type { ReactNode } from "react";
 import { cn } from "../utils/cn";
 
-export type RailKey = "media" | "text" | "transitions" | "effects" | "filters" | "audio" | "ai";
+export type RailKey =
+  | "media"
+  | "text"
+  | "transitions"
+  | "effects"
+  | "filters"
+  | "elements"
+  | "music"
+  | "audio"
+  | "ai";
 
 const ITEMS: { key: RailKey; label: string; badge?: string; icon: ReactNode }[] = [
   {
@@ -48,6 +57,28 @@ const ITEMS: { key: RailKey; label: string; badge?: string; icon: ReactNode }[] 
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round">
         <circle cx="9" cy="10" r="5.5" />
         <circle cx="15" cy="14" r="5.5" />
+      </svg>
+    ),
+  },
+  {
+    key: "elements",
+    label: "Elements",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="8" cy="8" r="4" />
+        <rect x="13" y="13" width="7.5" height="7.5" rx="1.5" />
+        <path d="M13 4h7.5v7.5H13z" />
+      </svg>
+    ),
+  },
+  {
+    key: "music",
+    label: "Music",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 18V6l9-2v12" />
+        <circle cx="6.5" cy="18" r="2.5" />
+        <circle cx="15.5" cy="16" r="2.5" />
       </svg>
     ),
   },

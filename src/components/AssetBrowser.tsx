@@ -271,7 +271,9 @@ export default function AssetBrowser({
       </div>
 
       {/* ============ Tag filter chips ============ */}
+      {!embedded && (
       <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-white/[0.05] bg-[#10141F] px-3 py-1.5 nova-scroll-thin">
+
         <span className="mr-1 shrink-0 text-[9.5px] uppercase tracking-widest text-zinc-600">Tags</span>
         {TAG_META.map((t) => {
           const active = activeTags.has(t.id);

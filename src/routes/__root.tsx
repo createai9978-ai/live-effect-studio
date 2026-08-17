@@ -78,11 +78,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "NOVA Studio — Browser Video Editor" },
+      {
+        name: "description",
+        content:
+          "NOVA Studio is a browser-based pro video editor with a live effects library, LUT color grading, transitions and a multi-track timeline.",
+      },
+      { name: "author", content: "NOVA Studio" },
+      { property: "og:site_name", content: "NOVA Studio" },
+      { property: "og:title", content: "NOVA Studio — Browser Video Editor" },
+      {
+        property: "og:description",
+        content:
+          "Edit video in the browser: live effect previews, LUT color grading, transitions and a multi-track timeline.",
+      },
+
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },

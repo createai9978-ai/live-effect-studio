@@ -1332,7 +1332,7 @@ function AppInner() {
     : null;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#0A0D14] font-sans text-zinc-200 antialiased selection:bg-[#00F0FF]/25">
+    <div className="flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#0A0D14] font-sans text-zinc-200 antialiased selection:bg-[#00F0FF]/25">
       <input
         ref={fileInputRef}
         type="file"

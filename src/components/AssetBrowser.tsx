@@ -252,12 +252,15 @@ export default function AssetBrowser({
 
 
         <div className="flex shrink-0 items-center gap-2">
+          {!embedded && (
           <button className="hidden items-center gap-1 rounded-md border border-white/[0.08] px-2 py-1 text-[10px] text-zinc-400 transition hover:bg-white/[0.05] sm:flex">
             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 15V3m0 12l-4-4m4 4l4-4M4 21h16" />
             </svg>
             Download Pack
           </button>
+          )}
+
           <button
             onClick={onClose}
             title="Close Asset Library (Esc)"

@@ -1,5 +1,7 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Clip, ClipEffects, Grade, WheelVal } from "../editor/types";
+import { rafThrottle } from "../editor/playhead";
+
 import { cn } from "../utils/cn";
 
 type Tab = "video" | "audio" | "color" | "animation";

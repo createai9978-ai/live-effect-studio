@@ -75,11 +75,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     void (async () => {
       const [roleRes, profileRes] = await Promise.all([
-        supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+        supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
         supabase.from("profiles").select("id, display_name, avatar_url").eq("id", userId).maybeSingle(),
       ]);
       if (!active) return;
-      setIsAdmin(roleRes.data === true);
+      setIsAdmin(roleRes.data != null);
+
       setProfile((profileRes.data as Profile | null) ?? null);
     })();
     return () => {

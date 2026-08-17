@@ -1365,7 +1365,7 @@ function AppInner() {
       />
 
       {/* ===== Upper row: rail · media pool · program monitor · inspector ===== */}
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         <ToolRail
           active={rail}
           onSelect={(k) => {

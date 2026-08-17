@@ -114,7 +114,7 @@ export default function ToolRail({
   onSelect: (key: RailKey) => void;
 }) {
   return (
-    <nav className="flex w-[78px] shrink-0 flex-col items-center gap-1 border-r border-white/[0.06] bg-[#0B0F19] py-3">
+    <nav className="nova-scroll-thin flex h-full min-h-0 w-[78px] shrink-0 flex-col items-center gap-1 overflow-y-auto overflow-x-hidden border-r border-white/[0.06] bg-[#0B0F19] py-3">
       {ITEMS.map((it) => {
         const on = active === it.key;
         return (
@@ -123,7 +123,7 @@ export default function ToolRail({
             onClick={() => onSelect(it.key)}
             title={it.label}
             className={cn(
-              "group relative flex w-[62px] flex-col items-center gap-1 rounded-xl px-1 py-2.5 transition-all duration-300",
+              "group relative flex w-[62px] shrink-0 flex-col items-center gap-1 rounded-xl px-1 py-2.5 transition-all duration-300",
               on
                 ? "bg-[#00F0FF]/10 text-[#00F0FF] shadow-[0_0_20px_-6px_#00F0FF]"
                 : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200"
@@ -144,7 +144,7 @@ export default function ToolRail({
           </button>
         );
       })}
-      <div className="mt-auto text-[9px] text-zinc-700">More</div>
+      <div className="mt-auto shrink-0 pt-2 text-[9px] text-zinc-700">More</div>
     </nav>
   );
 }

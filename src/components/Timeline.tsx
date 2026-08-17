@@ -223,6 +223,8 @@ function Timeline(props: Props) {
 
       if (seekImmediately) onSeek(at(e.clientX));
       setScrubbing(true);
+      // Freeze hover transitions app-wide so the drag stays glued to the cursor.
+      document.body.classList.add("nova-dragging");
       const target = e.currentTarget as HTMLElement;
       try {
         target.setPointerCapture(e.pointerId);
@@ -234,6 +236,7 @@ function Timeline(props: Props) {
       const up = () => {
         move.flush();
         setScrubbing(false);
+        document.body.classList.remove("nova-dragging");
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", up);
         window.removeEventListener("pointercancel", up);

@@ -175,6 +175,7 @@ export default function AssetBrowser({
     >
       {/* ============ Header row 1: brand + global search + close ============ */}
       <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] bg-[#181B24]/80 backdrop-blur-xl px-3 py-2">
+        {!embedded && (
         <div className="flex shrink-0 items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 shadow shadow-violet-500/30">
             <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
@@ -183,6 +184,8 @@ export default function AssetBrowser({
           </div>
           <span className="text-[12px] font-semibold text-zinc-100">Asset Library</span>
         </div>
+        )}
+
 
         {/* Sleek command-palette-style search bar with live suggestions */}
         <div className="relative mx-auto w-full max-w-2xl">
@@ -249,12 +252,15 @@ export default function AssetBrowser({
 
 
         <div className="flex shrink-0 items-center gap-2">
+          {!embedded && (
           <button className="hidden items-center gap-1 rounded-md border border-white/[0.08] px-2 py-1 text-[10px] text-zinc-400 transition hover:bg-white/[0.05] sm:flex">
             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 15V3m0 12l-4-4m4 4l4-4M4 21h16" />
             </svg>
             Download Pack
           </button>
+          )}
+
           <button
             onClick={onClose}
             title="Close Asset Library (Esc)"
@@ -268,7 +274,9 @@ export default function AssetBrowser({
       </div>
 
       {/* ============ Tag filter chips ============ */}
+      {!embedded && (
       <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-white/[0.05] bg-[#10141F] px-3 py-1.5 nova-scroll-thin">
+
         <span className="mr-1 shrink-0 text-[9.5px] uppercase tracking-widest text-zinc-600">Tags</span>
         {TAG_META.map((t) => {
           const active = activeTags.has(t.id);
@@ -301,6 +309,8 @@ export default function AssetBrowser({
           </button>
         )}
       </div>
+      )}
+
 
       {/* ============ Header row 2: colour-coded category tabs ============ */}
       <div
@@ -366,7 +376,7 @@ export default function AssetBrowser({
 
         <main className="flex min-w-0 flex-1 flex-col">
           {/* Sub-header (in-tab search + context info) — hidden when global search is active */}
-          {!globalQuery && (
+          {!globalQuery && !embedded && (
             <div className="flex items-center gap-3 border-b border-white/[0.05] bg-[#181B24] px-4 py-2">
               <div className="flex flex-1 items-center gap-2 rounded-md bg-black/40 px-2.5 py-1.5 ring-1 ring-white/[0.06] focus-within:ring-violet-500/50">
                 <svg className="h-3.5 w-3.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
@@ -409,7 +419,8 @@ export default function AssetBrowser({
 
           {/* Grid or media picker */}
           {/* Sub-header 2: adjustable thumbnail sizes + count */}
-          {!globalQuery && (
+          {!globalQuery && !embedded && (
+
             <div className="flex shrink-0 items-center gap-2 border-b border-white/[0.04] bg-[#10141F] px-4 py-1.5">
               <span className="text-[10px] text-zinc-600">Thumbnail</span>
               <div className="flex items-center rounded-md border border-white/[0.06] bg-black/40 p-0.5">

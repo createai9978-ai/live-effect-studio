@@ -564,3 +564,9 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 0 8px #00f0ff;
   cursor: pointer;
 }
+
+/* Compact docked asset drawer: always a clean 3-column grid */
+.nova-emb-grid [class*="grid-cols-"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0.375rem !important;
+}

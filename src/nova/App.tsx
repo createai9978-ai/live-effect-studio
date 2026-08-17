@@ -1364,8 +1364,10 @@ function AppInner() {
         onOpenAssetBrowser={() => openAssetBrowser("effects")}
       />
 
-      {/* ===== Upper row: rail · media pool · program monitor · inspector ===== */}
-      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
+      {/* The editor body is an explicit two-row grid: the upper workspace has
+          four stable columns, while the timeline owns the entire lower row. */}
+      <div className="nova-editor-layout min-h-0 min-w-0 flex-1">
+      <section className="nova-editor-workspace min-h-0 min-w-0 overflow-hidden">
         <ToolRail
           active={rail}
           onSelect={(k) => {
@@ -1388,11 +1390,7 @@ function AppInner() {
           }}
         />
 
-        {/* ===== Media / asset column — medium width, ~17% of viewport ===== */}
-        <div
-          className="flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#111621] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]"
-          style={{ width: "clamp(280px, 17vw, 340px)" }}
-        >
+        <div className="nova-editor-media flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#111621] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]">
         {browserOpen && (
           <AssetBrowser
             open={browserOpen}
@@ -1463,11 +1461,7 @@ function AppInner() {
           </div>
         ) : (
           inspectorOpen && (
-            <div
-              key="ws-inspector"
-              className="flex h-full min-h-0 shrink-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]"
-              style={{ width: "clamp(264px, 16.5vw, 320px)" }}
-            >
+            <div key="ws-inspector" className="nova-editor-inspector flex h-full min-h-0 min-w-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
               <InspectorPanel
                 clip={selectedClipObj}
                 clipName={selectedAsset?.name ?? null}
@@ -1479,13 +1473,10 @@ function AppInner() {
             </div>
           )
         )}
-      </div>
+      </section>
 
       {/* ===== Lower row: timeline + audio mixer ===== */}
-      <div
-        className="flex min-w-0 shrink-0 overflow-hidden border-t border-white/[0.06] bg-[#0A0D14]"
-        style={{ height: "clamp(280px, 31vh, 350px)" }}
-      >
+      <section className="nova-editor-timeline flex min-h-0 min-w-0 overflow-hidden border-t border-white/[0.06] bg-[#0A0D14]">
         <Timeline
           assets={assets}
           clips={clips}
@@ -1533,6 +1524,7 @@ function AppInner() {
           />
         )}
         {panels.audioMeters && <AudioMeters playing={playing} hasAudio={clips.length > 0} />}
+      </section>
       </div>
 
 

@@ -1455,7 +1455,9 @@ function AppInner() {
             myMedia={myMediaItems}
             onHoverEffect={setHoveredEffectId}
           />
+          </div>
         )}
+
 
         {!browserOpen && (
           <MediaBin

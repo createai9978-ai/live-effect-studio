@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { cn } from "../utils/cn";
 
 export type RailKey =
@@ -95,7 +95,7 @@ const ITEMS: { key: RailKey; label: string; badge?: string; icon: ReactNode }[] 
 ];
 
 /** Far-left vertical quick-tool strip. */
-export default function ToolRail({
+function ToolRail({
   active,
   onSelect,
 }: {
@@ -112,15 +112,20 @@ export default function ToolRail({
             onClick={() => onSelect(it.key)}
             title={it.label}
             className={cn(
-              "group relative flex w-full shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 py-2.5 transition-all duration-300",
+              "nova-tap group relative flex w-full shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 py-2.5",
               on
                 ? "bg-gradient-to-b from-[#00F0FF]/20 to-[#5B7CFF]/10 text-[#00F0FF] ring-1 ring-[#00F0FF]/40 shadow-[0_0_24px_-8px_#00F0FF]"
                 : "text-zinc-500 hover:bg-white/[0.05] hover:text-zinc-200"
             )}
           >
-            <span className="h-[22px] w-[22px] transition-transform duration-300 group-hover:scale-110">
+            {/* Active marker glides between rail items */}
+            {on && (
+              <span className="absolute left-0 top-1/2 h-6 w-[2px] -translate-y-1/2 rounded-r-full bg-[#00F0FF] shadow-[0_0_10px_#00F0FF]" />
+            )}
+            <span className="h-[22px] w-[22px] transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-110 group-active:scale-95">
               {it.icon}
             </span>
+
             <span className="max-w-full truncate text-[10px] font-medium leading-none tracking-tight">{it.label}</span>
             {it.badge && (
               <span className="absolute right-1 top-1 rounded-[3px] bg-fuchsia-500 px-1 text-[7px] font-bold text-white">
@@ -135,3 +140,5 @@ export default function ToolRail({
   );
 }
 
+/** Memoized: this panel only re-renders when its own props change. */
+export default memo(ToolRail);

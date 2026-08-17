@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from "react";
+import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Asset,
   Clip,
@@ -11,9 +11,11 @@ import {
   toTimecode,
   waveformBars,
 } from "../editor/types";
+import { playhead, rafThrottle, usePlayheadValue } from "../editor/playhead";
 import { EFFECT_DRAG_MIME } from "../editor/assetLibrary";
 import { cn } from "../utils/cn";
 import Tooltip from "./Tooltip";
+
 
 
 const HEAD_W = 148;
@@ -23,7 +25,7 @@ type Props = {
   clips: Clip[];
   videoTracks: TrackId[];
   audioTracks: TrackId[];
-  time: number;
+  /** The live playhead is read from the clock store, not from props. */
   seqDur: number;
   contentEnd: number;
   tool: Tool;
@@ -78,9 +80,91 @@ const CURSOR: Record<Tool, string> = {
   zoom: "cursor-zoom-in",
 };
 
-export default function Timeline(props: Props) {
+/** Running timecode — repaints on its own at 20 Hz, never the whole timeline. */
+const LiveTimecode = memo(function LiveTimecode() {
+  const t = usePlayheadValue(20);
+  return (
+    <span className="font-mono text-[10px] tabular-nums text-cyan-300">{toTimecode(t)}</span>
+  );
+});
+
+/**
+ * The cyan needle. It subscribes to the clock store and writes a `translate3d`
+ * on every frame, so playback and scrubbing move it on the compositor without
+ * a single React render or layout pass.
+ */
+const PlayheadNeedle = memo(function PlayheadNeedle({
+  seqDur,
+  scrubbing,
+  onSeek,
+  beginScrub,
+}: {
+  seqDur: number;
+  scrubbing: boolean;
+  onSeek: (t: number) => void;
+  beginScrub: (e: React.PointerEvent, seekImmediately?: boolean) => void;
+}) {
+  const railRef = useRef<HTMLDivElement>(null);
+  const durRef = useRef(seqDur);
+  durRef.current = seqDur;
+
+  useEffect(() => {
+    const apply = (t: number) => {
+      const el = railRef.current;
+      if (!el) return;
+      const pct = Math.min(1, Math.max(0, t / (durRef.current || 1))) * 100;
+      el.style.transform = `translate3d(${pct}%,0,0)`;
+    };
+    return playhead.subscribe(apply);
+  }, [seqDur]);
+
+  return (
+    <div
+      className="pointer-events-none absolute top-0 bottom-0 z-[60]"
+      style={{ left: HEAD_W, right: 0 }}
+    >
+      <div ref={railRef} className="absolute inset-y-0 left-0 w-full will-change-transform">
+        <div
+          className={cn(
+            "absolute inset-y-0 left-0 w-px bg-cyan-300 transition-shadow duration-150",
+            scrubbing ? "shadow-[0_0_14px] shadow-cyan-300" : "shadow-[0_0_8px] shadow-cyan-400/70"
+          )}
+        />
+        {/* Wide invisible grab strip so the thin line is easy to catch */}
+        <div
+          role="slider"
+          aria-label="Timeline playhead"
+          aria-valuemin={0}
+          aria-valuemax={seqDur}
+          aria-valuenow={Math.round(playhead.get() * 100) / 100}
+          tabIndex={0}
+          onPointerDown={(e) => beginScrub(e, false)}
+          onKeyDown={(e) => {
+            const nudge = e.shiftKey ? 1 : 1 / 30;
+            const now = playhead.get();
+            if (e.key === "ArrowLeft") { e.preventDefault(); onSeek(Math.max(0, now - nudge)); }
+            if (e.key === "ArrowRight") { e.preventDefault(); onSeek(Math.min(seqDur, now + nudge)); }
+          }}
+          className="pointer-events-auto absolute inset-y-0 left-0 w-3 -translate-x-1/2 cursor-ew-resize touch-none outline-none"
+        />
+        <div
+          onPointerDown={(e) => beginScrub(e, false)}
+          className={cn(
+            "pointer-events-auto absolute -top-6 left-0 flex h-6 w-4 -translate-x-1/2 cursor-ew-resize touch-none items-end justify-center rounded-b-[3px] bg-gradient-to-b from-cyan-200 to-cyan-500 shadow-[0_2px_10px] shadow-cyan-500/50 transition-transform duration-150 ease-[cubic-bezier(.22,1,.36,1)] hover:scale-110",
+            scrubbing && "scale-110"
+          )}
+        >
+          <span className="mb-0.5 h-2 w-px bg-cyan-900/60" />
+        </div>
+      </div>
+    </div>
+  );
+});
+
+
+function Timeline(props: Props) {
   const {
-    clips, videoTracks, audioTracks, time, seqDur, contentEnd, tool, zoom,
+    clips, videoTracks, audioTracks, seqDur, contentEnd, tool, zoom,
     onSetZoom, onSetTool, selected, onSeek, onDeleteSelected, onSelectClip, onUpdateAppliedEffect,
     selectedEffect, onSelectEffect, onDeleteAppliedEffect, onApplyEffectPreset,
     rampOpen, onToggleRamp,
@@ -90,8 +174,8 @@ export default function Timeline(props: Props) {
   const [razorHoverX, setRazorHoverX] = useState<number | null>(null);
   const [scrubbing, setScrubbing] = useState(false);
 
-
   const step = niceStep(seqDur / zoom);
+
   const tickCount = Math.floor(seqDur / step) + 1;
 
   /**
@@ -101,52 +185,77 @@ export default function Timeline(props: Props) {
    * timeFromClientX call was shifted right by ~148px, causing the razor to
    * silently reject cuts (rel > duration - 0.1) and drops to land off-target.
    */
-  const laneMetrics = () => {
+  const laneMetrics = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return { left: 0, width: 1 };
     const inner = el.firstElementChild as HTMLElement;
     const r = inner.getBoundingClientRect();
     return { left: r.left + HEAD_W, width: Math.max(1, r.width - HEAD_W) };
-  };
+  }, []);
 
-  const timeFromClientX = (clientX: number) => {
-    const { left, width } = laneMetrics();
-    return Math.min(seqDur, Math.max(0, ((clientX - left) / width) * seqDur));
-  };
+  const timeFromClientX = useCallback(
+    (clientX: number) => {
+      const { left, width } = laneMetrics();
+      return Math.min(seqDur, Math.max(0, ((clientX - left) / width) * seqDur));
+    },
+    [laneMetrics, seqDur]
+  );
 
-  const pxPerSec = () => {
-    const { width } = laneMetrics();
-    return width / seqDur;
-  };
+  const pxPerSec = useCallback(() => laneMetrics().width / seqDur, [laneMetrics, seqDur]);
 
   /**
    * Pointer-based scrubbing. Used by BOTH the ruler and the playhead needle so
    * the cyan line can be grabbed and dragged anywhere across the sequence
    * without losing the pointer (pointer capture keeps events flowing even when
    * the cursor leaves the element or crosses the video tracks).
+   *
+   * Geometry is measured once at gesture start and pointer moves are coalesced
+   * to one seek per animation frame, so dragging stays glued to the cursor
+   * instead of thrashing layout on every event.
    */
-  const beginScrub = (e: React.PointerEvent, seekImmediately = true) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (seekImmediately) onSeek(timeFromClientX(e.clientX));
-    setScrubbing(true);
-    const target = e.currentTarget as HTMLElement;
-    try {
-      target.setPointerCapture(e.pointerId);
-    } catch {
-      /* pointer capture unsupported — window listeners below still work */
-    }
-    const move = (ev: PointerEvent) => onSeek(timeFromClientX(ev.clientX));
-    const up = () => {
-      setScrubbing(false);
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-      window.removeEventListener("pointercancel", up);
-    };
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
-    window.addEventListener("pointercancel", up);
-  };
+  const beginScrub = useCallback(
+    (e: React.PointerEvent, seekImmediately = true) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const { left, width } = laneMetrics();
+      const at = (clientX: number) =>
+        Math.min(seqDur, Math.max(0, ((clientX - left) / width) * seqDur));
+
+      if (seekImmediately) onSeek(at(e.clientX));
+      setScrubbing(true);
+      // Freeze hover transitions app-wide so the drag stays glued to the cursor.
+      document.body.classList.add("nova-dragging");
+      const target = e.currentTarget as HTMLElement;
+      try {
+        target.setPointerCapture(e.pointerId);
+      } catch {
+        /* pointer capture unsupported — window listeners below still work */
+      }
+      const move = rafThrottle((clientX: number) => onSeek(at(clientX)));
+      const onMove = (ev: PointerEvent) => move(ev.clientX);
+      const up = () => {
+        move.flush();
+        setScrubbing(false);
+        document.body.classList.remove("nova-dragging");
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", up);
+        window.removeEventListener("pointercancel", up);
+      };
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", up);
+      window.addEventListener("pointercancel", up);
+    },
+    [laneMetrics, onSeek, seqDur]
+  );
+
+  // Razor guide follows the pointer through a ref-driven rAF write, so moving
+  // the mouse across the lanes never re-renders the whole timeline.
+  const setRazorHover = useMemo(
+    () => rafThrottle((x: number | null) => setRazorHoverX(x)),
+    []
+  );
+  useEffect(() => () => setRazorHover.cancel(), [setRazorHover]);
+
 
 
   return (
@@ -217,7 +326,7 @@ export default function Timeline(props: Props) {
       <div className="flex min-w-0 flex-1 flex-col bg-[#131824]">
         {/* Header bar */}
         <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] px-3 py-1">
-          <span className="font-mono text-[10px] text-cyan-300">{toTimecode(time)}</span>
+          <LiveTimecode />
           <span className="text-[10px] text-zinc-500">Main_Sequence</span>
           <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[8.5px] text-zinc-500">
             {clips.length} clip{clips.length === 1 ? "" : "s"}
@@ -282,9 +391,10 @@ export default function Timeline(props: Props) {
             <div
               className="relative flex min-h-0 flex-1 flex-col"
               onMouseMove={(e) => {
-                if (tool === "razor") setRazorHoverX(e.clientX);
+                if (tool === "razor") setRazorHover(e.clientX);
               }}
-              onMouseLeave={() => setRazorHoverX(null)}
+              onMouseLeave={() => setRazorHover(null)}
+
             >
               {videoTracks.map((t) => {
                 const trackHasFx = clips.some(
@@ -333,47 +443,14 @@ export default function Timeline(props: Props) {
                 />
               ))}
 
-              {/* Playhead — offset by HEAD_W, sits above every video/audio lane */}
-              <div
-                className="pointer-events-none absolute top-0 bottom-0 z-[60]"
-                style={{
-                  left: `calc(${HEAD_W}px + (100% - ${HEAD_W}px) * ${Math.min(100, (time / seqDur) * 100) / 100})`,
-                  willChange: "left",
-                  transition: scrubbing ? "none" : "left 90ms linear",
-                }}
-              >
-                <div
-                  className={cn(
-                    "h-full w-px bg-cyan-300",
-                    scrubbing ? "shadow-[0_0_14px] shadow-cyan-300" : "shadow-[0_0_8px] shadow-cyan-400/70"
-                  )}
-                />
-                {/* Wide invisible grab strip so the thin line is easy to catch */}
-                <div
-                  role="slider"
-                  aria-label="Timeline playhead"
-                  aria-valuemin={0}
-                  aria-valuemax={seqDur}
-                  aria-valuenow={time}
-                  tabIndex={0}
-                  onPointerDown={(e) => beginScrub(e, false)}
-                  onKeyDown={(e) => {
-                    const nudge = e.shiftKey ? 1 : 1 / 30;
-                    if (e.key === "ArrowLeft") { e.preventDefault(); onSeek(Math.max(0, time - nudge)); }
-                    if (e.key === "ArrowRight") { e.preventDefault(); onSeek(Math.min(seqDur, time + nudge)); }
-                  }}
-                  className="pointer-events-auto absolute inset-y-0 left-1/2 w-3 -translate-x-1/2 cursor-ew-resize touch-none outline-none"
-                />
-                <div
-                  onPointerDown={(e) => beginScrub(e, false)}
-                  className={cn(
-                    "pointer-events-auto absolute -top-6 left-1/2 flex h-6 w-4 -translate-x-1/2 cursor-ew-resize touch-none items-end justify-center rounded-b-[3px] bg-gradient-to-b from-cyan-200 to-cyan-500 shadow-[0_2px_10px] shadow-cyan-500/50 transition-transform duration-150 ease-[cubic-bezier(.22,1,.36,1)] hover:scale-110",
-                    scrubbing && "scale-110"
-                  )}
-                >
-                  <span className="mb-0.5 h-2 w-px bg-cyan-900/60" />
-                </div>
-              </div>
+              {/* Playhead — transform-driven, updated straight from the clock store */}
+              <PlayheadNeedle
+                seqDur={seqDur}
+                scrubbing={scrubbing}
+                onSeek={onSeek}
+                beginScrub={beginScrub}
+              />
+
 
 
               {/* Razor blade indicator — follows the mouse while razor tool is active */}
@@ -399,6 +476,13 @@ export default function Timeline(props: Props) {
     </div>
   );
 }
+
+/**
+ * Memoized: during playback the parent commits state a few times a second, but
+ * the timeline only needs to re-render when clips/tools/zoom actually change.
+ */
+export default memo(Timeline);
+
 
 /* ---------------- track head with M/S/Lock/Target ---------------- */
 function TrackHead({

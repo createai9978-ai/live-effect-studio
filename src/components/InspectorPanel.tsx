@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Clip, ClipEffects, Grade, WheelVal } from "../editor/types";
+import { rafThrottle } from "../editor/playhead";
+
 import { cn } from "../utils/cn";
 
 type Tab = "video" | "audio" | "color" | "animation";
@@ -13,7 +15,7 @@ type Props = {
   onClose?: () => void;
 };
 
-export default function InspectorPanel({
+function InspectorPanel({
   clip,
   clipName,
   grade,
@@ -221,7 +223,12 @@ function NumField({
   );
 }
 
-function Slider({
+/**
+ * Slider with optimistic local value: the thumb and fill track the pointer at
+ * input rate, while the (potentially expensive) parent update is coalesced to
+ * one commit per animation frame.
+ */
+const Slider = memo(function Slider({
   label,
   value,
   min,
@@ -238,7 +245,19 @@ function Slider({
   suffix?: string;
   onChange: (v: number) => void;
 }) {
-  const pct = ((value - min) / (max - min)) * 100;
+  const [local, setLocal] = useState(value);
+  const dragging = useRef(false);
+  useEffect(() => {
+    if (!dragging.current) setLocal(value);
+  }, [value]);
+
+  const commitRef = useRef(onChange);
+  commitRef.current = onChange;
+  const commit = useMemo(() => rafThrottle((v: number) => commitRef.current(v)), []);
+  useEffect(() => () => commit.cancel(), [commit]);
+
+  const shown = dragging.current ? local : value;
+  const pct = ((shown - min) / (max - min)) * 100;
   return (
     <div className="flex items-center gap-2">
       <span className="w-16 shrink-0 text-[10px] text-zinc-500">{label}</span>
@@ -247,20 +266,32 @@ function Slider({
         min={min}
         max={max}
         step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
+        value={shown}
+        onPointerDown={() => {
+          dragging.current = true;
+        }}
+        onPointerUp={() => {
+          dragging.current = false;
+          commit.flush();
+        }}
+        onChange={(e) => {
+          const v = Number(e.target.value);
+          setLocal(v);
+          commit(v);
+        }}
         className="nova-range h-1 flex-1 cursor-pointer appearance-none rounded-full"
         style={{
           background: `linear-gradient(90deg,#00F0FF ${pct}%, rgba(255,255,255,.08) ${pct}%)`,
         }}
       />
-      <span className="w-14 shrink-0 rounded-md bg-black/40 py-0.5 text-center font-mono text-[10px] text-zinc-300 ring-1 ring-white/[0.06]">
-        {step < 1 ? value.toFixed(2) : Math.round(value)}
+      <span className="w-14 shrink-0 rounded-md bg-black/40 py-0.5 text-center font-mono text-[10px] tabular-nums text-zinc-300 ring-1 ring-white/[0.06]">
+        {step < 1 ? shown.toFixed(2) : Math.round(shown)}
         {suffix}
       </span>
     </div>
   );
-}
+});
+
 
 function Toggle({ label, on, onChange }: { label: string; on: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -333,3 +364,6 @@ function Wheel({
     </div>
   );
 }
+
+/** Memoized: this panel only re-renders when its own props change. */
+export default memo(InspectorPanel);

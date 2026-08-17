@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Asset, fmtDuration, fmtSize, waveformBars } from "../editor/types";
 import { cn } from "../utils/cn";
 
@@ -11,7 +11,7 @@ type Props = {
   onOpenSource: (id: string) => void;
 };
 
-export default function MediaBin({
+function MediaBin({
   assets,
   importing,
   onOpenImport,
@@ -23,8 +23,22 @@ export default function MediaBin({
   const [tab, setTab] = useState<"Project Media" | "Stock" | "Favorites">("Project Media");
   const [dragOver, setDragOver] = useState(false);
 
-  const filtered = assets.filter((a) => a.name.toLowerCase().includes(query.toLowerCase()));
-  const totalBytes = assets.reduce((s, a) => s + a.size, 0);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q ? assets.filter((a) => a.name.toLowerCase().includes(q)) : assets;
+  }, [assets, query]);
+  const totalBytes = useMemo(() => assets.reduce((s, a) => s + a.size, 0), [assets]);
+
+  // Animated tab underline: measured from the active button so it glides.
+  const tabIndex = ["Project Media", "Stock", "Favorites"].indexOf(tab);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [indicator, setIndicator] = useState({ x: 0, width: 0 });
+  useLayoutEffect(() => {
+    const el = tabRefs.current[tabIndex];
+    if (el) setIndicator({ x: el.offsetLeft, width: el.offsetWidth });
+  }, [tabIndex]);
+
+
 
   return (
     <aside
@@ -49,27 +63,36 @@ export default function MediaBin({
         setDragOver(false);
       }}
     >
-      {/* Header tabs */}
+      {/* Header tabs — the accent bar slides between tabs on the compositor */}
       <div className="flex items-center gap-3 border-b border-white/[0.05] px-3">
-        {(["Project Media", "Stock", "Favorites"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={cn(
-              "relative py-2.5 text-[11px] font-semibold transition-colors",
-              tab === t ? "text-[#00F0FF]" : "text-zinc-500 hover:text-zinc-300"
-            )}
-          >
-            {t}
-            {tab === t && (
-              <span className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-[#00F0FF] shadow-[0_0_8px_#00F0FF]" />
-            )}
-          </button>
-        ))}
+        <div className="relative grid auto-cols-max grid-flow-col gap-3">
+          {(["Project Media", "Stock", "Favorites"] as const).map((t, i) => (
+            <button
+              key={t}
+              ref={(el) => {
+                tabRefs.current[i] = el;
+              }}
+              onClick={() => setTab(t)}
+              className={cn(
+                "relative py-2.5 text-[11px] font-semibold transition-colors duration-200 ease-[cubic-bezier(.22,1,.36,1)]",
+                tab === t ? "text-[#00F0FF]" : "text-zinc-500 hover:text-zinc-200"
+              )}
+            >
+              {t}
+            </button>
+          ))}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute bottom-0 left-0 h-[2px] rounded-full bg-[#00F0FF] shadow-[0_0_8px_#00F0FF] transition-[transform,width] duration-300 ease-[cubic-bezier(.22,1,.36,1)] will-change-transform"
+            style={{ width: indicator.width, transform: `translate3d(${indicator.x}px,0,0)` }}
+          />
+        </div>
         <span className="ml-auto text-[9px] text-zinc-600">
           {assets.length} item{assets.length === 1 ? "" : "s"}
         </span>
       </div>
+
+
 
       {/* Search */}
       <div className="p-2.5 pb-1.5">
@@ -294,3 +317,6 @@ function AssetCard({
     </div>
   );
 }
+
+/** Memoized: this panel only re-renders when its own props change. */
+export default memo(MediaBin);

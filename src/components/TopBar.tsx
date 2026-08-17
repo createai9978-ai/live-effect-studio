@@ -1,3 +1,4 @@
+import { memo } from "react";
 import MenuBar, { MenuActions } from "./MenuBar";
 import { Workspace } from "../editor/types";
 import { cn } from "../utils/cn";
@@ -14,7 +15,7 @@ const WORKSPACES: { id: Workspace; label: string; hint: string }[] = [
   { id: "graphics", label: "Graphics", hint: "Titles, shapes and motion graphics" },
 ];
 
-export default function TopBar({
+function TopBar({
   workspace,
   onSetWorkspace,
   menuActions,
@@ -161,3 +162,6 @@ export default function TopBar({
     </header>
   );
 }
+
+/** Memoized: this panel only re-renders when its own props change. */
+export default memo(TopBar);

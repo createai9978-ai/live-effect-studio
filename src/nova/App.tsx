@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { playhead } from "../editor/playhead";
+
 import TopBar from "../components/TopBar";
 import { AdminProvider } from "../admin/AdminContext";
 import { AuthProvider } from "../auth/AuthContext";
@@ -259,7 +261,9 @@ function AppInner() {
   const timeRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const endRef = useRef(0);
-  timeRef.current = time;
+  // NOTE: timeRef is owned by the transport (playback clock + seek), never by
+  // render, so a throttled state commit can't drag the clock backwards.
+
 
   // ---- derived ----
   const contentEnd = useMemo(
@@ -289,39 +293,80 @@ function AppInner() {
   }, [trackStates, videoTracks, audioTracks]);
 
   // ---- playback clock ----
+  // The frame-accurate value lives in the playhead store (read by the timeline
+  // needle and timecode readouts). React state is committed at ~30 Hz, which is
+  // enough for the monitor's frame logic while halving the render load.
+
   useEffect(() => {
     if (!playing) {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
       return;
     }
     let last = performance.now();
+    let lastCommit = 0;
     const tick = (now: number) => {
       const dt = (now - last) / 1000;
       last = now;
       const end = endRef.current;
       const nt = timeRef.current + dt;
       if (end > 0 && nt >= end) {
+        timeRef.current = end;
+        playhead.set(end);
         setTime(end);
         setPlaying(false);
         return;
       }
-      setTime(nt);
+      timeRef.current = nt;
+      playhead.set(nt);
+      if (now - lastCommit >= 33) {
+        lastCommit = now;
+        setTime(nt);
+      }
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     };
   }, [playing]);
 
+  // Keep clock + store aligned when something other than the transport moves the
+  // playhead (undo, project load, split). During playback the rAF loop owns both.
+  useEffect(() => {
+    if (playing) return;
+    timeRef.current = time;
+    playhead.set(time);
+  }, [time, playing]);
+
+
   const togglePlay = useCallback(() => {
     setPlaying((p) => {
-      if (!p && endRef.current > 0 && timeRef.current >= endRef.current - 0.05) setTime(0);
+      if (!p && endRef.current > 0 && timeRef.current >= endRef.current - 0.05) {
+        timeRef.current = 0;
+        playhead.set(0);
+        setTime(0);
+      }
       return !p;
     });
   }, []);
 
-  const seek = useCallback((t: number) => setTime(Math.max(0, t)), []);
+  const seek = useCallback((t: number) => {
+    const next = Math.max(0, t);
+    timeRef.current = next;
+    // Move the needle this frame; React catches up on the next commit.
+    playhead.set(next);
+    setTime(next);
+  }, []);
+
+  // Stable identities so the memoized Timeline doesn't re-render on every commit.
+  const handleSelectEffect = useCallback((clipId: string | null, effectId: string | null) => {
+    setSelectedFx(clipId && effectId ? { clipId, effectId } : null);
+  }, []);
+  const handleToggleRamp = useCallback(() => setRampOpen((v) => !v), []);
+
+
 
   // ---- import ----
   const importFiles = useCallback(async (files: FileList | File[]) => {
@@ -1392,6 +1437,8 @@ function AppInner() {
 
         <div className="nova-editor-media nova-panel-card flex h-full min-h-0 min-w-0 flex-col">
         {browserOpen && (
+          <div key={browserTab} className="nova-panel-enter flex h-full min-h-0 flex-col">
+
           <AssetBrowser
             open={browserOpen}
             initialTab={browserTab}
@@ -1408,7 +1455,9 @@ function AppInner() {
             myMedia={myMediaItems}
             onHoverEffect={setHoveredEffectId}
           />
+          </div>
         )}
+
 
         {!browserOpen && (
           <MediaBin
@@ -1484,7 +1533,6 @@ function AppInner() {
           clips={clips}
           videoTracks={videoTracks}
           audioTracks={audioTracks}
-          time={time}
           seqDur={seqDur}
           contentEnd={contentEnd}
           tool={tool}
@@ -1507,12 +1555,11 @@ function AppInner() {
           onApplyEffectPreset={applyEffectToClip}
           onUpdateAppliedEffect={updateAppliedEffect}
           selectedEffect={selectedFx}
-          onSelectEffect={(clipId, effectId) =>
-            setSelectedFx(clipId && effectId ? { clipId, effectId } : null)
-          }
+          onSelectEffect={handleSelectEffect}
           onDeleteAppliedEffect={deleteAppliedEffect}
           rampOpen={rampOpen}
-          onToggleRamp={() => setRampOpen((v) => !v)}
+          onToggleRamp={handleToggleRamp}
+
         />
         {rampOpen && (
           <SpeedCurveEditor

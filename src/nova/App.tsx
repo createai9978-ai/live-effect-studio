@@ -1476,8 +1476,10 @@ function AppInner() {
       </section>
 
       {/* ===== Lower row: timeline + audio mixer ===== */}
-      <section className="nova-editor-timeline flex min-h-0 min-w-0 overflow-hidden border-t border-white/[0.06] bg-[#0A0D14]">
+      <section className="nova-editor-timeline min-h-0 min-w-0">
+        <div className="nova-panel-card flex min-h-0 min-w-0">
         <Timeline
+
           assets={assets}
           clips={clips}
           videoTracks={videoTracks}

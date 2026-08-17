@@ -331,10 +331,14 @@ function AppInner() {
     };
   }, [playing]);
 
-  // Keep the store aligned whenever React state moves the playhead (seek, undo…).
+  // Keep clock + store aligned when something other than the transport moves the
+  // playhead (undo, project load, split). During playback the rAF loop owns both.
   useEffect(() => {
+    if (playing) return;
+    timeRef.current = time;
     playhead.set(time);
-  }, [time]);
+  }, [time, playing]);
+
 
   const togglePlay = useCallback(() => {
     setPlaying((p) => {

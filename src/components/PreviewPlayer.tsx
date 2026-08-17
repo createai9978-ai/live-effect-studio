@@ -307,9 +307,10 @@ export default function PreviewPlayer({
     : { width: "100%", height: "100%" };
 
   return (
-    <main className="nova-program-monitor flex min-h-0 min-w-0 flex-1 flex-col bg-[#111621]">
+    <main className="nova-program-monitor nova-panel-card flex min-h-0 min-w-0 flex-1 flex-col">
       {/* Monitor header */}
-      <div className="flex items-center justify-between border-b border-white/[0.05] px-4 py-1.5">
+      <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-2">
+
         <div className="flex items-center gap-2 text-[11px]">
           <span className="text-zinc-300">Program Monitor</span>
           <span className="text-zinc-600">·</span>

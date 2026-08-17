@@ -241,7 +241,7 @@ function Timeline(props: Props) {
       <div className="flex min-w-0 flex-1 flex-col bg-[#131824]">
         {/* Header bar */}
         <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] px-3 py-1">
-          <span className="font-mono text-[10px] text-cyan-300">{toTimecode(time)}</span>
+          <LiveTimecode />
           <span className="text-[10px] text-zinc-500">Main_Sequence</span>
           <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[8.5px] text-zinc-500">
             {clips.length} clip{clips.length === 1 ? "" : "s"}

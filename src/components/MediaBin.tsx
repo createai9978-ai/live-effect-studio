@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Asset, fmtDuration, fmtSize, waveformBars } from "../editor/types";
 import { cn } from "../utils/cn";
 
@@ -29,8 +29,15 @@ function MediaBin({
   }, [assets, query]);
   const totalBytes = useMemo(() => assets.reduce((s, a) => s + a.size, 0), [assets]);
 
-  // Animated tab underline: slides between tabs instead of popping.
+  // Animated tab underline: measured from the active button so it glides.
   const tabIndex = ["Project Media", "Stock", "Favorites"].indexOf(tab);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [indicator, setIndicator] = useState({ x: 0, width: 0 });
+  useLayoutEffect(() => {
+    const el = tabRefs.current[tabIndex];
+    if (el) setIndicator({ x: el.offsetLeft, width: el.offsetWidth });
+  }, [tabIndex]);
+
 
 
   return (

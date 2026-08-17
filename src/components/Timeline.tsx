@@ -150,9 +150,10 @@ export default function Timeline(props: Props) {
 
 
   return (
-    <div className="flex min-w-0 flex-1">
+    <div className="flex min-w-0 flex-1 flex-col">
       {/* ============ TOOL RAIL ============ */}
-      <div className="flex w-11 shrink-0 flex-col items-center gap-1 border-r border-white/[0.06] bg-[#171C29] py-2">
+      <div className="flex shrink-0 items-center gap-1 border-b border-white/[0.06] bg-white/[0.02] px-2 py-1.5">
+
         {TOOLS.map((t) => (
           <Tooltip key={t.id} label={t.label.split(" — ")[0]} hint={`Shortcut ${t.key}${t.label.includes(" — ") ? ` · ${t.label.split(" — ")[1]}` : ""}`} side="right">
             <button

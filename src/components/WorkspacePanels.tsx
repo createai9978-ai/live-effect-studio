@@ -5,7 +5,7 @@ import { cn } from "../utils/cn";
 /* ================= Audio workspace: mixer ================= */
 export function AudioMixerPanel() {
   return (
-    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#181B24]">
+    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#131824]">
       <div className="border-b border-white/[0.05] px-3 py-2 text-[11px] font-semibold text-zinc-200">
         Audio Track Mixer
       </div>
@@ -138,7 +138,7 @@ export function GraphicsPanel() {
     setLayers((prev) => prev.map((l) => (l.id === selected ? { ...l, ...patch } : l)));
 
   return (
-    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#181B24]">
+    <aside className="flex w-[300px] shrink-0 flex-col border-l border-white/[0.06] bg-[#131824]">
       <div className="flex items-center justify-between border-b border-white/[0.05] px-3 py-2">
         <span className="text-[11px] font-semibold text-zinc-200">Essential Graphics</span>
         <button

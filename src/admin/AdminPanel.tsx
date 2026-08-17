@@ -2,7 +2,7 @@ import { cn } from "../utils/cn";
 import { FONT_CHOICES, useAdmin } from "./AdminContext";
 
 const ACCENT_SWATCHES = ["#00E5FF", "#8A2BE2", "#F97316", "#22C55E", "#F43F5E", "#FACC15"];
-const SURFACES = ["#0F1117", "#0B0E14", "#101826", "#161219", "#12141A"];
+const SURFACES = ["#111621", "#0B0E14", "#101826", "#161219", "#12141A"];
 
 /** Right-hand admin drawer: fonts, accent colours, surface, logo and reset. */
 export default function AdminPanel() {

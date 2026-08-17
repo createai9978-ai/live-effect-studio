@@ -1332,7 +1332,7 @@ function AppInner() {
     : null;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#0B0F19] font-sans text-zinc-200 antialiased selection:bg-[#00F0FF]/25">
+    <div className="flex h-screen flex-col overflow-hidden bg-[#0A0D14] font-sans text-zinc-200 antialiased selection:bg-[#00F0FF]/25">
       <input
         ref={fileInputRef}
         type="file"
@@ -1389,7 +1389,7 @@ function AppInner() {
         />
 
         {browserOpen && (
-          <div className="flex h-full w-[292px] min-w-[292px] max-w-[292px] shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#0F1117] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]">
+          <div className="flex h-full w-[292px] min-w-[292px] max-w-[292px] shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#111621] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]">
           <AssetBrowser
             open={browserOpen}
             initialTab={browserTab}
@@ -1474,7 +1474,7 @@ function AppInner() {
       </div>
 
       {/* ===== Lower row: timeline + audio mixer ===== */}
-      <div className="flex h-[290px] shrink-0 border-t border-white/[0.06] bg-[#0B0F19]">
+      <div className="flex h-[290px] shrink-0 border-t border-white/[0.06] bg-[#0A0D14]">
         <Timeline
           assets={assets}
           clips={clips}

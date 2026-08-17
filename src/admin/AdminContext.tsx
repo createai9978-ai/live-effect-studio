@@ -30,7 +30,7 @@ export const DEFAULT_SETTINGS: AdminSettings = {
   fontScale: 1,
   accent: "#00E5FF",
   accent2: "#8A2BE2",
-  surface: "#0F1117",
+  surface: "#111621",
   logoUrl: "",
   labels: {},
 };

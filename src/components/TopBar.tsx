@@ -31,7 +31,7 @@ export default function TopBar({
 }) {
   const { settings } = useAdmin();
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-[#181B24]/80 backdrop-blur-xl px-3">
+    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-[#131824]/80 backdrop-blur-xl px-3">
       {/* Logo */}
       <div className="flex shrink-0 items-center gap-2.5">
         <button
@@ -91,7 +91,13 @@ export default function TopBar({
       </div>
 
 
-      {/* Project name */}
+      {/* Save status + project name */}
+      <div className="hidden items-center gap-2 rounded-lg border border-white/[0.06] bg-black/30 px-2.5 py-1 xl:flex">
+        <svg className="h-3.5 w-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17.5 19a4.5 4.5 0 000-9 6 6 0 00-11.6 1.6A3.7 3.7 0 006.5 19h11z" />
+        </svg>
+        <span className="text-[10px] leading-tight text-zinc-500">All changes saved</span>
+      </div>
       <div className="hidden items-center gap-2 rounded-lg border border-white/[0.06] bg-black/30 px-3 py-1 lg:flex">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px] shadow-emerald-400/60" />
         <span className="max-w-[180px] truncate text-[12px] text-zinc-300">{projectName}</span>
@@ -130,6 +136,13 @@ export default function TopBar({
       </button>
       </Tooltip>
       <AdminToggle />
+
+      {/* Profile */}
+      <Tooltip label="Account" hint="Profile, preferences and sync status" side="bottom">
+        <button className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#5B7CFF] text-[10px] font-bold text-[#04121a] ring-1 ring-white/20 transition hover:brightness-110 md:flex">
+          NS
+        </button>
+      </Tooltip>
 
 
     </header>

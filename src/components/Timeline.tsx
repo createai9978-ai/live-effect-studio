@@ -25,7 +25,7 @@ type Props = {
   clips: Clip[];
   videoTracks: TrackId[];
   audioTracks: TrackId[];
-  time: number;
+  /** The live playhead is read from the clock store, not from props. */
   seqDur: number;
   contentEnd: number;
   tool: Tool;

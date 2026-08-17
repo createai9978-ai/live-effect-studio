@@ -108,7 +108,7 @@ export default function HomeScreen({
             }}
           >
             {settings.logoUrl ? (
-              <img src={settings.logoUrl} alt="App logo" className="h-full w-full object-contain" />
+              <img src={settings.logoUrl} alt="NOVA Studio Logo" className="h-full w-full object-contain" />
             ) : (
               <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="5" width="20" height="14" rx="2" />
@@ -247,7 +247,7 @@ export default function HomeScreen({
                     <path d="M12 5v14M5 12h14" />
                   </svg>
                 </div>
-                <h1 className="text-[30px] font-semibold leading-tight text-white"><EditableText id="home.hero" text="New Project" /></h1>
+                <h1 className="text-[30px] font-semibold leading-tight text-white"><EditableText id="home.hero" text="NOVA Studio — New Project" /></h1>
                 <p className="mt-1 text-[13px] text-white/80">
                   Start a {ratio} timeline with the full effects library
                 </p>

@@ -45,7 +45,7 @@ export default function TopBar({
           }}
         >
           {settings.logoUrl ? (
-            <img src={settings.logoUrl} alt="App logo" className="h-full w-full object-contain" />
+            <img src={settings.logoUrl} alt="NOVA Studio Logo" className="h-full w-full object-contain" />
           ) : (
             <svg className="h-[18px] w-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="5" width="20" height="14" rx="2" />

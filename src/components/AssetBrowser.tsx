@@ -51,6 +51,8 @@ type Props = {
   /** The user's own imported photos/videos/audio, shown in the "Mine" tab. */
   myMedia?: AssetItem[];
   onHoverEffect?: (id: string | null) => void;
+  /** Render inline inside a side drawer instead of as a full-screen overlay. */
+  embedded?: boolean;
 };
 
 export default function AssetBrowser({
@@ -67,6 +69,7 @@ export default function AssetBrowser({
   projectClipSrc,
   myMedia = [],
   onHoverEffect,
+  embedded = false,
 }: Props) {
   const [tab, setTab] = useState<AssetTab>(initialTab);
   const [query, setQuery] = useState("");
@@ -162,7 +165,14 @@ export default function AssetBrowser({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[95] flex flex-col bg-[#0F1117]/95 backdrop-blur-md">
+    <div
+      className={cn(
+        "flex flex-col",
+        embedded
+          ? "h-full w-full min-h-0 bg-[#0F1117]"
+          : "fixed inset-0 z-[95] bg-[#0F1117]/95 backdrop-blur-md"
+      )}
+    >
       {/* ============ Header row 1: brand + global search + close ============ */}
       <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] bg-[#181B24]/80 backdrop-blur-xl px-3 py-2">
         <div className="flex shrink-0 items-center gap-2">
@@ -182,7 +192,7 @@ export default function AssetBrowser({
               <path d="M21 21l-4.35-4.35" />
             </svg>
             <input
-              autoFocus
+              autoFocus={!embedded}
               value={globalQuery}
               onChange={(e) => {
                 setGlobalQuery(e.target.value);
@@ -341,7 +351,7 @@ export default function AssetBrowser({
 
       {/* ============ Body ============ */}
       <div className="flex min-h-0 flex-1">
-        {treeForTab(tab) && !globalQuery && (
+        {treeForTab(tab) && !globalQuery && !embedded && (
           <EffectsSidebar
             tree={treeForTab(tab)!}
             label={TAB_META.find((t) => t.id === tab)?.label ?? "assets"}
@@ -471,7 +481,7 @@ export default function AssetBrowser({
             </div>
 
             {/* ============ Docked reference monitor ============ */}
-            <ReferenceMonitor
+            {!embedded && <ReferenceMonitor
               item={findItem(hovered) ?? (pinnedPreviewId ? findItem(pinnedPreviewId) : null)}
               previewFrameUrl={previewFrameUrl ?? null}
               previewClipName={previewClipName ?? null}
@@ -487,11 +497,11 @@ export default function AssetBrowser({
                 const id = hovered ?? pinnedPreviewId;
                 if (id) toggleFavorite(id);
               }}
-            />
+            />}
           </div>
 
           {/* Detail rail — description of the hovered item */}
-          <DetailRail item={findItem(hovered)} hasPreview={!!previewFrameUrl} />
+          {!embedded && <DetailRail item={findItem(hovered)} hasPreview={!!previewFrameUrl} />}
         </main>
       </div>
 

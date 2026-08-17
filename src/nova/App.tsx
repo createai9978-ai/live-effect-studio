@@ -1370,7 +1370,10 @@ function AppInner() {
           active={rail}
           onSelect={(k) => {
             setRail(k);
-            if (k === "media") return;
+            if (k === "media") {
+              setBrowserOpen(false);
+              return;
+            }
             const map: Record<string, AssetTab> = {
               text: "titles",
               transitions: "transitions",
@@ -1385,7 +1388,28 @@ function AppInner() {
           }}
         />
 
-        {panels.projectBin && (
+        {browserOpen && (
+          <div className="flex h-full w-[430px] min-w-[340px] max-w-[46vw] shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#0F1117] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]">
+          <AssetBrowser
+            open={browserOpen}
+            initialTab={browserTab}
+            embedded
+            onClose={() => setBrowserOpen(false)}
+            onApplyEffect={applyAssetPreset}
+            onApplyEffectToTimeline={applyPresetToTimeline}
+
+            hasProjectMedia={assets.length > 0}
+            onOpenImport={openImport}
+            previewFrameUrl={selectedAsset?.thumb ?? assets.find((a) => a.thumb)?.thumb ?? null}
+            previewClipName={selectedAsset?.name ?? assets.find((a) => a.thumb)?.name ?? null}
+            projectClipSrc={selectedAsset?.url ?? assets.find((a) => a.kind === "video")?.url ?? null}
+            myMedia={myMediaItems}
+            onHoverEffect={setHoveredEffectId}
+          />
+          </div>
+        )}
+
+        {panels.projectBin && !browserOpen && (
           <MediaBin
             assets={assets}
             importing={importing}
@@ -1541,21 +1565,7 @@ function AppInner() {
       {modal?.kind === "shortcuts" && <ShortcutsModal onClose={() => setModal(null)} />}
       {modal?.kind === "about" && <AboutModal onClose={() => setModal(null)} />}
 
-      <AssetBrowser
-        open={browserOpen}
-        initialTab={browserTab}
-        onClose={() => setBrowserOpen(false)}
-        onApplyEffect={applyAssetPreset}
-        onApplyEffectToTimeline={applyPresetToTimeline}
 
-        hasProjectMedia={assets.length > 0}
-        onOpenImport={openImport}
-        previewFrameUrl={selectedAsset?.thumb ?? assets.find((a) => a.thumb)?.thumb ?? null}
-        previewClipName={selectedAsset?.name ?? assets.find((a) => a.thumb)?.name ?? null}
-        projectClipSrc={selectedAsset?.url ?? assets.find((a) => a.kind === "video")?.url ?? null}
-        myMedia={myMediaItems}
-        onHoverEffect={setHoveredEffectId}
-      />
 
       {/* Effect Control Panel for a timeline FX instance */}
       {fxSelection && (

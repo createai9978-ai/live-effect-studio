@@ -357,47 +357,14 @@ function Timeline(props: Props) {
                 />
               ))}
 
-              {/* Playhead — offset by HEAD_W, sits above every video/audio lane */}
-              <div
-                className="pointer-events-none absolute top-0 bottom-0 z-[60]"
-                style={{
-                  left: `calc(${HEAD_W}px + (100% - ${HEAD_W}px) * ${Math.min(100, (time / seqDur) * 100) / 100})`,
-                  willChange: "left",
-                  transition: scrubbing ? "none" : "left 90ms linear",
-                }}
-              >
-                <div
-                  className={cn(
-                    "h-full w-px bg-cyan-300",
-                    scrubbing ? "shadow-[0_0_14px] shadow-cyan-300" : "shadow-[0_0_8px] shadow-cyan-400/70"
-                  )}
-                />
-                {/* Wide invisible grab strip so the thin line is easy to catch */}
-                <div
-                  role="slider"
-                  aria-label="Timeline playhead"
-                  aria-valuemin={0}
-                  aria-valuemax={seqDur}
-                  aria-valuenow={time}
-                  tabIndex={0}
-                  onPointerDown={(e) => beginScrub(e, false)}
-                  onKeyDown={(e) => {
-                    const nudge = e.shiftKey ? 1 : 1 / 30;
-                    if (e.key === "ArrowLeft") { e.preventDefault(); onSeek(Math.max(0, time - nudge)); }
-                    if (e.key === "ArrowRight") { e.preventDefault(); onSeek(Math.min(seqDur, time + nudge)); }
-                  }}
-                  className="pointer-events-auto absolute inset-y-0 left-1/2 w-3 -translate-x-1/2 cursor-ew-resize touch-none outline-none"
-                />
-                <div
-                  onPointerDown={(e) => beginScrub(e, false)}
-                  className={cn(
-                    "pointer-events-auto absolute -top-6 left-1/2 flex h-6 w-4 -translate-x-1/2 cursor-ew-resize touch-none items-end justify-center rounded-b-[3px] bg-gradient-to-b from-cyan-200 to-cyan-500 shadow-[0_2px_10px] shadow-cyan-500/50 transition-transform duration-150 ease-[cubic-bezier(.22,1,.36,1)] hover:scale-110",
-                    scrubbing && "scale-110"
-                  )}
-                >
-                  <span className="mb-0.5 h-2 w-px bg-cyan-900/60" />
-                </div>
-              </div>
+              {/* Playhead — transform-driven, updated straight from the clock store */}
+              <PlayheadNeedle
+                seqDur={seqDur}
+                scrubbing={scrubbing}
+                onSeek={onSeek}
+                beginScrub={beginScrub}
+              />
+
 
 
               {/* Razor blade indicator — follows the mouse while razor tool is active */}

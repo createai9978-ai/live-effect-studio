@@ -1332,7 +1332,7 @@ function AppInner() {
     : null;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#0A0D14] font-sans text-zinc-200 antialiased selection:bg-[#00F0FF]/25">
+    <div className="flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#0A0D14] font-sans text-zinc-200 antialiased selection:bg-[#00F0FF]/25">
       <input
         ref={fileInputRef}
         type="file"
@@ -1365,7 +1365,7 @@ function AppInner() {
       />
 
       {/* ===== Upper row: rail · media pool · program monitor · inspector ===== */}
-      <div className="flex min-h-0 flex-1 overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
         <ToolRail
           active={rail}
           onSelect={(k) => {
@@ -1388,8 +1388,12 @@ function AppInner() {
           }}
         />
 
+        {/* ===== Media / asset column — medium width, ~17% of viewport ===== */}
+        <div
+          className="flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#111621] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]"
+          style={{ width: "clamp(280px, 17vw, 340px)" }}
+        >
         {browserOpen && (
-          <div className="flex h-full w-[292px] min-w-[292px] max-w-[292px] shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#111621] shadow-[8px_0_28px_-18px_rgba(0,0,0,0.9)]">
           <AssetBrowser
             open={browserOpen}
             initialTab={browserTab}
@@ -1406,10 +1410,9 @@ function AppInner() {
             myMedia={myMediaItems}
             onHoverEffect={setHoveredEffectId}
           />
-          </div>
         )}
 
-        {panels.projectBin && !browserOpen && (
+        {!browserOpen && (
           <MediaBin
             assets={assets}
             importing={importing}
@@ -1419,6 +1422,7 @@ function AppInner() {
             onOpenSource={setSourceAssetId}
           />
         )}
+        </div>
 
         {panels.sourceMonitor && sourceAsset && (
           <LeftMonitorPanel
@@ -1446,20 +1450,24 @@ function AppInner() {
         />
 
         {workspace === "color" && panels.lumetri ? (
-          <div key="ws-color" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+          <div key="ws-color" className="flex h-full min-h-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
             <LumetriPanel grade={grade} onGradeChange={(g) => { pushHistory(); setGrade(g); }} />
           </div>
         ) : workspace === "audio" ? (
-          <div key="ws-audio" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+          <div key="ws-audio" className="flex h-full min-h-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
             <AudioMixerPanel />
           </div>
         ) : workspace === "graphics" ? (
-          <div key="ws-graphics" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+          <div key="ws-graphics" className="flex h-full min-h-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
             <GraphicsPanel />
           </div>
         ) : (
           inspectorOpen && (
-            <div key="ws-inspector" className="flex animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
+            <div
+              key="ws-inspector"
+              className="flex h-full min-h-0 shrink-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]"
+              style={{ width: "clamp(264px, 16.5vw, 320px)" }}
+            >
               <InspectorPanel
                 clip={selectedClipObj}
                 clipName={selectedAsset?.name ?? null}
@@ -1474,7 +1482,10 @@ function AppInner() {
       </div>
 
       {/* ===== Lower row: timeline + audio mixer ===== */}
-      <div className="flex h-[290px] shrink-0 border-t border-white/[0.06] bg-[#0A0D14]">
+      <div
+        className="flex min-w-0 shrink-0 overflow-hidden border-t border-white/[0.06] bg-[#0A0D14]"
+        style={{ height: "clamp(280px, 31vh, 350px)" }}
+      >
         <Timeline
           assets={assets}
           clips={clips}

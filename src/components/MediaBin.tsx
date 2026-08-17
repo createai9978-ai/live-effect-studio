@@ -29,7 +29,7 @@ export default function MediaBin({
   return (
     <aside
       className={cn(
-        "relative flex w-[268px] shrink-0 flex-col border-r border-white/[0.06] bg-[#0A0D14] transition",
+        "relative flex h-full w-full min-w-0 flex-col bg-[#0A0D14] transition",
         dragOver && "ring-2 ring-inset ring-[#00F0FF]/60"
       )}
       onDragOver={(e) => {

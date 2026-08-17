@@ -103,7 +103,8 @@ export default function ToolRail({
   onSelect: (key: RailKey) => void;
 }) {
   return (
-    <nav className="nova-scroll-thin flex h-full min-h-0 w-[68px] shrink-0 flex-col items-center gap-0.5 overflow-y-auto overflow-x-hidden border-r border-white/[0.06] bg-[#0A0D14] px-1 py-2">
+    <nav className="nova-scroll-thin flex h-full min-h-0 w-[76px] shrink-0 flex-col items-center gap-1 overflow-y-auto overflow-x-hidden border-r border-white/[0.06] bg-[#0A0D14] px-1.5 py-2.5">
+
 
       {ITEMS.map((it) => {
         const on = active === it.key;
@@ -113,7 +114,7 @@ export default function ToolRail({
             onClick={() => onSelect(it.key)}
             title={it.label}
             className={cn(
-              "group relative flex w-[58px] shrink-0 flex-col items-center gap-1 rounded-lg px-1 py-2 transition-all duration-300",
+              "group relative flex w-[64px] shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 py-2.5 transition-all duration-300",
               on
                 ? "bg-[#00F0FF]/10 text-[#00F0FF] shadow-[0_0_20px_-6px_#00F0FF]"
                 : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200"
@@ -122,10 +123,10 @@ export default function ToolRail({
             {on && (
               <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-[#00F0FF] shadow-[0_0_10px_#00F0FF]" />
             )}
-            <span className="h-[22px] w-[22px] transition-transform duration-300 group-hover:scale-110">
+            <span className="h-[24px] w-[24px] transition-transform duration-300 group-hover:scale-110">
               {it.icon}
             </span>
-            <span className="text-[9.5px] font-medium leading-none">{it.label}</span>
+            <span className="text-[11px] font-medium leading-none tracking-tight">{it.label}</span>
             {it.badge && (
               <span className="absolute right-1 top-1 rounded-[3px] bg-fuchsia-500 px-1 text-[7px] font-bold text-white">
                 {it.badge}

@@ -412,7 +412,8 @@ export default function AssetBrowser({
 
           {/* Grid or media picker */}
           {/* Sub-header 2: adjustable thumbnail sizes + count */}
-          {!globalQuery && (
+          {!globalQuery && !embedded && (
+
             <div className="flex shrink-0 items-center gap-2 border-b border-white/[0.04] bg-[#10141F] px-4 py-1.5">
               <span className="text-[10px] text-zinc-600">Thumbnail</span>
               <div className="flex items-center rounded-md border border-white/[0.06] bg-black/40 p-0.5">

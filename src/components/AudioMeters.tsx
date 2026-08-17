@@ -47,7 +47,8 @@ export default function AudioMeters({ playing, hasAudio }: { playing: boolean; h
 
         {CHANNELS.map((ch, i) => (
           <div key={ch} className="flex flex-1 flex-col items-center gap-1.5">
-            <div className="relative w-full flex-1 overflow-hidden rounded-sm bg-black/55 ring-1 ring-white/[0.05]">
+            <div className="relative w-full flex-1 overflow-hidden rounded-md bg-black/60 ring-1 ring-white/[0.07]">
+
               <div
                 className="absolute bottom-0 w-full bg-gradient-to-t from-emerald-500 via-lime-400 to-amber-400 transition-[height] duration-75"
                 style={{ height: `${levels[i] * 100}%` }}

@@ -388,9 +388,10 @@ function Timeline(props: Props) {
             <div
               className="relative flex min-h-0 flex-1 flex-col"
               onMouseMove={(e) => {
-                if (tool === "razor") setRazorHoverX(e.clientX);
+                if (tool === "razor") setRazorHover(e.clientX);
               }}
-              onMouseLeave={() => setRazorHoverX(null)}
+              onMouseLeave={() => setRazorHover(null)}
+
             >
               {videoTracks.map((t) => {
                 const trackHasFx = clips.some(
@@ -472,6 +473,13 @@ function Timeline(props: Props) {
     </div>
   );
 }
+
+/**
+ * Memoized: during playback the parent commits state a few times a second, but
+ * the timeline only needs to re-render when clips/tools/zoom actually change.
+ */
+export default memo(Timeline);
+
 
 /* ---------------- track head with M/S/Lock/Target ---------------- */
 function TrackHead({

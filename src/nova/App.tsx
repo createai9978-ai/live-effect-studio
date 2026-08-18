@@ -1409,178 +1409,216 @@ function AppInner() {
         onOpenAssetBrowser={() => openAssetBrowser("effects")}
       />
 
-      {/* The editor body is an explicit two-row grid: the upper workspace has
-          four stable columns, while the timeline owns the entire lower row. */}
-      <div className="nova-editor-layout min-h-0 min-w-0 flex-1">
-      <section className="nova-editor-workspace min-h-0 min-w-0 overflow-hidden">
-        <ToolRail
-          active={rail}
-          onSelect={(k) => {
-            setRail(k);
-            if (k === "media") {
-              setBrowserOpen(false);
-              return;
-            }
-            const map: Record<string, AssetTab> = {
-              text: "titles",
-              transitions: "transitions",
-              effects: "effects",
-              filters: "filters",
-              elements: "stickers",
-              music: "audio",
-              audio: "audio",
-              ai: "stock",
-            };
-            openAssetBrowser(map[k] ?? "effects");
-          }}
-        />
-
-        <div className="nova-editor-media nova-panel-card flex h-full min-h-0 min-w-0 flex-col">
-        {browserOpen && (
-          <div key={browserTab} className="nova-panel-enter flex h-full min-h-0 flex-col">
-
-          <AssetBrowser
-            open={browserOpen}
-            initialTab={browserTab}
-            embedded
-            onClose={() => setBrowserOpen(false)}
-            onApplyEffect={applyAssetPreset}
-            onApplyEffectToTimeline={applyPresetToTimeline}
-
-            hasProjectMedia={assets.length > 0}
-            onOpenImport={openImport}
-            previewFrameUrl={selectedAsset?.thumb ?? assets.find((a) => a.thumb)?.thumb ?? null}
-            previewClipName={selectedAsset?.name ?? assets.find((a) => a.thumb)?.name ?? null}
-            projectClipSrc={selectedAsset?.url ?? assets.find((a) => a.kind === "video")?.url ?? null}
-            myMedia={myMediaItems}
-            onHoverEffect={setHoveredEffectId}
-          />
+      {/* The editor body is a stable dock shell: rail | media | center | inspector
+          over a full-width timeline band. Regions are sized only by the layout
+          store, so importing media or selecting a clip can never move them. */}
+      <div className="nova-editor-shell min-h-0 min-w-0 flex-1" style={layoutApi.gridStyle}>
+        <section className="nova-editor-workspace">
+          <div className="nova-region-rail flex min-h-0 min-w-0">
+            <ToolRail
+              active={rail}
+              onSelect={(k) => {
+                setRail(k);
+                if (k === "media") {
+                  setBrowserOpen(false);
+                  return;
+                }
+                const map: Record<string, AssetTab> = {
+                  text: "titles",
+                  transitions: "transitions",
+                  effects: "effects",
+                  filters: "filters",
+                  elements: "stickers",
+                  music: "audio",
+                  audio: "audio",
+                  ai: "stock",
+                };
+                openAssetBrowser(map[k] ?? "effects");
+              }}
+            />
           </div>
-        )}
 
-
-        {!browserOpen && (
-          <MediaBin
-            assets={assets}
-            importing={importing}
-            onOpenImport={openImport}
-            onImportFiles={importFiles}
-            onDeleteAsset={deleteAsset}
-            onOpenSource={setSourceAssetId}
-          />
-        )}
-        </div>
-
-        {panels.sourceMonitor && sourceAsset && (
-          <LeftMonitorPanel
-            sourceAsset={sourceAsset}
-            selectedClip={selectedClipObj}
-            selectedAsset={selectedAsset}
-            onInsert={insertFromSource}
-            onUpdateClipEffects={updateClipEffects}
-          />
-        )}
-
-        <PreviewPlayer
-          assets={assets}
-          clips={clips}
-          time={time}
-          playing={playing}
-          contentEnd={contentEnd}
-          gradeFilter={gradeFilter}
-          audibleTracks={audibleTracks}
-          onTogglePlay={togglePlay}
-          onSeek={seek}
-          onOpenImport={openImport}
-          hoveredEffectId={hoveredEffectId}
-          audioLevel={audioReactiveLevel}
-        />
-
-        {workspace === "color" && panels.lumetri ? (
-          <div key="ws-color" className="flex h-full min-h-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
-            <LumetriPanel grade={grade} onGradeChange={(g) => { pushHistory(); setGrade(g); }} />
-          </div>
-        ) : workspace === "audio" ? (
-          <div key="ws-audio" className="flex h-full min-h-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
-            <AudioMixerPanel />
-          </div>
-        ) : workspace === "graphics" ? (
-          <div key="ws-graphics" className="flex h-full min-h-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
-            <GraphicsPanel />
-          </div>
-        ) : (
-          inspectorOpen && (
-            <div key="ws-inspector" className="nova-editor-inspector nova-panel-card flex h-full min-h-0 min-w-0 animate-[nova-panel_.3s_cubic-bezier(.22,1,.36,1)]">
-              <InspectorPanel
-                clip={selectedClipObj}
-                clipName={selectedAsset?.name ?? null}
-                grade={grade}
-                onGradeChange={(g) => setGrade(g)}
-                onUpdateEffects={(id, p) => updateClipEffects(id, p)}
-                onClose={() => setInspectorOpen(false)}
-              />
+          <DockPanel id="media" api={layoutApi} className="nova-region-media">
+            <div className="flex h-full min-h-0 min-w-0 flex-col">
+              {browserOpen ? (
+                <div key={browserTab} className="nova-panel-enter flex h-full min-h-0 flex-col">
+                  <AssetBrowser
+                    open={browserOpen}
+                    initialTab={browserTab}
+                    embedded
+                    onClose={() => setBrowserOpen(false)}
+                    onApplyEffect={applyAssetPreset}
+                    onApplyEffectToTimeline={applyPresetToTimeline}
+                    hasProjectMedia={assets.length > 0}
+                    onOpenImport={openImport}
+                    previewFrameUrl={selectedAsset?.thumb ?? assets.find((a) => a.thumb)?.thumb ?? null}
+                    previewClipName={selectedAsset?.name ?? assets.find((a) => a.thumb)?.name ?? null}
+                    projectClipSrc={selectedAsset?.url ?? assets.find((a) => a.kind === "video")?.url ?? null}
+                    myMedia={myMediaItems}
+                    onHoverEffect={setHoveredEffectId}
+                  />
+                </div>
+              ) : (
+                <MediaBin
+                  assets={assets}
+                  importing={importing}
+                  onOpenImport={openImport}
+                  onImportFiles={importFiles}
+                  onDeleteAsset={deleteAsset}
+                  onOpenSource={setSourceAssetId}
+                />
+              )}
             </div>
-          )
-        )}
-      </section>
+          </DockPanel>
 
-      {/* ===== Lower row: timeline + audio mixer ===== */}
-      <section className="nova-editor-timeline min-h-0 min-w-0">
-        <div className="nova-panel-card flex min-h-0 min-w-0">
-        <Timeline
+          {layoutApi.isDocked("media") && (
+            <PanelResizer
+              orientation="vertical"
+              label="Resize Project Media"
+              value={layoutApi.layout.mediaWidth}
+              onResize={(v) => layoutApi.setSize("mediaWidth", v)}
+            />
+          )}
 
-          assets={assets}
-          clips={clips}
-          videoTracks={videoTracks}
-          audioTracks={audioTracks}
-          seqDur={seqDur}
-          contentEnd={contentEnd}
-          tool={tool}
-          zoom={zoom}
-          trackStates={trackStates}
-          onUpdateTrackState={updateTrackState}
-          onSetZoom={setZoom}
-          onSetTool={setTool}
-          selected={selected}
-          onSelectClip={selectClip}
-          onSeek={seek}
-          onDropAsset={addClipToTrack}
-          onMoveClips={moveClips}
-          onRippleTrim={rippleTrim}
-          onSlipClip={slipClip}
-          onSlideClip={slideClip}
-          onSplitClip={splitClipAt}
-          onAddKeyframe={addKeyframe}
-          onDeleteSelected={deleteSelected}
-          onApplyEffectPreset={applyEffectToClip}
-          onUpdateAppliedEffect={updateAppliedEffect}
-          selectedEffect={selectedFx}
-          onSelectEffect={handleSelectEffect}
-          onDeleteAppliedEffect={deleteAppliedEffect}
-          rampOpen={rampOpen}
-          onToggleRamp={handleToggleRamp}
+          {/* Center region: Source + Program monitors always live here. */}
+          <div className="nova-region-center">
+            {panels.sourceMonitor && sourceAsset && (
+              <>
+                <DockPanel id="source" api={layoutApi} className="nova-region-source">
+                  <LeftMonitorPanel
+                    sourceAsset={sourceAsset}
+                    selectedClip={selectedClipObj}
+                    selectedAsset={selectedAsset}
+                    onInsert={insertFromSource}
+                    onUpdateClipEffects={updateClipEffects}
+                  />
+                </DockPanel>
+                {layoutApi.isDocked("source") && (
+                  <PanelResizer
+                    orientation="vertical"
+                    label="Resize Source Monitor"
+                    value={layoutApi.layout.sourceSplit * 1000}
+                    onResize={(v) => layoutApi.setSize("sourceSplit", v / 1000)}
+                  />
+                )}
+              </>
+            )}
 
-        />
-        {rampOpen && (
-          <SpeedCurveEditor
-            clipName={selectedClipObj ? (selectedAsset?.name ?? "Clip") : null}
-            clipDuration={selectedClipObj?.duration ?? 0}
-            onClose={() => setRampOpen(false)}
-            onApply={(speedPercent) => {
-              if (!selectedClipObj) return;
-              applySpeed(selectedClipObj.id, speedPercent);
-            }}
+            <DockPanel id="monitor" api={layoutApi} className="nova-region-monitor">
+              <PreviewPlayer
+                assets={assets}
+                clips={clips}
+                time={time}
+                playing={playing}
+                contentEnd={contentEnd}
+                gradeFilter={gradeFilter}
+                audibleTracks={audibleTracks}
+                onTogglePlay={togglePlay}
+                onSeek={seek}
+                onOpenImport={openImport}
+                hoveredEffectId={hoveredEffectId}
+                audioLevel={audioReactiveLevel}
+              />
+            </DockPanel>
+          </div>
+
+          {inspectorRegionVisible && layoutApi.isDocked("inspector") && (
+            <PanelResizer
+              orientation="vertical"
+              invert
+              label="Resize Inspector"
+              value={layoutApi.layout.inspectorWidth}
+              onResize={(v) => layoutApi.setSize("inspectorWidth", v)}
+            />
+          )}
+
+          {inspectorRegionVisible && (
+            <DockPanel id="inspector" api={layoutApi} className="nova-region-inspector">
+              {workspace === "color" && panels.lumetri ? (
+                <LumetriPanel grade={grade} onGradeChange={(g) => { pushHistory(); setGrade(g); }} />
+              ) : workspace === "audio" ? (
+                <AudioMixerPanel />
+              ) : workspace === "graphics" ? (
+                <GraphicsPanel />
+              ) : (
+                <InspectorPanel
+                  clip={selectedClipObj}
+                  clipName={selectedAsset?.name ?? null}
+                  grade={grade}
+                  onGradeChange={(g) => setGrade(g)}
+                  onUpdateEffects={(id, p) => updateClipEffects(id, p)}
+                  onClose={() => setInspectorOpen(false)}
+                />
+              )}
+            </DockPanel>
+          )}
+        </section>
+
+        {/* ===== Lower band: timeline + audio mixer, always full width ===== */}
+        {layoutApi.isDocked("timeline") && (
+          <PanelResizer
+            orientation="horizontal"
+            invert
+            label="Resize Timeline"
+            value={layoutApi.layout.timelineHeight}
+            onResize={(v) => layoutApi.setSize("timelineHeight", v)}
           />
         )}
-        </div>
-        {panels.audioMeters && (
-          <div className="nova-panel-card flex min-h-0 min-w-0">
-            <AudioMeters playing={playing} hasAudio={clips.length > 0} />
-          </div>
-        )}
-      </section>
+        <section className="nova-editor-timeline">
+          <DockPanel id="timeline" api={layoutApi} className="nova-region-timeline">
+            <Timeline
+              assets={assets}
+              clips={clips}
+              videoTracks={videoTracks}
+              audioTracks={audioTracks}
+              seqDur={seqDur}
+              contentEnd={contentEnd}
+              tool={tool}
+              zoom={zoom}
+              trackStates={trackStates}
+              onUpdateTrackState={updateTrackState}
+              onSetZoom={setZoom}
+              onSetTool={setTool}
+              selected={selected}
+              onSelectClip={selectClip}
+              onSeek={seek}
+              onDropAsset={addClipToTrack}
+              onMoveClips={moveClips}
+              onRippleTrim={rippleTrim}
+              onSlipClip={slipClip}
+              onSlideClip={slideClip}
+              onSplitClip={splitClipAt}
+              onAddKeyframe={addKeyframe}
+              onDeleteSelected={deleteSelected}
+              onApplyEffectPreset={applyEffectToClip}
+              onUpdateAppliedEffect={updateAppliedEffect}
+              selectedEffect={selectedFx}
+              onSelectEffect={handleSelectEffect}
+              onDeleteAppliedEffect={deleteAppliedEffect}
+              rampOpen={rampOpen}
+              onToggleRamp={handleToggleRamp}
+            />
+            {rampOpen && (
+              <SpeedCurveEditor
+                clipName={selectedClipObj ? (selectedAsset?.name ?? "Clip") : null}
+                clipDuration={selectedClipObj?.duration ?? 0}
+                onClose={() => setRampOpen(false)}
+                onApply={(speedPercent) => {
+                  if (!selectedClipObj) return;
+                  applySpeed(selectedClipObj.id, speedPercent);
+                }}
+              />
+            )}
+          </DockPanel>
 
+          {panels.audioMeters && (
+            <DockPanel id="mixer" api={layoutApi} className="nova-region-mixer">
+              <AudioMeters playing={playing} hasAudio={clips.length > 0} />
+            </DockPanel>
+          )}
+        </section>
       </div>
+
 
 
       <AudioEngine assets={assets} clips={clips} time={time} playing={playing} audibleTracks={audibleTracks} onLevel={setAudioReactiveLevel} />

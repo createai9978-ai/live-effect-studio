@@ -635,42 +635,96 @@ input[type="range"]::-moz-range-thumb {
 }
 
 
-.nova-editor-layout {
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) clamp(330px, 35vh, 400px);
-  gap: 10px;
-  padding: 10px;
+/* ============================================================
+   Editor dock shell.
+
+   Structure is declared here, once. Panels are placed into fixed
+   regions and are sized ONLY by the CSS variables owned by the
+   layout store, so media import / clip selection can never move
+   or resize a region.
+   ============================================================ */
+.nova-editor-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
   overflow: hidden;
+  padding: 10px;
+  gap: 0;
 }
 
 .nova-editor-workspace {
-  display: grid;
-  gap: 10px;
-  grid-template-columns:
-    84px
-    clamp(330px, 21vw, 400px)
-    minmax(560px, 1fr)
-    clamp(320px, 19vw, 372px);
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  gap: 0;
 }
 
-.nova-editor-media { grid-column: 2; }
-.nova-program-monitor { grid-column: 3; }
-.nova-editor-inspector { grid-column: 4; }
+/* Every dock region is a hard box: it clips its own content and never
+   negotiates its size with a sibling. */
+.nova-dock-region {
+  flex-direction: column;
+  overflow: hidden;
+  contain: paint;
+}
 
+.nova-region-rail { flex: 0 0 84px; min-width: 84px }
+.nova-region-media {
+  flex: 0 0 var(--nova-media-w, 340px);
+  width: var(--nova-media-w, 340px);
+  min-width: 0;
+}
+.nova-region-center { display: flex; flex: 1 1 auto; min-width: 0; min-height: 0; overflow: hidden }
+.nova-region-source {
+  flex: 0 0 calc(var(--nova-source-split, 0.38) * 100%);
+  min-width: 0;
+}
+.nova-region-monitor { flex: 1 1 auto; min-width: 0 }
+.nova-region-inspector {
+  flex: 0 0 var(--nova-inspector-w, 330px);
+  width: var(--nova-inspector-w, 330px);
+  min-width: 0;
+}
+
+/* The timeline owns the whole bottom band, always full width. */
 .nova-editor-timeline {
-  grid-row: 2;
+  display: flex;
+  flex: 0 0 var(--nova-timeline-h, 360px);
+  height: var(--nova-timeline-h, 360px);
+  min-height: 0;
   width: 100%;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) clamp(240px, 17vw, 300px);
+  overflow: hidden;
+  gap: 0;
+}
+.nova-region-timeline { flex: 1 1 auto; min-width: 0 }
+.nova-region-mixer {
+  flex: 0 0 var(--nova-mixer-w, clamp(220px, 16vw, 290px));
+  min-width: 0;
 }
 
-/* Preserve professional control sizes instead of crushing the editor when the
-   browser is narrower than a desktop workstation. */
-@media (max-width: 1279px) {
-  .nova-editor-layout { min-width: 1220px; }
-  .nova-editor-workspace {
-    grid-template-columns: 78px 320px minmax(510px, 1fr) 330px;
-  }
+/* A region collapsed by an undocked panel takes no space and shows nothing. */
+.nova-region-media:empty,
+.nova-region-inspector:empty,
+.nova-region-mixer:empty { display: none }
+
+/* Gaps are rendered by the resizers themselves so drag targets sit exactly
+   between two panels. */
+.nova-resizer { touch-action: none }
+.nova-resizer::after { content: "" }
+
+.nova-dock-affordance { opacity: 0; transition: opacity 180ms var(--ease-drift) }
+.nova-dock-region:hover .nova-dock-affordance,
+.nova-dock-affordance:focus-within { opacity: 1 }
+
+.nova-float-window {
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.9);
+  animation: nova-panel-in 220ms var(--ease-expo) both;
 }
+
+@media (max-width: 1279px) {
+  .nova-editor-shell { min-width: 1180px }
+}
+
 

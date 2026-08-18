@@ -76,11 +76,19 @@ export function useEditorLayout() {
   const gridStyle = useMemo(
     () =>
       ({
-        "--nova-media-w": `${layout.mediaWidth}px`,
-        "--nova-inspector-w": `${layout.inspectorWidth}px`,
-        "--nova-timeline-h": `${layout.timelineHeight}px`,
+        // A floating panel gives its dock region back to the grid instead of
+        // leaving a hole, but the region itself never moves.
+        "--nova-media-w": layout.panels.media.mode === "docked" ? `${layout.mediaWidth}px` : "0px",
+        "--nova-inspector-w":
+          layout.panels.inspector.mode === "docked" ? `${layout.inspectorWidth}px` : "0px",
+        "--nova-timeline-h":
+          layout.panels.timeline.mode === "docked" || layout.panels.mixer.mode === "docked"
+            ? `${layout.timelineHeight}px`
+            : "0px",
+        "--nova-mixer-w": layout.panels.mixer.mode === "docked" ? "clamp(220px, 16vw, 290px)" : "0px",
+        "--nova-source-split": layout.panels.source.mode === "docked" ? layout.sourceSplit : 0,
       }) as React.CSSProperties,
-    [layout.mediaWidth, layout.inspectorWidth, layout.timelineHeight]
+    [layout]
   );
 
   return {

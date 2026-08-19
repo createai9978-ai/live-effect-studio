@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { playhead } from "../editor/playhead";
+import { useEditorLayout } from "../editor/useEditorLayout";
+import DockPanel from "../components/DockPanel";
+import PanelResizer from "../components/PanelResizer";
 
 import TopBar from "../components/TopBar";
 import { AdminProvider } from "../admin/AdminContext";
@@ -213,6 +216,8 @@ function AppInner() {
   const [browserTab, setBrowserTab] = useState<AssetTab>("effects");
   const [rail, setRail] = useState<RailKey>("media");
   const [inspectorOpen, setInspectorOpen] = useState(true);
+  const layoutApi = useEditorLayout();
+  const inspectorRegionVisible = workspace !== "editing" ? true : inspectorOpen;
   const [hoveredEffectId, setHoveredEffectId] = useState<string | null>(null);
   const [audioReactiveLevel, setAudioReactiveLevel] = useState(0);
   const openAssetBrowser = useCallback((t: AssetTab = "effects") => {

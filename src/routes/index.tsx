@@ -1,7 +1,21 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
+import { AppBoundary } from "../nova/AppBoundary";
 
-const NovaApp = lazy(() => import("../nova/App"));
+// A stale build/chunk reference makes the dynamic import reject and blanks the
+// page. Retry once, then force a hard reload to pick up the fresh bundle.
+const NovaApp = lazy(async () => {
+  try {
+    return await import("../nova/App");
+  } catch {
+    try {
+      return await import("../nova/App");
+    } catch (err) {
+      if (typeof window !== "undefined") window.location.reload();
+      throw err;
+    }
+  }
+});
 
 export const Route = createFileRoute("/")({
   head: () => ({

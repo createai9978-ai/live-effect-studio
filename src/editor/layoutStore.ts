@@ -70,7 +70,7 @@ export const DEFAULT_LAYOUT: EditorLayout = {
   version: 2,
   mediaWidth: 300,
   inspectorWidth: 300,
-  timelineHeight: 340,
+  timelineHeight: 318,
   sourceSplit: 0.38,
   panels: {
     media: { mode: "docked", rect: defaultRect(0) },

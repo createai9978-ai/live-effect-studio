@@ -217,6 +217,7 @@ function AppInner() {
   const [rail, setRail] = useState<RailKey>("media");
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const layoutApi = useEditorLayout();
+  const inspectorRegionVisible = workspace !== "editing" ? true : inspectorOpen;
   const [hoveredEffectId, setHoveredEffectId] = useState<string | null>(null);
   const [audioReactiveLevel, setAudioReactiveLevel] = useState(0);
   const openAssetBrowser = useCallback((t: AssetTab = "effects") => {

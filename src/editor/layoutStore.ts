@@ -53,9 +53,9 @@ export type EditorLayout = {
 };
 
 export const LAYOUT_LIMITS = {
-  mediaWidth: [260, 520] as const,
-  inspectorWidth: [260, 460] as const,
-  timelineHeight: [220, 620] as const,
+  mediaWidth: [280, 460] as const,
+  inspectorWidth: [280, 420] as const,
+  timelineHeight: [240, 560] as const,
   sourceSplit: [0.22, 0.6] as const,
 };
 
@@ -68,9 +68,9 @@ const defaultRect = (i: number): FloatRect => ({
 
 export const DEFAULT_LAYOUT: EditorLayout = {
   version: 2,
-  mediaWidth: 340,
-  inspectorWidth: 330,
-  timelineHeight: 360,
+  mediaWidth: 300,
+  inspectorWidth: 300,
+  timelineHeight: 318,
   sourceSplit: 0.38,
   panels: {
     media: { mode: "docked", rect: defaultRect(0) },

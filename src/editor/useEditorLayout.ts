@@ -83,7 +83,7 @@ export function useEditorLayout() {
           layout.panels.inspector.mode === "docked" ? `${layout.inspectorWidth}px` : "0px",
         "--nova-timeline-h":
           layout.panels.timeline.mode === "docked" || layout.panels.mixer.mode === "docked"
-            ? `${layout.timelineHeight}px`
+            ? `clamp(240px, ${layout.timelineHeight}px, 38dvh)`
             : "0px",
         "--nova-mixer-w": layout.panels.mixer.mode === "docked" ? "clamp(220px, 16vw, 290px)" : "0px",
         "--nova-source-split": layout.panels.source.mode === "docked" ? layout.sourceSplit : 0,

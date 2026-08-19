@@ -333,7 +333,7 @@ export default function PreviewPlayer({
 
       {/* Video frame */}
       <div className="relative flex min-h-0 flex-1 items-center justify-center bg-black p-2.5">
-        <div className="relative aspect-video max-h-full w-full max-w-full overflow-hidden rounded-md bg-[#000000] shadow-2xl shadow-black/60 ring-1 ring-white/[0.07]">
+        <div className="relative h-full max-h-full w-full max-w-full overflow-hidden rounded-md bg-[#000000] shadow-2xl shadow-black/60 ring-1 ring-white/[0.07]">
           {active && mergedEffects ? (
             <>
               {(() => {

@@ -48,15 +48,17 @@ function Index() {
         </div>
       }
     >
-      <Suspense
-        fallback={
-          <div className="flex min-h-screen items-center justify-center bg-[#111621] text-sm text-zinc-500">
-            Loading NOVA Studio…
-          </div>
-        }
-      >
-        <NovaApp />
-      </Suspense>
+      <AppBoundary>
+        <Suspense
+          fallback={
+            <div className="flex min-h-screen items-center justify-center bg-[#111621] text-sm text-zinc-500">
+              Loading NOVA Studio…
+            </div>
+          }
+        >
+          <NovaApp />
+        </Suspense>
+      </AppBoundary>
     </ClientOnly>
   );
 }

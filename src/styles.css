@@ -723,8 +723,15 @@ input[type="range"]::-moz-range-thumb {
   animation: nova-panel-in 220ms var(--ease-expo) both;
 }
 
+/* Narrow viewports keep the desktop dock proportions but scroll *inside* the
+   shell — the page itself never scrolls. */
 @media (max-width: 1279px) {
-  .nova-editor-shell { min-width: 1180px }
+  .nova-editor-shell { overflow-x: auto; overflow-y: hidden }
+  .nova-editor-workspace,
+  .nova-editor-timeline { min-width: 1180px }
 }
+
+/* Panels only scroll internally, never the window. */
+.nova-dock-region > * { min-height: 0; min-width: 0 }
 
 

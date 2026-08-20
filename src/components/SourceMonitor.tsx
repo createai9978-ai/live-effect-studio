@@ -158,7 +158,7 @@ export default function SourceMonitor({ asset, onInsert }: Props) {
       </div>
 
       {/* Trim bar */}
-      <div className="px-3 pb-1">
+      <div className="min-w-0 overflow-hidden px-3 pb-1">
         <div ref={barRef} className="group relative h-6 cursor-col-resize" onMouseDown={scrub}>
           {/* base track */}
           <div className="absolute top-1/2 h-1.5 w-full -translate-y-1/2 rounded-full bg-white/[0.07]" />
@@ -193,7 +193,8 @@ export default function SourceMonitor({ asset, onInsert }: Props) {
       </div>
 
       {/* Transport + trim controls */}
-      <div className="flex items-center gap-1 border-t border-white/[0.05] px-3 py-1.5">
+      <div className="flex min-w-0 shrink-0 flex-row items-center justify-between gap-1 overflow-hidden border-t border-white/[0.05] px-2 py-1.5">
+
         <span className="mr-1 font-mono text-[10px] text-cyan-300">{toTimecode(t)}</span>
 
         <button

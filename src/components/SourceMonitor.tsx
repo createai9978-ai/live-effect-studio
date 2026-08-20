@@ -82,10 +82,11 @@ export default function SourceMonitor({ asset, onInsert }: Props) {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       {/* Viewer */}
-      <div className="relative flex min-h-0 flex-1 items-center justify-center bg-black p-3">
-        <div className="relative aspect-video max-h-full w-full overflow-hidden rounded-md bg-[#000000] ring-1 ring-white/[0.07]">
+      <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-black p-3">
+        <div className="relative aspect-video max-h-full w-full max-w-full overflow-hidden rounded-md bg-[#000000] ring-1 ring-white/[0.07]">
+
           {asset.kind === "video" ? (
             <video
               key={asset.id}
@@ -157,7 +158,7 @@ export default function SourceMonitor({ asset, onInsert }: Props) {
       </div>
 
       {/* Trim bar */}
-      <div className="px-3 pb-1">
+      <div className="min-w-0 overflow-hidden px-3 pb-1">
         <div ref={barRef} className="group relative h-6 cursor-col-resize" onMouseDown={scrub}>
           {/* base track */}
           <div className="absolute top-1/2 h-1.5 w-full -translate-y-1/2 rounded-full bg-white/[0.07]" />
@@ -192,25 +193,28 @@ export default function SourceMonitor({ asset, onInsert }: Props) {
       </div>
 
       {/* Transport + trim controls */}
-      <div className="flex items-center gap-1 border-t border-white/[0.05] px-3 py-1.5">
-        <span className="mr-1 font-mono text-[10px] text-cyan-300">{toTimecode(t)}</span>
+      <div className="flex min-w-0 shrink-0 flex-row items-center justify-between gap-1 overflow-hidden border-t border-white/[0.05] px-2 py-1.5">
+        {/* Left cluster: timecode + in/out marks */}
+        <div className="flex min-w-0 shrink items-center gap-1 overflow-hidden">
+          <span className="truncate font-mono text-[10px] text-cyan-300">{toTimecode(t)}</span>
+          <button
+            title="Mark In (at playhead)"
+            onClick={() => setInPt(Math.min(t, outPt - 0.1))}
+            className="hidden h-6 shrink-0 items-center rounded-md bg-violet-500/15 px-1.5 font-mono text-[10px] font-bold text-violet-300 transition hover:bg-violet-500/30 sm:flex"
+          >
+            {"{"}
+          </button>
+          <button
+            title="Mark Out (at playhead)"
+            onClick={() => setOutPt(Math.max(t, inPt + 0.1))}
+            className="hidden h-6 shrink-0 items-center rounded-md bg-fuchsia-500/15 px-1.5 font-mono text-[10px] font-bold text-fuchsia-300 transition hover:bg-fuchsia-500/30 sm:flex"
+          >
+            {"}"}
+          </button>
+        </div>
 
-        <button
-          title="Mark In (at playhead)"
-          onClick={() => setInPt(Math.min(t, outPt - 0.1))}
-          className="flex h-6 items-center rounded-md bg-violet-500/15 px-1.5 font-mono text-[10px] font-bold text-violet-300 transition hover:bg-violet-500/30"
-        >
-          {"{"}
-        </button>
-        <button
-          title="Mark Out (at playhead)"
-          onClick={() => setOutPt(Math.max(t, inPt + 0.1))}
-          className="flex h-6 items-center rounded-md bg-fuchsia-500/15 px-1.5 font-mono text-[10px] font-bold text-fuchsia-300 transition hover:bg-fuchsia-500/30"
-        >
-          {"}"}
-        </button>
-
-        <div className="mx-auto flex items-center gap-0.5">
+        {/* Center transport */}
+        <div className="flex shrink-0 items-center gap-0.5">
           <MiniBtn title="Go to In" onClick={() => seekTo(inPt)}>
             <path d="M6 5v14M20 5l-10 7 10 7V5z" />
           </MiniBtn>
@@ -222,7 +226,7 @@ export default function SourceMonitor({ asset, onInsert }: Props) {
               if (!playing && t >= outPt - 0.05) seekTo(inPt);
               setPlaying((p) => !p);
             }}
-            className="mx-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-600/30 transition hover:brightness-110"
+            className="mx-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-600/30 transition hover:brightness-110"
             title="Play In→Out"
           >
             {playing ? (
@@ -239,37 +243,40 @@ export default function SourceMonitor({ asset, onInsert }: Props) {
           </MiniBtn>
         </div>
 
-        {/* Insert + drag */}
-        <button
-          onClick={() => onInsert(asset.id, inPt, trimDur)}
-          title={`Insert trimmed clip (${fmtDuration(trimDur)}) at the timeline playhead`}
-          className="flex h-6 items-center gap-1 rounded-md bg-gradient-to-r from-violet-600 to-fuchsia-600 px-2 text-[9.5px] font-medium text-white shadow-md shadow-violet-600/25 transition hover:brightness-110"
-        >
-          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M12 19l-4-4M12 19l4-4" />
-          </svg>
-          Insert
-        </button>
-        <div
-          draggable
-          onDragStart={(e) => {
-            e.dataTransfer.setData(
-              "application/x-nova-asset",
-              JSON.stringify({ assetId: asset.id, offset: inPt, duration: trimDur })
-            );
-            e.dataTransfer.setData("text/plain", asset.id);
-            e.dataTransfer.effectAllowed = "copy";
-          }}
-          title="Drag the trimmed In→Out range to a timeline track"
-          className="flex h-6 cursor-grab items-center rounded-md border border-white/[0.1] px-1.5 text-zinc-400 transition hover:border-violet-500/50 hover:text-violet-300 active:cursor-grabbing"
-        >
-          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-            <circle cx="9" cy="6" r="1.2" /><circle cx="15" cy="6" r="1.2" />
-            <circle cx="9" cy="12" r="1.2" /><circle cx="15" cy="12" r="1.2" />
-            <circle cx="9" cy="18" r="1.2" /><circle cx="15" cy="18" r="1.2" />
-          </svg>
+        {/* Right cluster: insert + drag */}
+        <div className="flex min-w-0 shrink items-center justify-end gap-1 overflow-hidden">
+          <button
+            onClick={() => onInsert(asset.id, inPt, trimDur)}
+            title={`Insert trimmed clip (${fmtDuration(trimDur)}) at the timeline playhead`}
+            className="flex h-6 min-w-0 shrink items-center gap-1 rounded-md bg-gradient-to-r from-violet-600 to-fuchsia-600 px-2 text-[9.5px] font-medium text-white shadow-md shadow-violet-600/25 transition hover:brightness-110"
+          >
+            <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14M12 19l-4-4M12 19l4-4" />
+            </svg>
+            <span className="hidden truncate sm:inline">Insert</span>
+          </button>
+          <div
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData(
+                "application/x-nova-asset",
+                JSON.stringify({ assetId: asset.id, offset: inPt, duration: trimDur })
+              );
+              e.dataTransfer.setData("text/plain", asset.id);
+              e.dataTransfer.effectAllowed = "copy";
+            }}
+            title="Drag the trimmed In→Out range to a timeline track"
+            className="hidden h-6 shrink-0 cursor-grab items-center rounded-md border border-white/[0.1] px-1.5 text-zinc-400 transition hover:border-violet-500/50 hover:text-violet-300 active:cursor-grabbing sm:flex"
+          >
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+              <circle cx="9" cy="6" r="1.2" /><circle cx="15" cy="6" r="1.2" />
+              <circle cx="9" cy="12" r="1.2" /><circle cx="15" cy="12" r="1.2" />
+              <circle cx="9" cy="18" r="1.2" /><circle cx="15" cy="18" r="1.2" />
+            </svg>
+          </div>
         </div>
       </div>
+
     </div>
   );
 }
@@ -287,7 +294,7 @@ function MiniBtn({
     <button
       title={title}
       onClick={onClick}
-      className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 transition hover:bg-white/[0.07] hover:text-zinc-100"
+      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-zinc-400 transition hover:bg-white/[0.07] hover:text-zinc-100"
     >
       <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         {children}

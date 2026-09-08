@@ -234,6 +234,41 @@ export default function HomeScreen({
         </div>
 
         <div className="mx-auto max-w-[1180px] px-6 py-6">
+          {/* ---------- Central frosted portfolio card ---------- */}
+          <div className="mb-6 flex justify-center">
+            <div
+              className="flex w-full max-w-[760px] flex-col items-center gap-5 rounded-3xl border border-white/[0.18] bg-white/[0.06] px-8 py-8 shadow-[0_0_60px_-12px_rgba(255,255,255,0.12)] backdrop-blur-2xl"
+              style={{
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.08) inset, 0 24px 80px -16px rgba(0,0,0,0.45), 0 0 60px -12px rgba(255,255,255,0.10)",
+              }}
+            >
+              <h1 className="text-center text-[34px] font-bold leading-tight tracking-tight text-white drop-shadow-[0_2px_24px_rgba(255,255,255,0.18)]">
+                CREATIVE PORTFOLIO
+              </h1>
+
+              <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+                {[
+                  "Personal Presentation",
+                  "About Me",
+                  "Education",
+                  "Personal Skills",
+                  "Work Experience",
+                  "Project Portfolio",
+                ].map((label, i, arr) => (
+                  <div key={label} className="flex items-center gap-3">
+                    <button className="group relative text-[12.5px] font-medium tracking-wide text-zinc-300 transition-colors duration-300 hover:text-white">
+                      {label}
+                      <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-[#00E5FF] transition-all duration-300 group-hover:w-full" />
+                    </button>
+                    {i < arr.length - 1 && (
+                      <span className="h-3.5 w-px bg-white/20" aria-hidden />
+                    )}
+                  </div>
+                ))}
+              </nav>
+            </div>
+          </div>
+
           {/* hero row */}
           <div className="nova-stagger grid gap-4 lg:grid-cols-[1fr_1.5fr]">
             <button
@@ -349,41 +384,6 @@ export default function HomeScreen({
           </div>
         </div>
       </main>
-
-      {/* ---------- Central frosted portfolio overlay ---------- */}
-      <div className="pointer-events-none fixed inset-0 z-[100] flex items-center justify-center p-6">
-        <div
-          className="pointer-events-auto flex w-full max-w-[920px] flex-col items-center gap-6 rounded-3xl border border-white/[0.18] bg-white/[0.06] p-10 shadow-[0_0_60px_-12px_rgba(255,255,255,0.15)] backdrop-blur-2xl"
-          style={{
-            boxShadow: "0 0 0 1px rgba(255,255,255,0.08) inset, 0 24px 80px -16px rgba(0,0,0,0.45), 0 0 60px -12px rgba(255,255,255,0.12)",
-          }}
-        >
-          <h1 className="text-center text-[clamp(28px,5vw,52px)] font-bold tracking-tight text-white drop-shadow-[0_2px_24px_rgba(255,255,255,0.18)]">
-            CREATIVE PORTFOLIO
-          </h1>
-
-          <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            {[
-              "Personal Presentation",
-              "About Me",
-              "Education",
-              "Personal Skills",
-              "Work Experience",
-              "Project Portfolio",
-            ].map((label, i, arr) => (
-              <div key={label} className="flex items-center gap-4">
-                <button className="relative text-[12.5px] font-medium tracking-wide text-zinc-300 transition-colors duration-300 hover:text-white">
-                  {label}
-                  <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-[#00E5FF] transition-all duration-300 hover:w-full" />
-                </button>
-                {i < arr.length - 1 && (
-                  <span className="h-3.5 w-px bg-white/20" aria-hidden />
-                )}
-              </div>
-            ))}
-          </nav>
-        </div>
-      </div>
     </div>
   );
 }

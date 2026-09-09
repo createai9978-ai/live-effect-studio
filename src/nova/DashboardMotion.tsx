@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import motionAsset from "../assets/nova-glass-motion.mp4.asset.json";
+
+const MOTION_VIDEO = "/video/nova-glass-motion.mp4";
 
 export default function DashboardMotion() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -27,7 +28,7 @@ export default function DashboardMotion() {
       {!failed && (
         <video
           ref={videoRef}
-          src={motionAsset.url}
+          src={MOTION_VIDEO}
           poster="/images/nova-motion-fallback.jpg"
           autoPlay
           muted

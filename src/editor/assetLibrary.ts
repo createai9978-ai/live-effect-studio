@@ -736,6 +736,69 @@ const atmosphericSet = makeSet({
   ],
 });
 
+/* ---------- Suite I — Camera & Motion (shake, motion blur, flicker) ---------- */
+
+const camMotionSet = makeSet({
+  prefix: "cam-fx", target: 48, glyph: "camera", tag: "CAMERA",
+  gradient: ["#0b1220", "#f43f5e"], tags: ["cinematic", "gaming", "vlog"],
+  names: [
+    ["Handheld Camera Shake", "cameraShake"],
+    ["Impact Recoil Shake", "cameraShake"],
+    ["Earthquake Rumble Shake", "cameraShake"],
+    ["Bass Drop Beat Shake", "cameraShake"],
+    ["Subtle Documentary Sway", "cameraShake"],
+    ["Directional Motion Blur", "directionalBlur"],
+    ["Whip Pan Motion Smear", "directionalBlur"],
+    ["Shutter Angle Trail Blur", "motionTrail"],
+    ["Random Flicker Strobe", "grain"],
+    ["Neon Sign Flicker", "glow"],
+    ["Rolling Shutter Skew", "glitchBlock"],
+    ["Zoom Punch Pulse", "zoomPulse"],
+  ],
+});
+
+/* ---------- Suite J — Optics Lab (specialised blurs + sharpening) ---------- */
+
+const opticsLabSet = makeSet({
+  prefix: "optics-fx", target: 44, glyph: "distort", tag: "OPTICS",
+  gradient: ["#0f172a", "#94a3b8"], tags: ["cinematic", "corporate", "minimal"],
+  names: [
+    ["Gaussian Soft Focus Blur", "gaussianBlur"],
+    ["Radial Zoom Blur", "zoomPulse"],
+    ["Directional Streak Blur", "directionalBlur"],
+    ["Tilt Shift Miniature Blur", "gaussianBlur"],
+    ["Bokeh Highlight Defocus", "gaussianBlur"],
+    ["Lens Breathing Focus Pull", "gaussianBlur"],
+    ["Edge Detail Sharpen", "sharpen"],
+    ["Broadcast Clarity Sharpen", "sharpen"],
+    ["Micro Contrast Sharpen", "sharpen"],
+    ["Denoise & Recover Detail", "sharpen"],
+    ["Anamorphic Squeeze Optics", "chromaticAberration"],
+    ["Chromatic Fringe Optics", "chromaticAberration"],
+  ],
+});
+
+/* ---------- Suite K — Pro Tools (chroma key, PiP, tracking) ---------- */
+
+const proToolsSet = makeSet({
+  prefix: "pro-tool", target: 30, glyph: "layers", tag: "TOOL", ai: true,
+  gradient: ["#052e16", "#22d3ee"], tags: ["corporate", "ai", "gaming"],
+  names: [
+    ["Chroma Key Green Screen", "rotoscope"],
+    ["Chroma Key Blue Screen", "rotoscope"],
+    ["Spill Suppression Key", "rotoscope"],
+    ["Edge Refine Matte Key", "rotoscope"],
+    ["Picture in Picture Corner", "splitLayout"],
+    ["Picture in Picture Reaction", "splitLayout"],
+    ["Split Screen Compare", "splitLayout"],
+    ["Motion Tracking Attach", "bodyTrack"],
+    ["Mask Tracking Follow", "bodyTrack"],
+    ["Face Tracking Blur Mask", "bodyTrack"],
+    ["Object Tracking Highlight", "bodyTrack"],
+    ["Auto Reframe Tracking", "bodyTrack"],
+  ],
+});
+
 /* ================= EFFECTS TREE =================
    Seven professional collections, Filmora-Pro style: Cinema Grade,
    Light & Lens Flares, VHS Glitch, Neural AI FX, Kinetic Motion,
@@ -863,6 +926,33 @@ export const EFFECTS_TREE: EffectCategory[] = [
     children: [
       { id: "vfx-blur-cat", label: "Blur & Focus", icon: "distort", count: vfxBlur.length, items: vfxBlur, accent: "#94a3b8", badge: "BLUR" },
       { id: "vfx-distort-cat", label: "Distort & Shake", icon: "distort", count: vfxDistort.length, items: vfxDistort, accent: "#f43f5e", badge: "WARP" },
+    ],
+  },
+  {
+    id: "camera-optics",
+    label: "Camera & Optics",
+    icon: "camera",
+    count: camMotionSet.length + opticsLabSet.length,
+    items: dedupe([...camMotionSet, ...opticsLabSet]),
+    accent: "#38bdf8",
+    gradient: ["#0ea5e9", "#f43f5e"],
+    badge: "LENS",
+    children: [
+      { id: "cam-motion-cat", label: "Shake, Blur & Flicker", icon: "camera", count: camMotionSet.length, items: camMotionSet, accent: "#f43f5e", badge: "MOTION" },
+      { id: "optics-lab-cat", label: "Blur & Sharpen Lab", icon: "distort", count: opticsLabSet.length, items: opticsLabSet, accent: "#94a3b8", badge: "OPTIC" },
+    ],
+  },
+  {
+    id: "pro-tools",
+    label: "Pro Tools",
+    icon: "layers",
+    count: proToolsSet.length,
+    items: proToolsSet,
+    accent: "#22d3ee",
+    gradient: ["#22d3ee", "#4ade80"],
+    badge: "KEY",
+    children: [
+      { id: "pro-tools-cat", label: "Key, PiP & Tracking", icon: "layers", count: proToolsSet.length, items: proToolsSet, accent: "#22d3ee", badge: "TOOL" },
     ],
   },
 ];
@@ -1005,6 +1095,64 @@ const trnGlitchCat = makeSet({
     ["Shake Cut Transition", "cameraShake"],
   ],
 });
+const trnMotion3D = makeSet({
+  prefix: "trn-m3d", target: 26, glyph: "wipe", tag: "3D MOTION",
+  gradient: ["#0b1220", "#818cf8"], tags: ["corporate", "gaming"],
+  names: [
+    ["Cube Spin Left", "transitionWarp"],
+    ["Cube Spin Up", "transitionWarp"],
+    ["Box Tumble Roll", "transitionWarp"],
+    ["Door Swing Open", "mirror"],
+    ["Prism Rotate Reveal", "kaleido"],
+    ["Perspective Flip Card", "mirror"],
+  ],
+});
+const trnCinematic = makeSet({
+  prefix: "trn-cine", target: 26, glyph: "camera", tag: "CINEMATIC",
+  gradient: ["#0f172a", "#fbbf24"], tags: ["cinematic", "travel"],
+  names: [
+    ["Cinematic Zoom In Punch", "zoomPulse"],
+    ["Cinematic Zoom Out Pull", "zoomPulse"],
+    ["Camera Pan Light Leak", "lightLeakFx"],
+    ["Whip Pan Blur Cut", "directionalBlur"],
+    ["Dolly Push Through", "zoomPulse"],
+    ["Parallax Depth Slide", "directionalBlur"],
+  ],
+});
+const trnDistort = makeSet({
+  prefix: "trn-dist", target: 24, glyph: "distort", tag: "DISTORT",
+  gradient: ["#312e81", "#22d3ee"], tags: ["gaming", "music"],
+  names: [
+    ["RGB Split Tear", "rgbSplit"],
+    ["Datamosh Smear Cut", "glitchBlock"],
+    ["Signal Distortion Wave", "vhs"],
+    ["Warp Shatter Break", "transitionWarp"],
+    ["Lens Warp Bulge Cut", "chromaticAberration"],
+  ],
+});
+const trnFlare = makeSet({
+  prefix: "trn-flare", target: 22, glyph: "leak", tag: "FLARE",
+  gradient: ["#7c2d12", "#fde68a"], tags: ["cinematic", "wedding"],
+  names: [
+    ["Light Leak Sweep", "lightLeakFx"],
+    ["Lens Flare Wipe", "glow"],
+    ["Halation Bloom Cut", "glow"],
+    ["Sun Burst Cross Fade", "glow"],
+  ],
+});
+const trnWipes = makeSet({
+  prefix: "trn-wipe", target: 28, glyph: "wipe", tag: "WIPE",
+  gradient: ["#0b1220", "#94a3b8"], tags: ["corporate", "minimal"],
+  names: [
+    ["Seamless Linear Wipe", "transitionWarp"],
+    ["Iris Circle Wipe", "transitionWarp"],
+    ["Barn Door Wipe", "transitionWarp"],
+    ["Gradient Dissolve Wipe", "transitionWarp"],
+    ["Radial Clock Sweep", "transitionWarp"],
+    ["Luma Dissolve Pattern", "transitionWarp"],
+  ],
+});
+
 
 /* ---------- TITLES ---------- */
 const ttlTrending = makeSet({
@@ -1042,6 +1190,39 @@ const ttlSport = makeSet({
   gradient: ["#052e16", "#4ade80"], tags: ["gaming", "corporate"],
   names: ["Stadium Scoreline Title", "Match Day Slam", "Kickoff Countdown Title", "Trophy Reveal Title"],
 });
+const ttlKinetic = makeSet({
+  prefix: "ttl-kin", target: 30, glyph: "text", tag: "KINETIC", fx: "textMotion",
+  gradient: ["#1e1b4b", "#22d3ee"], tags: ["music", "vlog"],
+  names: [
+    "Kinetic Word Pop",
+    "Typewriter Reveal",
+    "Bounce In Kinetic Line",
+    "Split Reveal Headline",
+    "Glitch Text Kinetic",
+    "Scale Slam Kinetic Word",
+  ],
+});
+const ttlOpeners = makeSet({
+  prefix: "ttl-open", target: 24, glyph: "text", tag: "OPENER", fx: "textMotion",
+  gradient: ["#0b1220", "#fbbf24"], tags: ["cinematic", "corporate"],
+  names: [
+    "Cinematic Intro Opener",
+    "Minimal Title Card",
+    "Documentary Chapter Card",
+    "Trailer Text Sting",
+  ],
+});
+const ttlCredits = makeSet({
+  prefix: "ttl-cred", target: 18, glyph: "text", tag: "CREDITS", fx: "textMotion",
+  gradient: ["#0a0a0a", "#a8a29e"], tags: ["cinematic", "minimal"],
+  names: [
+    "Scrolling Credit Roll",
+    "Cast & Crew Column Roll",
+    "End Card Thanks Roll",
+    "Studio Logo Credit Out",
+  ],
+});
+
 
 /* ---------- STICKERS ---------- */
 const stkTrending = makeSet({

@@ -41,6 +41,11 @@ export type EffectFamily =
   | "lut"
   | "speed"
   | "blur"
+  | "chroma"
+  | "pip"
+  | "tracking"
+  | "sharpen"
+  | "flicker"
   | "generic";
 
 export type FamilySchema = {

@@ -394,7 +394,12 @@ input[type="range"]::-moz-range-thumb {
   --nebula-glass: oklch(0.2 0.03 270 / 0.62);
   --nebula-cyan: oklch(0.84 0.14 205);
   --nebula-violet: oklch(0.61 0.25 300);
+  --background: oklch(0.12 0.018 265);
+  --foreground: oklch(0.97 0.008 255);
+  --muted-foreground: oklch(0.68 0.025 260);
+  --primary-foreground: oklch(0.12 0.018 265);
   background: var(--nebula-carbon);
+  color: var(--foreground);
 }
 .nova-nebula-particles {
   position: absolute;
@@ -418,8 +423,8 @@ input[type="range"]::-moz-range-thumb {
     "rail deck deck";
   gap: 14px;
   width: min(1480px, calc(100% - 32px));
-  height: calc(100dvh - 32px);
-  margin: 16px auto;
+  height: min(1000px, calc(100dvh - 32px));
+  margin: max(16px, calc((100dvh - 1000px) / 2)) auto;
   font-family: var(--font-sans);
 }
 .nova-nebula-glass {

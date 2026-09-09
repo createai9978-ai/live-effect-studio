@@ -318,7 +318,12 @@ const SCHEMAS: Record<EffectFamily, FamilySchema> = {
 /** Resolve a family from an effect name / pack tag. */
 export function familyFor(name: string, tag?: string): EffectFamily {
   const n = `${name} ${tag ?? ""}`.toLowerCase();
-  if (/interpolat|frame rate|slow ?mo|motion sync|voice-to-fx|smart body|tracking|fps/.test(n)) return "ai-motion";
+  if (/chroma key|green screen|blue screen|spill|matte key/.test(n)) return "chroma";
+  if (/picture in picture|\bpip\b|split screen|compare/.test(n)) return "pip";
+  if (/tracking|track |auto reframe|follow/.test(n)) return "tracking";
+  if (/sharpen|clarity|denoise|detail recovery/.test(n)) return "sharpen";
+  if (/flicker|strobe/.test(n)) return "flicker";
+  if (/interpolat|frame rate|slow ?mo|motion sync|voice-to-fx|smart body|fps/.test(n)) return "ai-motion";
   if (/rotoscope|depth|mask|cutout|background|portrait|segment|body effect/.test(n)) return "ai-mask";
   if (/transition|wipe|slit|zoom blur|whip|burst|dissolve|swipe|morph/.test(n)) return "transition";
   if (/glitch|vhs|crt|retro|rgb|datamosh|scanline|cyberpunk|distort/.test(n)) return "glitch";

@@ -739,7 +739,7 @@ const atmosphericSet = makeSet({
 /* ---------- Suite I — Camera & Motion (shake, motion blur, flicker) ---------- */
 
 const camMotionSet = makeSet({
-  prefix: "cam-fx", target: 48, glyph: "camera", tag: "CAMERA",
+  prefix: "cam-fx", target: 48, glyph: "shake", tag: "CAMERA",
   gradient: ["#0b1220", "#f43f5e"], tags: ["cinematic", "gaming", "vlog"],
   names: [
     ["Handheld Camera Shake", "cameraShake"],
@@ -760,7 +760,7 @@ const camMotionSet = makeSet({
 /* ---------- Suite J — Optics Lab (specialised blurs + sharpening) ---------- */
 
 const opticsLabSet = makeSet({
-  prefix: "optics-fx", target: 44, glyph: "distort", tag: "OPTICS",
+  prefix: "optics-fx", target: 44, glyph: "bokeh", tag: "OPTICS",
   gradient: ["#0f172a", "#94a3b8"], tags: ["cinematic", "corporate", "minimal"],
   names: [
     ["Gaussian Soft Focus Blur", "gaussianBlur"],
@@ -781,7 +781,7 @@ const opticsLabSet = makeSet({
 /* ---------- Suite K — Pro Tools (chroma key, PiP, tracking) ---------- */
 
 const proToolsSet = makeSet({
-  prefix: "pro-tool", target: 30, glyph: "layers", tag: "TOOL", ai: true,
+  prefix: "pro-tool", target: 30, glyph: "grid", tag: "TOOL", ai: true,
   gradient: ["#052e16", "#22d3ee"], tags: ["corporate", "ai", "gaming"],
   names: [
     ["Chroma Key Green Screen", "rotoscope"],
@@ -1108,7 +1108,7 @@ const trnMotion3D = makeSet({
   ],
 });
 const trnCinematic = makeSet({
-  prefix: "trn-cine", target: 26, glyph: "camera", tag: "CINEMATIC",
+  prefix: "trn-cine", target: 26, glyph: "zoomin", tag: "CINEMATIC",
   gradient: ["#0f172a", "#fbbf24"], tags: ["cinematic", "travel"],
   names: [
     ["Cinematic Zoom In Punch", "zoomPulse"],
@@ -1120,7 +1120,7 @@ const trnCinematic = makeSet({
   ],
 });
 const trnDistort = makeSet({
-  prefix: "trn-dist", target: 24, glyph: "distort", tag: "DISTORT",
+  prefix: "trn-dist", target: 24, glyph: "vhs", tag: "DISTORT",
   gradient: ["#312e81", "#22d3ee"], tags: ["gaming", "music"],
   names: [
     ["RGB Split Tear", "rgbSplit"],
@@ -1261,7 +1261,7 @@ const stkLove = makeSet({
   names: ["Heart Float Overlay", "Kiss Mark Pop", "Love Frame Border", "Petal Drift Hearts"],
 });
 const stkPopups = makeSet({
-  prefix: "stk-pop", target: 22, glyph: "target", tag: "POP-UP", fx: "textMotion",
+  prefix: "stk-pop", target: 22, glyph: "logo", tag: "POP-UP", fx: "textMotion",
   gradient: ["#450a0a", "#fb7185"], tags: ["vlog", "gaming"],
   names: [
     "Subscribe Button Pop-up",
@@ -1377,7 +1377,7 @@ export const LIB_TREES: Partial<Record<AssetTab, EffectCategory[]>> = {
     cat("ttl-cat-kin", "Kinetic Typography", "brush", ttlKinetic, "#22d3ee", "NEW"),
     cat("ttl-cat-lt", "Lower Thirds", "brush", ttlLowerThirds, "#38bdf8"),
     cat("ttl-cat-open", "Intro Openers", "sparkle", ttlOpeners, "#fbbf24", "NEW"),
-    cat("ttl-cat-cred", "Credit Rolls", "text", ttlCredits, "#a8a29e"),
+    cat("ttl-cat-cred", "Credit Rolls", "brush", ttlCredits, "#a8a29e"),
     cat("ttl-cat-lux", "Luxury", "sparkle", ttlLuxury, "#fbbf24"),
     cat("ttl-cat-tech", "Tech", "glitch", ttlTech, "#22d3ee"),
     cat("ttl-cat-fun", "Graffiti & Fun", "brush", ttlFun, "#f472b6"),

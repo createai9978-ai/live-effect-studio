@@ -10,6 +10,7 @@ import { AuthProvider } from "../auth/AuthContext";
 import AdminPanel from "../admin/AdminPanel";
 
 import HomeScreen, { AspectRatio } from "./HomeScreen";
+import DashboardMotion from "./DashboardMotion";
 import SpeedCurveEditor from "../components/SpeedCurveEditor";
 import MediaBin from "../components/MediaBin";
 import ToolRail, { RailKey } from "../components/ToolRail";

@@ -569,8 +569,8 @@ input[type="range"]::-moz-range-thumb {
 }
 @media (max-width: 640px) {
   .nova-nebula-layout { width: calc(100% - 16px); height: calc(100dvh - 16px); margin: 8px; grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "header" "portfolio" "stage" "tools" "deck"; gap: 10px; }
-  .nova-nebula-rail { display: none; }.nova-nebula-header { flex-wrap: wrap; min-height: 104px; }.nova-nebula-status { min-width: auto; }.nova-nebula-ratios { order: 3; width: 100%; justify-content: center; }.nova-nebula-ratio { flex: 1; min-width: 0; padding: 0 7px; }.nova-nebula-open { margin-left: auto; padding: 0 10px; }.nova-nebula-open svg { display: none; }
-  .nova-nebula-portfolio { width: 100%; }.nova-nebula-stage { min-height: 430px; padding: 34px 20px; }.nova-nebula-stage-copy { width: 100%; }.nova-nebula-stage-copy h2 { font-size: 42px; }
+  .nova-nebula-rail { display: none; }.nova-nebula-header { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; min-height: 104px; gap: 7px; padding: 10px 12px; }.nova-nebula-status { min-width: 0; font-size: 8px; }.nova-nebula-ratios { grid-column: 1 / -1; order: 3; width: 100%; justify-content: center; }.nova-nebula-ratio { flex: 1; min-width: 0; padding: 0 7px; }.nova-nebula-open { margin-left: 0; padding: 0 9px; font-size: 10px; }.nova-nebula-open svg { display: none; }
+  .nova-nebula-portfolio { width: 100%; overflow: hidden; }.nova-nebula-stage { min-height: 430px; padding: 34px 20px; }.nova-nebula-stage-copy { width: 100%; min-width: 0; }.nova-nebula-stage-copy h2 { max-width: 100%; overflow-wrap: anywhere; font-size: 38px; line-height: 1.02; }
   .nova-nebula-tool-stack { grid-template-columns: 1fr; }.nova-nebula-deck { grid-template-columns: 1fr; overflow: visible; }.nova-nebula-deck-divider { width: 100%; height: 1px; }.nova-nebula-dialog-actions { flex-direction: column-reverse; }.nova-nebula-dialog-actions button { width: 100%; }
 }
 @keyframes nova-border-spin {

@@ -32,7 +32,7 @@ function TopBar({
 }) {
   const { settings } = useAdmin();
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-white/[0.07] bg-gradient-to-r from-[#0d1224]/90 via-[#111634]/85 to-[#0d1224]/90 backdrop-blur-xl px-3.5">
+    <header className="nova-editor-topbar flex h-14 shrink-0 items-center gap-3 px-3.5">
       {/* Logo */}
       <div className="flex shrink-0 items-center gap-2.5">
         <button
@@ -48,7 +48,7 @@ function TopBar({
           {settings.logoUrl ? (
             <img src={settings.logoUrl} alt="Prism Studio logo" className="h-full w-full object-contain" />
           ) : (
-            <svg className="h-[18px] w-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <svg className="h-[18px] w-[18px] text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="5" width="20" height="14" rx="2" />
               <path d="M2 9h20M7 5v4M12 5v4M17 5v4M7 15h4" />
             </svg>
@@ -56,7 +56,7 @@ function TopBar({
         </button>
         <span className="hidden items-center gap-1.5 text-[15px] font-semibold tracking-wide text-zinc-50 md:inline-flex">
           <EditableText id="app.title.prism" text="Prism Studio" />
-          <span className="rounded-md bg-gradient-to-r from-violet-500 to-fuchsia-500 px-1.5 py-px text-[8.5px] font-bold tracking-wider text-white">PRO</span>
+          <span className="nova-editor-badge rounded-md px-1.5 py-px text-[8.5px] font-bold tracking-wider">PRO</span>
         </span>
 
       </div>
@@ -69,7 +69,7 @@ function TopBar({
       <div className="mx-auto flex items-center gap-1 rounded-xl border border-white/[0.07] bg-black/35 p-1">
         {WORKSPACES.map((w) => (
           <Tooltip key={w.id} label={`${w.label} workspace`} hint={w.hint} side="bottom">
-            <button
+       <button
               onClick={() => onSetWorkspace(w.id)}
               aria-pressed={workspace === w.id}
               style={
@@ -125,13 +125,13 @@ function TopBar({
           e.stopPropagation();
           onOpenAssetBrowser();
         }}
-        className="hidden shrink-0 items-center gap-1.5 rounded-md border border-violet-400/30 bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10 px-2.5 py-1.5 text-[11px] font-medium text-violet-200 transition hover:from-violet-500/25 hover:to-fuchsia-500/20 md:flex"
+         className="nova-editor-action hidden shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium md:flex"
       >
         <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 2l2.5 5 5.5.8-4 3.8 1 5.4-5-2.6-5 2.6 1-5.4-4-3.8 5.5-.8L12 2z" />
         </svg>
         Assets
-        <span className="rounded bg-gradient-to-r from-fuchsia-500 to-orange-400 px-1 py-px text-[7.5px] font-bold text-white">
+         <span className="nova-editor-badge rounded px-1 py-px text-[7.5px] font-bold">
           NEW
         </span>
       </button>
@@ -141,7 +141,7 @@ function TopBar({
       <Tooltip label="Export Media" hint="Choose resolution, frame rate, format and quality · Ctrl+M" side="bottom">
       <button
         onClick={menuActions.exportSequence}
-        className="flex shrink-0 items-center gap-1.5 rounded-md bg-gradient-to-r from-violet-600 to-fuchsia-600 px-3 py-1.5 text-[11px] font-medium text-white shadow-lg shadow-violet-600/25 transition hover:brightness-110"
+         className="nova-editor-export flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-medium"
       >
         <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 3v12M12 15l-4-4M12 15l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
@@ -153,7 +153,7 @@ function TopBar({
 
       {/* Profile */}
       <Tooltip label="Account" hint="Profile, preferences and sync status" side="bottom">
-        <button className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#5B7CFF] text-[10px] font-bold text-[#04121a] ring-1 ring-white/20 transition hover:brightness-110 md:flex">
+        <button className="nova-editor-avatar hidden h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition md:flex">
           PS
         </button>
       </Tooltip>

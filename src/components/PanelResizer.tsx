@@ -57,7 +57,7 @@ function PanelResizer({ orientation, value, invert, onResize, className, label }
     >
       <span
         className={cn(
-          "absolute rounded-full bg-transparent transition-colors duration-200 group-hover:bg-[#00F0FF]/45",
+          "nova-resizer-line absolute rounded-full bg-transparent transition-colors duration-200",
           vertical ? "inset-y-3 left-1/2 w-[2px] -translate-x-1/2" : "inset-x-6 top-1/2 h-[2px] -translate-y-1/2"
         )}
       />

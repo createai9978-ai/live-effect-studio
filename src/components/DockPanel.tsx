@@ -88,7 +88,7 @@ function DockPanel({ id, api, className, children }: Props) {
       onClick={() => api.togglePanelMode(id)}
       title={docked ? `Detach ${PANEL_TITLE[id]}` : `Dock ${PANEL_TITLE[id]} back`}
       aria-label={docked ? `Detach ${PANEL_TITLE[id]}` : `Dock ${PANEL_TITLE[id]}`}
-      className="nova-tap nova-dock-btn grid h-5 w-5 place-items-center rounded-md text-zinc-500 hover:bg-white/[0.08] hover:text-[#00F0FF]"
+      className="nova-tap nova-dock-btn grid h-5 w-5 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-primary"
     >
       <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         {docked ? (
@@ -124,9 +124,9 @@ function DockPanel({ id, api, className, children }: Props) {
     >
       <div
         onPointerDown={(e) => startGesture(e, "move")}
-        className="flex shrink-0 cursor-grab items-center justify-between border-b border-white/[0.07] bg-white/[0.03] px-3 py-1.5 active:cursor-grabbing"
+        className="nova-float-titlebar flex shrink-0 cursor-grab items-center justify-between px-3 py-1.5 active:cursor-grabbing"
       >
-        <span className="truncate text-[11px] font-semibold text-zinc-200">{PANEL_TITLE[id]}</span>
+        <span className="truncate text-[11px] font-semibold text-foreground">{PANEL_TITLE[id]}</span>
         {toggle}
       </div>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">{children}</div>

@@ -3,7 +3,7 @@ import { cn } from "../utils/cn";
 import { cubicBezier, cssEase, type EasingId } from "../editor/motionEngine";
 
 /**
- * NOVA Studio — Motion Controls.
+ * Prism Studio — Motion Controls.
  *
  * A Premiere/Filmora-grade keyframe surface: Position X/Y, Scale, Rotation and
  * Opacity, each with its own keyframe lane, diamond indicators and an easing

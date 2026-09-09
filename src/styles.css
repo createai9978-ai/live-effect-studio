@@ -19,7 +19,7 @@
  */
 
 @theme inline {
-  /* NOVA Studio workstation palette */
+  /* Prism Studio workstation palette */
   --font-sans: "DM Sans", system-ui, sans-serif;
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --color-nova-canvas: oklch(0.16 0.021 262);   /* #111621 */
@@ -921,7 +921,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================================================
-   NOVA Studio shell — floating rounded panels over a deep navy
+   Prism Studio shell — floating rounded panels over a deep navy
    gradient desk, matching the reference workstation design.
    ============================================================ */
 .nova-desk {

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "../utils/cn";
+import { Button } from "../components/ui/button";
 import EditableText from "../admin/EditableText";
 import AdminToggle from "../admin/AdminToggle";
 import { useAdmin } from "../admin/AdminContext";
@@ -40,24 +41,23 @@ const RECOMMENDED = [
 
 type NavItem = { id: string; label: string; icon: string; badge?: string };
 
-const NAV_GROUPS: { id: string; title: string; items: NavItem[] }[] = [
-  {
-    id: "workspace",
-    title: "Workspace",
-    items: [
-      { id: "create", label: "Create Project", icon: "M12 5v14M5 12h14" },
-      { id: "cloud", label: "Studio Cloud", icon: "M6 18a4 4 0 010-8 5 5 0 019.6-1.6A4 4 0 1118 18z", badge: "SYNC" },
-    ],
-  },
-  {
-    id: "library",
-    title: "Library",
-    items: [
-      { id: "hub", label: "Creator Hub", icon: "M4 6h16v12H4zM4 10h16" },
-      { id: "toolbox", label: "Toolbox", icon: "M3 8h18v11H3zM8 8V6a4 4 0 018 0v2" },
-    ],
-  },
+const NAV_ITEMS: NavItem[] = [
+  { id: "create", label: "Create Project", icon: "M12 5v14M5 12h14" },
+  { id: "cloud", label: "Studio Cloud", icon: "M6 18a4 4 0 010-8 5 5 0 019.6-1.6A4 4 0 1118 18z", badge: "SYNC" },
+  { id: "hub", label: "Creator Hub", icon: "M4 6h16v12H4zM4 10h16" },
+  { id: "toolbox", label: "Toolbox", icon: "M3 8h18v11H3zM8 8V6a4 4 0 018 0v2" },
 ];
+
+const PORTFOLIO_SECTIONS = [
+  "Personal Presentation",
+  "About Me",
+  "Education",
+  "Personal Skills",
+  "Work Experience",
+  "Project Portfolio",
+];
+
+type DialogState = { title: string; description: string; action?: "create" | "open" } | null;
 
 export default function HomeScreen({
   onCreateProject,
@@ -70,6 +70,7 @@ export default function HomeScreen({
 }) {
   const [ratio, setRatio] = useState<AspectRatio>("16:9");
   const [nav, setNav] = useState("create");
+  const [dialog, setDialog] = useState<DialogState>(null);
   const { settings } = useAdmin();
   const { user, profile, isAdmin } = useAuth();
   const accountLabel = profile?.display_name || user?.email || "Guest session";
@@ -78,226 +79,166 @@ export default function HomeScreen({
     .join("")
     .toUpperCase();
 
-  return (
-    <div className="nova-live-dashboard relative flex h-screen overflow-hidden bg-[#111621] font-sans text-zinc-200 antialiased">
-      <DashboardMotion />
-      {/* Ambient cinematic wash behind the whole launcher */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-40 -top-40 h-[540px] w-[540px] rounded-full opacity-[0.16] blur-[120px]"
-        style={{
-          background: `radial-gradient(circle, var(--nova-accent,#00E5FF), transparent 70%)`,
-          animation: "nova-aurora 18s var(--ease-drift) infinite",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-52 right-0 h-[560px] w-[560px] rounded-full opacity-[0.14] blur-[130px]"
-        style={{
-          background: `radial-gradient(circle, var(--nova-accent-2,#8A2BE2), transparent 70%)`,
-          animation: "nova-aurora 24s var(--ease-drift) infinite reverse",
-        }}
-      />
+  useEffect(() => {
+    if (!dialog) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDialog(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [dialog]);
 
-      {/* ---------- Side rail ---------- */}
-      <aside className="nova-live-glass relative z-10 hidden w-[248px] shrink-0 flex-col border-r border-white/[0.09] p-4 md:flex">
-        <div className="nova-rise mb-8 flex items-center gap-2.5">
+  const openNav = (item: NavItem) => {
+    setNav(item.id);
+    if (item.id === "create") {
+      onCreateProject(ratio);
+      return;
+    }
+    setDialog({
+      title: item.label,
+      description:
+        item.id === "cloud"
+          ? "Your synchronized projects and shared studio files are ready from the editor workspace."
+          : item.id === "hub"
+            ? "Open the editor to browse creative templates, effects, titles, and transitions."
+            : "Launch the complete production toolbox with your selected canvas format.",
+      action: "create",
+    });
+  };
+
+  const openPortfolio = (title: string) => {
+    setDialog({
+      title,
+      description: `${title} opens as a dedicated sequence inside NOVA Studio, ready for media, titles, motion, and cinematic grading.`,
+      action: title === "Project Portfolio" ? "open" : "create",
+    });
+  };
+
+  return (
+    <div className="nova-live-dashboard nova-nebula-shell relative h-screen overflow-hidden font-sans text-foreground antialiased">
+      <DashboardMotion />
+      <div className="nova-nebula-particles" aria-hidden="true" />
+
+      <div className="nova-nebula-layout">
+      <aside className="nova-nebula-glass nova-nebula-rail">
+        <div className="nova-nebula-brand">
           <div
-            className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl shadow-lg shadow-violet-500/25"
+            className="nova-nebula-logo"
             style={{
               background: settings.logoUrl ? "transparent" : `linear-gradient(135deg, ${settings.accent}, ${settings.accent2})`,
-              animation: "nova-breathe 5.5s var(--ease-drift) infinite",
             }}
           >
             {settings.logoUrl ? (
               <img src={settings.logoUrl} alt="NOVA Studio Logo" className="h-full w-full object-contain" />
             ) : (
-              <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="5" width="20" height="14" rx="2" />
                 <path d="M2 9h20M7 5v4M12 5v4M17 5v4" />
               </svg>
             )}
           </div>
-          <div className="leading-tight">
-            <div className="text-[13.5px] font-semibold text-zinc-50">
+          <div className="nova-nebula-brand-copy">
+            <div>
               <EditableText id="home.brand" text="NOVA" />
             </div>
-            <div className="text-[11px] font-light text-zinc-400">
+            <div className="nova-nebula-brand-sub">
               <EditableText id="home.brandSub" text="Studio" />
             </div>
           </div>
         </div>
 
-        <nav className="flex flex-col gap-6">
-          {NAV_GROUPS.map((group) => (
-            <div key={group.id} className="nova-stagger flex flex-col gap-1">
-              <div className="px-3 pb-1 text-[9.5px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
-                {group.title}
-              </div>
-              {group.items.map((n) => {
-                const active = nav === n.id;
-                return (
-                  <button
-                    key={n.id}
-                    onClick={() => setNav(n.id)}
-                    className={cn(
-                      "group relative flex items-center gap-2.5 overflow-hidden rounded-lg px-3 py-2.5 text-[12.5px]",
-                      "transition-[background-color,color,transform] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
-                      "hover:translate-x-[3px]",
-                      active
-                        ? "bg-gradient-to-r from-[#00E5FF]/15 to-[#8A2BE2]/15 text-[#8DF3FF] ring-1 ring-[#00E5FF]/25"
-                        : "text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-100"
-                    )}
-                  >
-                    {/* sliding active rail */}
-                    <span
-                      className={cn(
-                        "absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-[#00E5FF]",
-                        "origin-left transition-transform duration-[420ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]",
-                        active ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
-                      )}
-                    />
-                    <svg
-                      className={cn(
-                        "h-4 w-4 transition-transform duration-[420ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]",
-                        active ? "scale-110" : "group-hover:scale-110"
-                      )}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={1.7}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d={n.icon} />
-                    </svg>
-                    <EditableText id={`home.nav.${n.id}`} text={n.label} />
-                    {n.badge && (
-                      <span className="ml-auto rounded bg-white/[0.07] px-1.5 py-px text-[8px] font-bold tracking-wide text-zinc-400">
-                        {n.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+        <nav className="nova-nebula-rail-nav" aria-label="Workspace navigation">
+          {NAV_ITEMS.map((item) => (
+            <Button
+              key={item.id}
+              variant="ghost"
+              size="icon"
+              onClick={() => openNav(item)}
+              className={cn("nova-nebula-rail-button", nav === item.id && "is-active")}
+              title={item.label}
+              aria-label={item.label}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+                <path d={item.icon} />
+              </svg>
+              {item.badge && <span className="nova-nebula-sync-dot" />}
+            </Button>
           ))}
         </nav>
-
-        <div className="nova-live-glass-soft nova-lift mt-auto rounded-xl border border-white/[0.08] p-3">
-          <div className="flex items-center gap-2.5">
-            <div
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
-              style={{
-                background: `linear-gradient(135deg, var(--nova-accent,#00E5FF), var(--nova-accent-2,#8A2BE2))`,
-              }}
-            >
-              {accountInitials}
-            </div>
-            <div className="min-w-0">
-              <div className="truncate text-[11.5px] text-zinc-200">{accountLabel}</div>
-              <div className="text-[10px] text-zinc-500">
-                {user ? (isAdmin ? "Administrator" : "Signed in") : "Not signed in"}
-              </div>
-            </div>
-          </div>
+        <div className="nova-nebula-avatar" title={accountLabel}>
+          {accountInitials}
+          <span className={user ? "is-online" : ""} />
         </div>
       </aside>
 
-      {/* ---------- Main ---------- */}
-      <main className="relative z-10 min-w-0 flex-1 overflow-y-auto">
-        {/* top strip */}
-        <div className="nova-live-glass sticky top-0 z-20 flex items-center gap-2 border-b border-white/[0.08] px-6 py-3">
-          <div className="relative flex items-center gap-1 rounded-lg border border-white/[0.06] bg-black/30 p-0.5">
+      <header className="nova-nebula-glass nova-nebula-header">
+          <div className="nova-nebula-status">
+            <span className="nova-nebula-status-pulse" />
+            <span>STUDIO LINK</span>
+            <strong>{user ? (isAdmin ? "ADMIN" : "ONLINE") : "LOCAL"}</strong>
+          </div>
+          <div className="nova-nebula-ratios" aria-label="Project aspect ratio">
             {RATIOS.map((r) => (
-              <button
+              <Button
                 key={r.id}
+                variant="ghost"
                 onClick={() => setRatio(r.id)}
                 title={r.hint}
-                className={cn(
-                  "rounded-md px-3 py-1.5 text-[11.5px]",
-                  "transition-[background-color,color,transform] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
-                  ratio === r.id
-                    ? "scale-[1.04] bg-[#00E5FF]/15 text-[#8DF3FF] ring-1 ring-[#00E5FF]/35"
-                    : "text-zinc-500 hover:scale-[1.03] hover:text-zinc-200"
-                )}
+                aria-pressed={ratio === r.id}
+                className={cn("nova-nebula-ratio", ratio === r.id && "is-active")}
               >
                 {r.label}
-              </button>
+              </Button>
             ))}
           </div>
-          <button
+          <Button
+            variant="ghost"
             onClick={onOpenProject}
-            className="nova-lift ml-auto rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11.5px] text-zinc-300 hover:bg-white/[0.07] hover:text-white"
+            className="nova-nebula-open"
           >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}><path d="M4 7h6l2 2h8v10H4z" /></svg>
             Open Project
-          </button>
+          </Button>
           <AdminToggle />
+      </header>
+
+      <section className="nova-nebula-glass nova-nebula-portfolio">
+        <div className="nova-nebula-kicker">CREATIVE SYSTEM / 04</div>
+        <h1 className="nova-gradient-text"><EditableText id="home.portfolio" text="CREATIVE PORTFOLIO" /></h1>
+        <nav className="nova-nebula-portfolio-nav" aria-label="Portfolio sections">
+          {PORTFOLIO_SECTIONS.map((label, index) => (
+            <Button key={label} variant="ghost" onClick={() => openPortfolio(label)} className="nova-pill">
+              <span>{String(index + 1).padStart(2, "0")}</span>{label}
+            </Button>
+          ))}
+        </nav>
+      </section>
+
+      <main className="nova-nebula-stage">
+        <div className="nova-nebula-stage-copy">
+          <div className="nova-nebula-kicker"><span /> LIVE COMPOSITION</div>
+          <h2><EditableText id="home.hero" text="Shape motion into cinema." /></h2>
+          <p>Build a {ratio} sequence with precision effects, adaptive color, and a professional multi-track timeline.</p>
+          <Button onClick={() => onCreateProject(ratio)} className="nova-nebula-ignite">
+            Ignite new project
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}><path d="m9 18 6-6-6-6" /></svg>
+          </Button>
         </div>
+        <div className="nova-nebula-preview"><HeroPreview /></div>
+        <div className="nova-nebula-float-stat" aria-hidden="true"><i /><i /><i /><span>ENC 009</span></div>
+      </main>
 
-        <div className="mx-auto max-w-[1180px] px-6 py-6">
-          {/* ---------- Central frosted portfolio card ---------- */}
-          <div className="mb-6 flex justify-center py-6">
-            <div
-              className="nova-glass-hero nova-live-glass flex w-full max-w-[760px] flex-col items-center gap-6 rounded-3xl border border-white/[0.18] px-8 py-8 shadow-[0_0_60px_-12px_rgba(255,255,255,0.12)]"
-              style={{
-                boxShadow: "0 0 0 1px rgba(255,255,255,0.08) inset, 0 24px 80px -16px rgba(0,0,0,0.45), 0 0 60px -12px rgba(255,255,255,0.10)",
-              }}
-            >
-              <h1 className="nova-gradient-text text-center text-[34px] font-bold leading-tight tracking-tight">
-                CREATIVE PORTFOLIO
-              </h1>
-
-              <nav className="flex flex-wrap items-center justify-center gap-2">
-                {[
-                  "Personal Presentation",
-                  "About Me",
-                  "Education",
-                  "Personal Skills",
-                  "Work Experience",
-                  "Project Portfolio",
-                ].map((label) => (
-                  <button key={label} className="nova-pill">
-                    {label}
-                  </button>
-                ))}
-              </nav>
-            </div>
-          </div>
-
-          {/* hero row */}
-          <div className="nova-stagger grid gap-4 lg:grid-cols-[1fr_1.5fr]">
-            <button
-              onClick={() => onCreateProject(ratio)}
-              className="nova-lift nova-sheen-host group relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#00E5FF] via-[#3AA7FF] to-[#8A2BE2] p-8 text-left shadow-2xl shadow-cyan-500/10"
-            >
-              <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 [background:radial-gradient(600px_at_50%_0%,rgba(255,255,255,.22),transparent)]" />
-              <div className="relative flex h-full min-h-[170px] flex-col justify-center">
-                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-black/25 ring-1 ring-white/25 transition-transform duration-[520ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:rotate-90">
-                  <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                </div>
-                <h1 className="text-[30px] font-semibold leading-tight text-white"><EditableText id="home.hero" text="NOVA Studio — New Project" /></h1>
-                <p className="mt-1 text-[13px] text-white/80">
-                  Start a {ratio} timeline with the full effects library
-                </p>
-              </div>
-            </button>
-
-            <HeroPreview />
-          </div>
-
-          {/* quick tools */}
-          <div className="nova-stagger mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="nova-nebula-tools" aria-label="Quick tools">
+        <div className="nova-nebula-section-heading"><span>Quick systems</span><small>04 MODULES</small></div>
+        <div className="nova-nebula-tool-stack">
             {QUICK_TOOLS.map((t) => (
-              <button
+              <Button
                 key={t.id}
+                variant="ghost"
                 onClick={() => onCreateProject(ratio)}
-                className="nova-live-glass-soft nova-lift nova-sheen-host group rounded-xl border border-white/[0.09] p-4 text-left hover:border-[#00E5FF]/30 hover:shadow-[0_18px_40px_-20px_rgba(0,229,255,0.55)]"
+                className="nova-nebula-glass nova-nebula-tool"
               >
                 <svg
-                  className="mb-2.5 h-5 w-5 text-[#8DF3FF] transition-transform duration-[520ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-y-0.5 group-hover:scale-110"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -307,79 +248,71 @@ export default function HomeScreen({
                 >
                   <path d={t.icon} />
                 </svg>
-                <div className="text-[12.5px] font-medium text-zinc-100">{t.label}</div>
-                <div className="mt-0.5 text-[11px] text-zinc-500">{t.desc}</div>
-              </button>
+                <span><strong>{t.label}</strong><small>{t.desc}</small></span>
+                <b>↗</b>
+              </Button>
             ))}
-          </div>
+        </div>
+      </section>
 
-          {/* recommended strip */}
-          <div className="mt-8">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-[13px] font-medium text-zinc-200"><EditableText id="home.recommended" text="Recommended" /></h2>
-              <span className="text-[11px] text-zinc-500">Expand</span>
-            </div>
-            <div className="nova-stagger flex flex-wrap gap-2">
+      <section className="nova-nebula-glass nova-nebula-deck">
+        <div className="nova-nebula-deck-block">
+          <div className="nova-nebula-section-heading"><span><EditableText id="home.recommended" text="Signal library" /></span><small>TRENDING</small></div>
+          <div className="nova-nebula-recommended">
               {RECOMMENDED.map((r) => (
-                <button
+                <Button
                   key={r.id}
+                  variant="ghost"
                   onClick={() => onCreateProject(ratio)}
-                  className="nova-live-glass-soft nova-lift relative rounded-lg border border-white/[0.08] px-4 py-2.5 text-[11.5px] text-zinc-300 hover:border-[#8A2BE2]/40 hover:text-white"
+                  className="nova-nebula-chip"
                 >
                   {r.label}
-                  {r.badge && (
-                    <span className="absolute -right-1.5 -top-1.5 rounded bg-gradient-to-r from-fuchsia-500 to-orange-400 px-1.5 py-px text-[8px] font-bold text-white">
-                      {r.badge}
-                    </span>
-                  )}
-                </button>
+                  {r.badge && <span>{r.badge}</span>}
+                </Button>
               ))}
-            </div>
           </div>
-
-          {/* recent projects */}
-          <div className="mt-8 pb-10">
-            <h2 className="mb-3 text-[13px] font-medium text-zinc-200"><EditableText id="home.localProjects" text="Local Projects" /></h2>
+        </div>
+        <div className="nova-nebula-deck-divider" />
+        <div className="nova-nebula-deck-block nova-nebula-projects">
+          <div className="nova-nebula-section-heading"><span><EditableText id="home.localProjects" text="Local Projects" /></span><small>{recentProjects.length.toString().padStart(2, "0")} FILES</small></div>
             {recentProjects.length === 0 ? (
-              <div className="nova-live-glass-soft nova-rise flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.1] py-14">
-                <svg
-                  className="mb-3 h-10 w-10 text-zinc-700"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ animation: "nova-breathe 6s var(--ease-drift) infinite" }}
-                >
-                  <path d="M3 7l9-4 9 4-9 4-9-4zM3 12l9 4 9-4M3 17l9 4 9-4" />
-                </svg>
-                <div className="text-[12px] text-zinc-500">No recent projects yet</div>
-                <button
-                  onClick={() => onCreateProject(ratio)}
-                  className="nova-lift mt-3 rounded-lg bg-gradient-to-r from-[#00E5FF] to-[#8A2BE2] px-4 py-1.5 text-[11.5px] font-medium text-white shadow-lg shadow-cyan-500/20 hover:brightness-110"
-                >
-                  Create your first project
-                </button>
-              </div>
+              <Button variant="ghost" onClick={() => onCreateProject(ratio)} className="nova-nebula-empty-project">
+                <span>+</span><div><strong>Initialize first sequence</strong><small>No local projects yet</small></div>
+              </Button>
             ) : (
-              <div className="nova-stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="nova-nebula-project-list">
                 {recentProjects.map((p) => (
-                  <button
+                  <Button
                     key={p.id}
-                    onClick={() => onCreateProject(ratio)}
-                    className="nova-live-glass-soft nova-lift nova-sheen-host rounded-xl border border-white/[0.09] p-3 text-left hover:border-[#00E5FF]/30"
+                    variant="ghost"
+                    onClick={onOpenProject}
+                    className="nova-nebula-project"
                   >
-                    <div className="mb-2 h-20 overflow-hidden rounded-lg bg-gradient-to-br from-slate-800 to-slate-900" />
-                    <div className="truncate text-[12px] text-zinc-100">{p.name}</div>
-                    <div className="text-[10.5px] text-zinc-500">{p.edited}</div>
-                  </button>
+                    <i /><span><strong>{p.name}</strong><small>{p.edited}</small></span>
+                  </Button>
                 ))}
               </div>
             )}
-          </div>
         </div>
-      </main>
+      </section>
+      </div>
+
+      {dialog && (
+        <div className="nova-nebula-dialog-backdrop" role="presentation" onMouseDown={() => setDialog(null)}>
+          <section className="nova-nebula-glass nova-nebula-dialog" role="dialog" aria-modal="true" aria-labelledby="nova-dialog-title" onMouseDown={(event) => event.stopPropagation()}>
+            <Button variant="ghost" size="icon" className="nova-nebula-dialog-close" onClick={() => setDialog(null)} aria-label="Close dialog">×</Button>
+            <div className="nova-nebula-kicker">NOVA / MODULE</div>
+            <h2 id="nova-dialog-title">{dialog.title}</h2>
+            <p>{dialog.description}</p>
+            <div className="nova-nebula-dialog-actions">
+              <Button variant="ghost" onClick={() => setDialog(null)}>Not now</Button>
+              <Button className="nova-nebula-ignite" onClick={() => { setDialog(null); dialog.action === "open" ? onOpenProject() : onCreateProject(ratio); }}>
+                {dialog.action === "open" ? "Open project" : "Enter studio"}
+              </Button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

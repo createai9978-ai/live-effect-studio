@@ -80,7 +80,7 @@ export default function HeroPreview() {
   };
 
   return (
-    <div className="nova-live-glass nova-rise relative overflow-hidden rounded-2xl border border-white/[0.1] shadow-2xl shadow-black/40 transition-shadow duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-[0_30px_80px_-30px_rgba(0,229,255,0.45)]">
+    <div className="nova-nebula-player relative overflow-hidden">
       <div className="relative aspect-video w-full overflow-hidden bg-black">
         <video
           ref={videoRef}

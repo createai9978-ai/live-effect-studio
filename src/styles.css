@@ -925,19 +925,45 @@ input[type="range"]::-moz-range-thumb {
    gradient desk, matching the reference workstation design.
    ============================================================ */
 .nova-desk {
+  --background: oklch(0.12 0.018 265);
+  --foreground: oklch(0.97 0.008 255);
+  --card: oklch(0.2 0.03 270 / 0.72);
+  --card-foreground: oklch(0.97 0.008 255);
+  --popover: oklch(0.18 0.032 270 / 0.96);
+  --popover-foreground: oklch(0.97 0.008 255);
+  --primary: oklch(0.84 0.14 205);
+  --primary-foreground: oklch(0.12 0.018 265);
+  --secondary: oklch(0.25 0.055 268 / 0.72);
+  --secondary-foreground: oklch(0.94 0.015 255);
+  --muted: oklch(0.22 0.026 265 / 0.78);
+  --muted-foreground: oklch(0.68 0.025 260);
+  --accent: oklch(0.84 0.14 205 / 0.1);
+  --accent-foreground: oklch(0.9 0.08 210);
+  --border: oklch(0.84 0.14 205 / 0.14);
+  --input: oklch(0.84 0.14 205 / 0.16);
+  --ring: oklch(0.84 0.14 205 / 0.72);
+  --editor-carbon: oklch(0.12 0.018 265);
+  --editor-glass: oklch(0.2 0.03 270 / 0.68);
+  --editor-glass-strong: oklch(0.17 0.032 270 / 0.88);
+  --editor-cyan: oklch(0.84 0.14 205);
+  --editor-blue: oklch(0.62 0.18 255);
+  --editor-violet: oklch(0.61 0.25 300);
+  isolation: isolate;
   background:
-    radial-gradient(1200px 700px at 12% -10%, rgba(56, 96, 210, 0.22), transparent 60%),
-    radial-gradient(900px 600px at 95% 0%, rgba(150, 70, 220, 0.18), transparent 60%),
-    linear-gradient(180deg, #0a0e1c 0%, #080b16 55%, #0a0a14 100%);
+    linear-gradient(180deg, color-mix(in oklab, var(--editor-carbon) 76%, transparent), color-mix(in oklab, var(--editor-carbon) 92%, transparent));
+  color: var(--foreground);
 }
 
 .nova-panel-card {
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(23, 29, 52, 0.96), rgba(14, 18, 34, 0.96));
-  border: 1px solid rgba(120, 145, 255, 0.14);
+  position: relative;
+  border-radius: 14px;
+  background: linear-gradient(145deg, color-mix(in oklab, var(--editor-glass) 94%, transparent), color-mix(in oklab, var(--editor-carbon) 74%, transparent));
+  border: 1px solid color-mix(in oklab, var(--editor-cyan) 16%, transparent);
+  backdrop-filter: blur(22px) saturate(150%);
   box-shadow:
-    0 18px 40px -24px rgba(0, 0, 0, 0.95),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    0 18px 42px -28px oklch(0.02 0.02 270 / 0.92),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent),
+    0 0 24px -20px color-mix(in oklab, var(--editor-cyan) 42%, transparent);
   overflow: hidden;
   /* Isolate each floating panel so repaints inside one (meters, needle, hover
      states) never invalidate the rest of the editor. */
@@ -999,8 +1025,10 @@ input[type="range"]::-moz-range-thumb {
   min-height: 0;
   min-width: 0;
   overflow: hidden;
-  padding: 10px;
-  gap: 0;
+  position: relative;
+  z-index: 2;
+  padding: 10px 12px 12px;
+  gap: 8px;
 }
 
 .nova-editor-workspace {
@@ -1069,7 +1097,7 @@ input[type="range"]::-moz-range-thumb {
 .nova-dock-affordance:focus-within { opacity: 1 }
 
 .nova-float-window {
-  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 30px 70px -20px oklch(0.02 0.02 270 / 0.92), 0 0 34px -18px color-mix(in oklab, var(--editor-cyan) 35%, transparent);
   animation: nova-panel-in 220ms var(--ease-expo) both;
 }
 
@@ -1083,5 +1111,93 @@ input[type="range"]::-moz-range-thumb {
 
 /* Panels only scroll internally, never the window. */
 .nova-dock-region > * { min-height: 0; min-width: 0 }
+
+/* Unified editor chrome — the same cinematic glass system as the launcher. */
+.nova-editor-theme > .nova-motion-backdrop {
+  z-index: -1;
+}
+.nova-editor-theme .nova-motion-backdrop-video {
+  opacity: .34;
+  filter: saturate(.82) contrast(1.08) hue-rotate(-5deg);
+}
+.nova-editor-theme .nova-motion-backdrop-scrim {
+  background:
+    linear-gradient(90deg, oklch(0.08 0.025 270 / .88), oklch(0.1 0.025 265 / .64) 48%, oklch(0.08 0.026 275 / .86)),
+    linear-gradient(180deg, oklch(0.08 0.02 265 / .38), oklch(0.07 0.02 270 / .82));
+}
+.nova-editor-topbar {
+  position: relative;
+  z-index: 40;
+  border-bottom: 1px solid color-mix(in oklab, var(--editor-cyan) 14%, transparent);
+  background: linear-gradient(110deg, color-mix(in oklab, var(--editor-glass-strong) 96%, transparent), color-mix(in oklab, var(--editor-blue) 8%, var(--editor-glass-strong)), color-mix(in oklab, var(--editor-glass-strong) 96%, transparent));
+  backdrop-filter: blur(26px) saturate(160%);
+  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--foreground) 3%, transparent), 0 12px 34px oklch(0.03 0.02 270 / .3);
+}
+.nova-editor-badge {
+  color: var(--primary-foreground);
+  background: linear-gradient(120deg, var(--editor-cyan), color-mix(in oklab, var(--editor-blue) 72%, var(--editor-cyan)));
+  box-shadow: 0 0 14px color-mix(in oklab, var(--editor-cyan) 24%, transparent);
+}
+.nova-editor-action {
+  color: var(--foreground);
+  border: 1px solid color-mix(in oklab, var(--editor-cyan) 28%, transparent);
+  background: color-mix(in oklab, var(--editor-cyan) 9%, transparent);
+  transition: transform 180ms var(--ease-back), background 180ms ease, box-shadow 180ms ease;
+}
+.nova-editor-action:hover {
+  transform: translateY(-1px);
+  background: color-mix(in oklab, var(--editor-cyan) 15%, transparent);
+  box-shadow: 0 0 20px color-mix(in oklab, var(--editor-cyan) 18%, transparent);
+}
+.nova-editor-export {
+  color: var(--primary-foreground);
+  background: linear-gradient(120deg, var(--editor-cyan), color-mix(in oklab, var(--editor-blue) 70%, var(--editor-cyan)));
+  box-shadow: 0 8px 22px -10px color-mix(in oklab, var(--editor-cyan) 60%, transparent);
+  transition: transform 180ms var(--ease-back), filter 180ms ease, box-shadow 180ms ease;
+}
+.nova-editor-export:hover { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 10px 28px -10px color-mix(in oklab, var(--editor-cyan) 74%, transparent); }
+.nova-editor-export:active { transform: scale(.96); }
+.nova-editor-avatar {
+  color: var(--primary-foreground);
+  border: 1px solid color-mix(in oklab, var(--foreground) 20%, transparent);
+  background: linear-gradient(135deg, var(--editor-cyan), var(--editor-blue));
+  box-shadow: 0 0 16px color-mix(in oklab, var(--editor-cyan) 28%, transparent);
+}
+.nova-tool-active {
+  color: var(--editor-cyan);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--editor-cyan) 16%, transparent), color-mix(in oklab, var(--editor-blue) 8%, transparent));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--editor-cyan) 34%, transparent), 0 0 22px -10px color-mix(in oklab, var(--editor-cyan) 74%, transparent);
+}
+.nova-tool-marker { background: var(--editor-cyan); box-shadow: 0 0 10px var(--editor-cyan); }
+.nova-resizer-line { opacity: .3; background: color-mix(in oklab, var(--editor-cyan) 38%, transparent); }
+.nova-resizer:hover .nova-resizer-line { opacity: 1; background: color-mix(in oklab, var(--editor-cyan) 78%, transparent); box-shadow: 0 0 10px color-mix(in oklab, var(--editor-cyan) 55%, transparent); }
+.nova-float-titlebar { border-bottom: 1px solid color-mix(in oklab, var(--editor-cyan) 12%, transparent); background: color-mix(in oklab, var(--foreground) 4%, transparent); }
+
+/* Normalize inherited legacy violet/fuchsia chrome inside the editor only. */
+.nova-editor-theme :where(button, [role="button"], input, select) { accent-color: var(--editor-cyan); }
+.nova-editor-theme :where(button, [role="button"]):focus-visible { box-shadow: 0 0 0 2px color-mix(in oklab, var(--editor-cyan) 58%, transparent); }
+.nova-editor-theme input[type="range"]::-webkit-slider-thumb {
+  background: var(--foreground);
+  border-color: color-mix(in oklab, var(--editor-cyan) 68%, var(--foreground));
+  box-shadow: 0 0 9px color-mix(in oklab, var(--editor-cyan) 70%, transparent);
+}
+.nova-editor-theme * { scrollbar-color: color-mix(in oklab, var(--editor-cyan) 22%, transparent) transparent; }
+.nova-editor-theme *::-webkit-scrollbar-thumb { background-color: color-mix(in oklab, var(--editor-cyan) 18%, transparent); }
+.nova-editor-theme *::-webkit-scrollbar-thumb:hover { background-color: color-mix(in oklab, var(--editor-cyan) 42%, transparent); }
+.nova-editor-theme .nova-panel-card :where(.bg-\[\#0A0D14\], .bg-\[\#131824\], .bg-\[\#171C29\]) { background-color: transparent; }
+.nova-editor-theme .nova-panel-card :where(.border-white\/\[0\.05\], .border-white\/\[0\.06\], .border-white\/\[0\.07\], .border-white\/\[0\.08\]) { border-color: color-mix(in oklab, var(--editor-cyan) 10%, transparent); }
+.nova-editor-theme [class*="bg-violet-"] { background-color: var(--editor-cyan) !important; color: var(--primary-foreground); }
+.nova-editor-theme [class*="bg-fuchsia-"] { background-color: var(--editor-blue) !important; }
+.nova-editor-theme [class*="text-violet-"] { color: var(--editor-cyan) !important; }
+.nova-editor-theme [class*="text-fuchsia-"] { color: var(--editor-cyan) !important; }
+.nova-editor-theme [class*="border-violet-"] { border-color: color-mix(in oklab, var(--editor-cyan) 42%, transparent) !important; }
+.nova-editor-theme [class*="border-fuchsia-"] { border-color: color-mix(in oklab, var(--editor-blue) 38%, transparent) !important; }
+.nova-editor-theme [class*="from-violet-"] { --tw-gradient-from: var(--editor-cyan) var(--tw-gradient-from-position) !important; --tw-gradient-to: color-mix(in oklab, var(--editor-cyan) 0%, transparent) var(--tw-gradient-to-position) !important; }
+.nova-editor-theme [class*="to-fuchsia-"] { --tw-gradient-to: var(--editor-blue) var(--tw-gradient-to-position) !important; }
+.nova-editor-theme [class*="shadow-violet-"] { --tw-shadow-color: color-mix(in oklab, var(--editor-cyan) 28%, transparent) !important; }
+
+@media (max-width: 1279px) {
+  .nova-editor-topbar { min-width: 1180px; }
+}
 
 

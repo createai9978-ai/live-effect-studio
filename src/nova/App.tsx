@@ -10,6 +10,7 @@ import { AuthProvider } from "../auth/AuthContext";
 import AdminPanel from "../admin/AdminPanel";
 
 import HomeScreen, { AspectRatio } from "./HomeScreen";
+import DashboardMotion from "./DashboardMotion";
 import SpeedCurveEditor from "../components/SpeedCurveEditor";
 import MediaBin from "../components/MediaBin";
 import ToolRail, { RailKey } from "../components/ToolRail";
@@ -1382,7 +1383,8 @@ function AppInner() {
     : null;
 
   return (
-    <div className="nova-desk flex h-[100dvh] w-screen flex-col overflow-hidden font-sans text-zinc-200 antialiased selection:bg-[#00F0FF]/25">
+    <div className="nova-desk nova-editor-theme relative isolate flex h-[100dvh] w-screen flex-col overflow-hidden font-sans text-foreground antialiased">
+      <DashboardMotion />
       <input
         ref={fileInputRef}
         type="file"

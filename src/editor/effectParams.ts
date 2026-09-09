@@ -41,6 +41,11 @@ export type EffectFamily =
   | "lut"
   | "speed"
   | "blur"
+  | "chroma"
+  | "pip"
+  | "tracking"
+  | "sharpen"
+  | "flicker"
   | "generic";
 
 export type FamilySchema = {
@@ -205,6 +210,92 @@ const SCHEMAS: Record<EffectFamily, FamilySchema> = {
       { name: "Zoom Blur", values: { amount: 80, type: "Radial", angle: 45, highlights: 45 } },
     ],
   },
+  chroma: {
+    family: "chroma",
+    familyLabel: "Chroma Key / Green Screen",
+    params: [
+      sel("keyColor", "Key Colour", ["Green", "Blue", "Magenta", "Custom"], "Green"),
+      num("tolerance", "Tolerance", 0, 100, 45, "%", 1, "How much of the key colour is removed"),
+      num("edgeFeather", "Edge Feather", 0, 100, 20),
+      num("spill", "Spill Suppression", 0, 100, 45),
+      num("shrink", "Edge Shrink", 0, 100, 12),
+    ],
+    presets: [
+      { name: "Studio Green", values: { keyColor: "Green", tolerance: 45, edgeFeather: 20, spill: 45, shrink: 12 } },
+      { name: "Soft Hair Edge", values: { keyColor: "Green", tolerance: 35, edgeFeather: 55, spill: 60, shrink: 5 } },
+      { name: "Hard Cutout", values: { keyColor: "Green", tolerance: 70, edgeFeather: 5, spill: 30, shrink: 30 } },
+      { name: "Blue Screen", values: { keyColor: "Blue", tolerance: 50, edgeFeather: 25, spill: 55, shrink: 14 } },
+    ],
+  },
+  pip: {
+    family: "pip",
+    familyLabel: "Picture in Picture",
+    params: [
+      num("size", "PiP Size", 10, 100, 35),
+      num("offsetX", "Horizontal Offset", -100, 100, 60, "", 1),
+      num("offsetY", "Vertical Offset", -100, 100, -55, "", 1),
+      num("radius", "Corner Radius", 0, 100, 18),
+      num("border", "Border Glow", 0, 100, 25),
+      num("opacity", "Opacity", 10, 100, 100),
+    ],
+    presets: [
+      { name: "Corner Cam", values: { size: 28, offsetX: 65, offsetY: -60, radius: 20, border: 25, opacity: 100 } },
+      { name: "Reaction Bubble", values: { size: 34, offsetX: -60, offsetY: -55, radius: 100, border: 45, opacity: 100 } },
+      { name: "Split Compare", values: { size: 50, offsetX: 50, offsetY: 0, radius: 0, border: 0, opacity: 100 } },
+      { name: "Ghost Overlay", values: { size: 70, offsetX: 0, offsetY: 0, radius: 12, border: 10, opacity: 45 } },
+    ],
+  },
+  tracking: {
+    family: "tracking",
+    familyLabel: "Motion / Mask Tracking",
+    params: [
+      sel("target", "Track Target", ["Face", "Object", "Point", "Mask Region"], "Face"),
+      num("search", "Search Radius", 5, 100, 35),
+      num("smoothing", "Track Smoothing", 0, 100, 55),
+      num("feather", "Mask Feather", 0, 100, 30),
+      num("scaleTrack", "Follow Scale", 0, 100, 60),
+    ],
+    presets: [
+      { name: "Face Follow", values: { target: "Face", search: 30, smoothing: 60, feather: 35, scaleTrack: 70 } },
+      { name: "Object Lock", values: { target: "Object", search: 45, smoothing: 40, feather: 20, scaleTrack: 55 } },
+      { name: "Point Attach", values: { target: "Point", search: 15, smoothing: 25, feather: 0, scaleTrack: 0 } },
+      { name: "Mask Region", values: { target: "Mask Region", search: 60, smoothing: 75, feather: 60, scaleTrack: 40 } },
+    ],
+  },
+  sharpen: {
+    family: "sharpen",
+    familyLabel: "Sharpen & Detail",
+    params: [
+      num("amount", "Sharpen Amount", 0, 100, 40),
+      num("radius", "Radius", 0, 100, 25),
+      num("threshold", "Edge Threshold", 0, 100, 15),
+      num("denoise", "Denoise", 0, 100, 20),
+      num("clarity", "Micro Contrast", 0, 100, 30),
+    ],
+    presets: [
+      { name: "Subtle Crisp", values: { amount: 20, radius: 15, threshold: 25, denoise: 10, clarity: 15 } },
+      { name: "Broadcast", values: { amount: 40, radius: 25, threshold: 15, denoise: 20, clarity: 30 } },
+      { name: "Detail Punch", values: { amount: 70, radius: 35, threshold: 8, denoise: 30, clarity: 55 } },
+      { name: "Rescue Soft Shot", values: { amount: 90, radius: 45, threshold: 5, denoise: 55, clarity: 70 } },
+    ],
+  },
+  flicker: {
+    family: "flicker",
+    familyLabel: "Flicker / Strobe",
+    params: [
+      num("rate", "Flicker Rate", 1, 60, 12, "Hz", 1),
+      num("depth", "Flicker Depth", 0, 100, 45),
+      num("randomness", "Randomness", 0, 100, 40),
+      sel("blend", "Flicker Blend", ["screen", "overlay", "multiply"], "screen"),
+      num("warmth", "Flicker Warmth", -100, 100, 15, "", 1),
+    ],
+    presets: [
+      { name: "Candle Flame", values: { rate: 8, depth: 30, randomness: 80, blend: "screen", warmth: 45 } },
+      { name: "Neon Sign", values: { rate: 18, depth: 55, randomness: 60, blend: "screen", warmth: 10 } },
+      { name: "Projector Flicker", values: { rate: 24, depth: 35, randomness: 25, blend: "overlay", warmth: 20 } },
+      { name: "Strobe Party", values: { rate: 45, depth: 95, randomness: 10, blend: "screen", warmth: -20 } },
+    ],
+  },
   generic: {
     family: "generic",
     familyLabel: "Effect",
@@ -227,7 +318,12 @@ const SCHEMAS: Record<EffectFamily, FamilySchema> = {
 /** Resolve a family from an effect name / pack tag. */
 export function familyFor(name: string, tag?: string): EffectFamily {
   const n = `${name} ${tag ?? ""}`.toLowerCase();
-  if (/interpolat|frame rate|slow ?mo|motion sync|voice-to-fx|smart body|tracking|fps/.test(n)) return "ai-motion";
+  if (/chroma key|green screen|blue screen|spill|matte key/.test(n)) return "chroma";
+  if (/picture in picture|\bpip\b|split screen|compare/.test(n)) return "pip";
+  if (/tracking|track |auto reframe|follow/.test(n)) return "tracking";
+  if (/sharpen|clarity|denoise|detail recovery/.test(n)) return "sharpen";
+  if (/flicker|strobe/.test(n)) return "flicker";
+  if (/interpolat|frame rate|slow ?mo|motion sync|voice-to-fx|smart body|fps/.test(n)) return "ai-motion";
   if (/rotoscope|depth|mask|cutout|background|portrait|segment|body effect/.test(n)) return "ai-mask";
   if (/transition|wipe|slit|zoom blur|whip|burst|dissolve|swipe|morph/.test(n)) return "transition";
   if (/glitch|vhs|crt|retro|rgb|datamosh|scanline|cyberpunk|distort/.test(n)) return "glitch";
@@ -358,6 +454,40 @@ export function paramsToVisual(family: EffectFamily, v: ParamValues): VisualResu
       if (mb > 0.02) f.push(`blur(${(mb * 2).toFixed(2)}px)`);
       f.push(`contrast(${(1 + (n(v.ramp) / 100) * 0.2).toFixed(3)})`, `saturate(${(1 + (fast > 1 ? 0.2 : -0.05)).toFixed(3)})`);
       transform = `scale(${(1 + Math.min(0.12, Math.abs(fast - 1) * 0.08)).toFixed(3)})`;
+      break;
+    }
+    case "chroma": {
+      const tol = n(v.tolerance, 45) / 100;
+      const spill = n(v.spill, 45) / 100;
+      f.push(`saturate(${(1 + tol * 0.25 - spill * 0.35).toFixed(3)})`, `contrast(${(1 + tol * 0.2).toFixed(3)})`);
+      break;
+    }
+    case "pip": {
+      const size = n(v.size, 35) / 100;
+      const op = n(v.opacity, 100) / 100;
+      f.push(`opacity(${op.toFixed(3)})`, `brightness(${(1 + n(v.border, 25) / 500).toFixed(3)})`);
+      transform = `scale(${(0.55 + size * 0.45).toFixed(3)}) translate(${(n(v.offsetX) * 0.12).toFixed(2)}%, ${(n(v.offsetY) * 0.12).toFixed(2)}%)`;
+      break;
+    }
+    case "tracking": {
+      const sm = n(v.smoothing, 55) / 100;
+      f.push(`contrast(${(1 + sm * 0.12).toFixed(3)})`, `blur(${((n(v.feather, 30) / 100) * 0.8).toFixed(2)}px)`);
+      transform = `scale(${(1 + (n(v.scaleTrack, 60) / 100) * 0.03).toFixed(3)})`;
+      break;
+    }
+    case "sharpen": {
+      const a = n(v.amount, 40) / 100;
+      f.push(
+        `contrast(${(1 + a * 0.35 + (n(v.clarity, 30) / 100) * 0.2).toFixed(3)})`,
+        `saturate(${(1 + a * 0.12).toFixed(3)})`,
+        `blur(${((n(v.denoise, 20) / 100) * 0.4).toFixed(2)}px)`
+      );
+      break;
+    }
+    case "flicker": {
+      const d = n(v.depth, 45) / 100;
+      const w = n(v.warmth, 15) / 100;
+      f.push(`brightness(${(1 + d * 0.22).toFixed(3)})`, `sepia(${Math.max(0, w * 0.35).toFixed(3)})`, `contrast(${(1 + d * 0.15).toFixed(3)})`);
       break;
     }
     case "blur": {

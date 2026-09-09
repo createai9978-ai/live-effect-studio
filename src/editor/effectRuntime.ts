@@ -89,8 +89,13 @@ export function compileRenderProgram(
     type = "motionVectors";
     engine = "local-ai";
   } else if (/vhs|crt|scanline/.test(text)) type = "vhs";
+  else if (/sharpen|clarity|denoise|detail/.test(text)) type = "sharpen";
+  else if (/picture in picture|\bpip\b|split screen|compare/.test(text)) type = "splitLayout";
   else if (/rgb split|channel split|chromatic/.test(text)) type = "rgbSplit";
-  else if (/shake|handheld|jitter|recoil/.test(text)) type = "cameraShake";
+  else if (/shake|handheld|jitter|recoil|rumble/.test(text)) type = "cameraShake";
+  else if (/flicker|strobe/.test(text)) type = "grain";
+  else if (/gaussian|defocus|tilt shift|soft focus|bokeh blur/.test(text)) type = "gaussianBlur";
+  else if (/directional blur|streak|whip pan|motion smear/.test(text)) type = "directionalBlur";
   else if (/grain|noise|dust|scratch/.test(text)) type = "grain";
   else if (/glow|bloom|halation|flare|leak|burn/.test(text)) type = "glow";
   else if (/trail|echo|clone|ghost/.test(text)) type = "motionTrail";

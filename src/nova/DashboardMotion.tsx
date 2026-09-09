@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 const MOTION_VIDEO = "/video/nova-glass-motion.mp4";
 
 export default function DashboardMotion() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -25,21 +24,18 @@ export default function DashboardMotion() {
 
   return (
     <div className="nova-motion-backdrop" aria-hidden="true">
-      {!failed && (
-        <video
-          ref={videoRef}
-          src={MOTION_VIDEO}
-          poster="/images/nova-motion-fallback.jpg"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          disablePictureInPicture
-          onError={() => setFailed(true)}
-          className="nova-motion-backdrop-video"
-        />
-      )}
+      <video
+        ref={videoRef}
+        src={MOTION_VIDEO}
+        poster="/images/nova-motion-fallback.jpg"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        disablePictureInPicture
+        className="nova-motion-backdrop-video"
+      />
       <div className="nova-motion-backdrop-scrim" />
     </div>
   );

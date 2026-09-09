@@ -8,7 +8,7 @@ import { useAuth } from "../auth/AuthContext";
 import DashboardMotion from "./DashboardMotion";
 
 /**
- * NOVA Studio launcher — the dashboard shown before the editor opens.
+ * Prism Studio launcher — the dashboard shown before the editor opens.
  * Premium studio layout: grouped side rail with a sliding active indicator,
  * aspect-ratio picker, cinematic hero, quick-action tools and a project shelf.
  */
@@ -108,7 +108,7 @@ export default function HomeScreen({
   const openPortfolio = (title: string) => {
     setDialog({
       title,
-      description: `${title} opens as a dedicated sequence inside NOVA Studio, ready for media, titles, motion, and cinematic grading.`,
+      description: `${title} opens as a dedicated sequence inside Prism Studio, ready for media, titles, motion, and cinematic grading.`,
       action: title === "Project Portfolio" ? "open" : "create",
     });
   };
@@ -128,7 +128,7 @@ export default function HomeScreen({
             }}
           >
             {settings.logoUrl ? (
-              <img src={settings.logoUrl} alt="NOVA Studio Logo" className="h-full w-full object-contain" />
+              <img src={settings.logoUrl} alt="Prism Studio logo" className="h-full w-full object-contain" />
             ) : (
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="5" width="20" height="14" rx="2" />
@@ -138,7 +138,7 @@ export default function HomeScreen({
           </div>
           <div className="nova-nebula-brand-copy">
             <div>
-              <EditableText id="home.brand" text="NOVA" />
+              <EditableText id="home.brand.prism" text="Prism" />
             </div>
             <div className="nova-nebula-brand-sub">
               <EditableText id="home.brandSub" text="Studio" />
@@ -298,7 +298,7 @@ export default function HomeScreen({
         <div className="nova-nebula-dialog-backdrop" role="presentation" onMouseDown={() => setDialog(null)}>
           <section className="nova-nebula-glass nova-nebula-dialog" role="dialog" aria-modal="true" aria-labelledby="nova-dialog-title" onMouseDown={(event) => event.stopPropagation()}>
             <Button variant="ghost" size="icon" className="nova-nebula-dialog-close" onClick={() => setDialog(null)} aria-label="Close dialog">×</Button>
-            <div className="nova-nebula-kicker">NOVA / MODULE</div>
+            <div className="nova-nebula-kicker">PRISM / MODULE</div>
             <h2 id="nova-dialog-title">{dialog.title}</h2>
             <p>{dialog.description}</p>
             <div className="nova-nebula-dialog-actions">

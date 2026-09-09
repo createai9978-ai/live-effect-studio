@@ -1,5 +1,5 @@
 /**
- * Read-only view over the NOVA Studio asset catalog for MCP tools.
+ * Read-only view over the Prism Studio asset catalog for MCP tools.
  * Pure data helpers — no env reads, no I/O.
  */
 import {

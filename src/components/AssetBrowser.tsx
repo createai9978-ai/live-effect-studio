@@ -630,7 +630,7 @@ function EffectsSidebar({
             <svg className="h-3.5 w-3.5 text-fuchsia-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2l2.5 5 5.5.8-4 3.8 1 5.4-5-2.6-5 2.6 1-5.4-4-3.8 5.5-.8L12 2z" />
             </svg>
-            <span className="text-[11px] font-semibold text-zinc-100">NOVA Pro</span>
+            <span className="text-[11px] font-semibold text-zinc-100">Prism Pro</span>
           </div>
           <p className="text-[9.5px] leading-relaxed text-zinc-400">
             Unlock 2,400+ premium effects, AI presets, and 4K stock media.

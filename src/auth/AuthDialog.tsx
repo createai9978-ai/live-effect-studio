@@ -50,7 +50,7 @@ export default function AuthDialog({ open, onClose }: { open: boolean; onClose: 
         if (needsConfirm) {
           toast.info("Check your inbox", { description: "Confirm your email to finish signing up." });
         } else {
-          toast.success("Welcome to NOVA Studio");
+          toast.success("Welcome to Prism Studio");
           onClose();
         }
       }
@@ -84,7 +84,7 @@ export default function AuthDialog({ open, onClose }: { open: boolean; onClose: 
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
       role="dialog"
       aria-modal="true"
-      aria-label="Sign in to NOVA Studio"
+      aria-label="Sign in to Prism Studio"
     >
       <div className="my-auto w-full max-w-[380px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#141824]/95 shadow-2xl shadow-black/60 animate-[nova-pop_.28s_cubic-bezier(.22,1,.36,1)]">
         <div className="relative border-b border-white/[0.06] px-5 py-4">

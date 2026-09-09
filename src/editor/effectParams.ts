@@ -456,6 +456,40 @@ export function paramsToVisual(family: EffectFamily, v: ParamValues): VisualResu
       transform = `scale(${(1 + Math.min(0.12, Math.abs(fast - 1) * 0.08)).toFixed(3)})`;
       break;
     }
+    case "chroma": {
+      const tol = n(v.tolerance, 45) / 100;
+      const spill = n(v.spill, 45) / 100;
+      f.push(`saturate(${(1 + tol * 0.25 - spill * 0.35).toFixed(3)})`, `contrast(${(1 + tol * 0.2).toFixed(3)})`);
+      break;
+    }
+    case "pip": {
+      const size = n(v.size, 35) / 100;
+      const op = n(v.opacity, 100) / 100;
+      f.push(`opacity(${op.toFixed(3)})`, `brightness(${(1 + n(v.border, 25) / 500).toFixed(3)})`);
+      transform = `scale(${(0.55 + size * 0.45).toFixed(3)}) translate(${(n(v.offsetX) * 0.12).toFixed(2)}%, ${(n(v.offsetY) * 0.12).toFixed(2)}%)`;
+      break;
+    }
+    case "tracking": {
+      const sm = n(v.smoothing, 55) / 100;
+      f.push(`contrast(${(1 + sm * 0.12).toFixed(3)})`, `blur(${((n(v.feather, 30) / 100) * 0.8).toFixed(2)}px)`);
+      transform = `scale(${(1 + (n(v.scaleTrack, 60) / 100) * 0.03).toFixed(3)})`;
+      break;
+    }
+    case "sharpen": {
+      const a = n(v.amount, 40) / 100;
+      f.push(
+        `contrast(${(1 + a * 0.35 + (n(v.clarity, 30) / 100) * 0.2).toFixed(3)})`,
+        `saturate(${(1 + a * 0.12).toFixed(3)})`,
+        `blur(${((n(v.denoise, 20) / 100) * 0.4).toFixed(2)}px)`
+      );
+      break;
+    }
+    case "flicker": {
+      const d = n(v.depth, 45) / 100;
+      const w = n(v.warmth, 15) / 100;
+      f.push(`brightness(${(1 + d * 0.22).toFixed(3)})`, `sepia(${Math.max(0, w * 0.35).toFixed(3)})`, `contrast(${(1 + d * 0.15).toFixed(3)})`);
+      break;
+    }
     case "blur": {
       const a = n(v.amount) / 100;
       f.push(`blur(${(a * 6).toFixed(2)}px)`, `brightness(${(1 + (n(v.highlights) / 100) * 0.18).toFixed(3)})`);

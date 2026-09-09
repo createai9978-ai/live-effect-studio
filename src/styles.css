@@ -1186,6 +1186,15 @@ input[type="range"]::-moz-range-thumb {
 .nova-editor-theme *::-webkit-scrollbar-thumb:hover { background-color: color-mix(in oklab, var(--editor-cyan) 42%, transparent); }
 .nova-editor-theme .nova-panel-card :where(.bg-\[\#0A0D14\], .bg-\[\#131824\], .bg-\[\#171C29\]) { background-color: transparent; }
 .nova-editor-theme .nova-panel-card :where(.border-white\/\[0\.05\], .border-white\/\[0\.06\], .border-white\/\[0\.07\], .border-white\/\[0\.08\]) { border-color: color-mix(in oklab, var(--editor-cyan) 10%, transparent); }
+.nova-editor-theme [class*="bg-violet-"] { background-color: var(--editor-cyan) !important; color: var(--primary-foreground); }
+.nova-editor-theme [class*="bg-fuchsia-"] { background-color: var(--editor-blue) !important; }
+.nova-editor-theme [class*="text-violet-"] { color: var(--editor-cyan) !important; }
+.nova-editor-theme [class*="text-fuchsia-"] { color: var(--editor-cyan) !important; }
+.nova-editor-theme [class*="border-violet-"] { border-color: color-mix(in oklab, var(--editor-cyan) 42%, transparent) !important; }
+.nova-editor-theme [class*="border-fuchsia-"] { border-color: color-mix(in oklab, var(--editor-blue) 38%, transparent) !important; }
+.nova-editor-theme [class*="from-violet-"] { --tw-gradient-from: var(--editor-cyan) var(--tw-gradient-from-position) !important; --tw-gradient-to: color-mix(in oklab, var(--editor-cyan) 0%, transparent) var(--tw-gradient-to-position) !important; }
+.nova-editor-theme [class*="to-fuchsia-"] { --tw-gradient-to: var(--editor-blue) var(--tw-gradient-to-position) !important; }
+.nova-editor-theme [class*="shadow-violet-"] { --tw-shadow-color: color-mix(in oklab, var(--editor-cyan) 28%, transparent) !important; }
 
 @media (max-width: 1279px) {
   .nova-editor-topbar { min-width: 1180px; }

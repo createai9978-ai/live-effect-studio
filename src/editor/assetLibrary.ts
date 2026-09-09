@@ -1260,6 +1260,19 @@ const stkLove = makeSet({
   gradient: ["#4c0519", "#fda4af"], tags: ["wedding"],
   names: ["Heart Float Overlay", "Kiss Mark Pop", "Love Frame Border", "Petal Drift Hearts"],
 });
+const stkPopups = makeSet({
+  prefix: "stk-pop", target: 22, glyph: "target", tag: "POP-UP", fx: "textMotion",
+  gradient: ["#450a0a", "#fb7185"], tags: ["vlog", "gaming"],
+  names: [
+    "Subscribe Button Pop-up",
+    "Like Burst Animation",
+    "Notification Bell Ring",
+    "Follower Counter Pop",
+    "Comment Bubble Slide",
+    "Share Icon Bounce",
+  ],
+});
+
 
 /* ---------- TEMPLATES ---------- */
 const tplTrending = makeSet({
@@ -1352,11 +1365,19 @@ export const LIB_TREES: Partial<Record<AssetTab, EffectCategory[]>> = {
     cat("trn-cat-3d", "3D", "shapes", trn3D, "#60a5fa"),
     cat("trn-cat-burn", "Film Burn", "overlay", trnFilmBurn, "#fb923c"),
     cat("trn-cat-glitch", "Glitch", "glitch", trnGlitchCat, "#22d3ee"),
+    cat("trn-cat-m3d", "3D Motion", "shapes", trnMotion3D, "#818cf8", "NEW"),
+    cat("trn-cat-cine", "Cinematic Camera", "camera", trnCinematic, "#fbbf24", "NEW"),
+    cat("trn-cat-dist", "Digital Distortion", "distort", trnDistort, "#22d3ee"),
+    cat("trn-cat-flare", "Flare & Light Leak", "overlay", trnFlare, "#fde68a"),
+    cat("trn-cat-wipe", "Seamless Wipes", "reveal", trnWipes, "#94a3b8"),
   ],
   titles: [
     cat("ttl-cat-trend", "Trending", "brush", ttlTrending, "#818cf8", "HOT"),
     cat("ttl-cat-cap", "AI Captions", "brush", ttlCaptions, "#22d3ee", "AI"),
+    cat("ttl-cat-kin", "Kinetic Typography", "brush", ttlKinetic, "#22d3ee", "NEW"),
     cat("ttl-cat-lt", "Lower Thirds", "brush", ttlLowerThirds, "#38bdf8"),
+    cat("ttl-cat-open", "Intro Openers", "sparkle", ttlOpeners, "#fbbf24", "NEW"),
+    cat("ttl-cat-cred", "Credit Rolls", "text", ttlCredits, "#a8a29e"),
     cat("ttl-cat-lux", "Luxury", "sparkle", ttlLuxury, "#fbbf24"),
     cat("ttl-cat-tech", "Tech", "glitch", ttlTech, "#22d3ee"),
     cat("ttl-cat-fun", "Graffiti & Fun", "brush", ttlFun, "#f472b6"),
@@ -1364,6 +1385,7 @@ export const LIB_TREES: Partial<Record<AssetTab, EffectCategory[]>> = {
   ],
   stickers: [
     cat("stk-cat-trend", "Trending", "sparkle", stkTrending, "#f472b6", "HOT"),
+    cat("stk-cat-pop", "Social Pop-ups", "target", stkPopups, "#fb7185", "NEW"),
     cat("stk-cat-sub", "Subscribe", "target", stkSubscribe, "#fb7185"),
     cat("stk-cat-arrow", "Arrow", "target", stkArrow, "#fb923c"),
     cat("stk-cat-line", "Line", "brush", stkLine, "#22d3ee"),

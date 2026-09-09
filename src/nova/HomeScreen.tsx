@@ -5,7 +5,6 @@ import EditableText from "../admin/EditableText";
 import AdminToggle from "../admin/AdminToggle";
 import { useAdmin } from "../admin/AdminContext";
 import { useAuth } from "../auth/AuthContext";
-import HeroPreview from "./HeroPreview";
 import DashboardMotion from "./DashboardMotion";
 
 /**
@@ -224,8 +223,6 @@ export default function HomeScreen({
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}><path d="m9 18 6-6-6-6" /></svg>
           </Button>
         </div>
-        <div className="nova-nebula-preview"><HeroPreview /></div>
-        <div className="nova-nebula-float-stat" aria-hidden="true"><i /><i /><i /><span>ENC 009</span></div>
       </main>
 
       <section className="nova-nebula-tools" aria-label="Quick tools">

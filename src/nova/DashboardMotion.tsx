@@ -15,7 +15,7 @@ export default function DashboardMotion() {
         video.pause();
         return;
       }
-      void video.play().catch(() => setFailed(true));
+      void video.play().catch(() => {});
     };
 
     document.addEventListener("visibilitychange", syncPlayback);

@@ -522,7 +522,7 @@ export function ShortcutsModal({ onClose }: { onClose: () => void }) {
 /* ============================ About ============================ */
 export function AboutModal({ onClose }: { onClose: () => void }) {
   return (
-    <ModalShell title="About NOVA Studio" onClose={onClose}>
+    <ModalShell title="About Prism Studio" onClose={onClose}>
       <div className="space-y-3 p-5 text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 shadow-xl shadow-violet-500/40">
           <svg className="h-7 w-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -531,7 +531,7 @@ export function AboutModal({ onClose }: { onClose: () => void }) {
           </svg>
         </div>
         <div>
-          <div className="text-[14px] font-semibold text-zinc-100">NOVA Studio · Edit</div>
+          <div className="text-[14px] font-semibold text-zinc-100">Prism Studio · Edit</div>
           <div className="text-[10px] text-zinc-500">Non-linear editor · v1.0</div>
         </div>
         <p className="mx-auto max-w-xs text-[10.5px] leading-relaxed text-zinc-500">

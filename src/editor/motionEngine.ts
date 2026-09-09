@@ -1,5 +1,5 @@
 /**
- * NOVA Studio — professional motion engine.
+ * Prism Studio — professional motion engine.
  *
  * Provides Filmora/Premiere-grade animation primitives:
  *  - real cubic-bezier easing solvers (Newton-Raphson + bisection fallback)

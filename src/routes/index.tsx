@@ -20,13 +20,13 @@ const NovaApp = lazy(async () => {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NOVA Studio — Pro Video Editor & Effects Library" },
+      { title: "Prism Studio — Pro Video Editor & Effects Library" },
       {
         name: "description",
         content:
-          "NOVA Studio is a browser video editor with a Filmora-grade effects panel: live looping previews, 220+ presets, LUTs, transitions and a multi-track timeline.",
+          "Prism Studio is a browser video editor with a Filmora-grade effects panel: live looping previews, 220+ presets, LUTs, transitions and a multi-track timeline.",
       },
-      { property: "og:title", content: "NOVA Studio — Pro Video Editor & Effects Library" },
+      { property: "og:title", content: "Prism Studio — Pro Video Editor & Effects Library" },
       {
         property: "og:description",
         content:
@@ -44,7 +44,7 @@ function Index() {
     <ClientOnly
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-[#111621] text-sm text-zinc-500">
-          Loading NOVA Studio…
+          Loading Prism Studio…
         </div>
       }
     >
@@ -52,7 +52,7 @@ function Index() {
         <Suspense
           fallback={
             <div className="flex min-h-screen items-center justify-center bg-[#111621] text-sm text-zinc-500">
-              Loading NOVA Studio…
+              Loading Prism Studio…
             </div>
           }
         >

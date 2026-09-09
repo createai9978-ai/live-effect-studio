@@ -46,7 +46,7 @@ function TopBar({
           }}
         >
           {settings.logoUrl ? (
-            <img src={settings.logoUrl} alt="NOVA Studio Logo" className="h-full w-full object-contain" />
+            <img src={settings.logoUrl} alt="Prism Studio logo" className="h-full w-full object-contain" />
           ) : (
             <svg className="h-[18px] w-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="5" width="20" height="14" rx="2" />
@@ -55,7 +55,7 @@ function TopBar({
           )}
         </button>
         <span className="hidden items-center gap-1.5 text-[15px] font-semibold tracking-wide text-zinc-50 md:inline-flex">
-          <EditableText id="app.title" text="NOVA Studio" />
+          <EditableText id="app.title.prism" text="Prism Studio" />
           <span className="rounded-md bg-gradient-to-r from-violet-500 to-fuchsia-500 px-1.5 py-px text-[8.5px] font-bold tracking-wider text-white">PRO</span>
         </span>
 
@@ -154,7 +154,7 @@ function TopBar({
       {/* Profile */}
       <Tooltip label="Account" hint="Profile, preferences and sync status" side="bottom">
         <button className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#00F0FF] to-[#5B7CFF] text-[10px] font-bold text-[#04121a] ring-1 ring-white/20 transition hover:brightness-110 md:flex">
-          NS
+          PS
         </button>
       </Tooltip>
 

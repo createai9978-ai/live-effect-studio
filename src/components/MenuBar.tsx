@@ -209,7 +209,7 @@ export default function MenuBar({ actions }: { actions: MenuActions }) {
       label: "Help",
       items: [
         { label: "Keyboard Shortcuts…", shortcut: "Ctrl+/", onClick: actions.openShortcuts },
-        { label: "About NOVA Studio", onClick: actions.openAbout },
+        { label: "About Prism Studio", onClick: actions.openAbout },
       ],
     },
   ];

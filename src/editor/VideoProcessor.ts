@@ -1,5 +1,5 @@
 /**
- * WebGL-based video effect processor for NOVA Studio.
+ * WebGL-based video effect processor for Prism Studio.
  * Provides GPU-accelerated real-time effects for the preview player.
  */
 

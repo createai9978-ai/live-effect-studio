@@ -4,7 +4,7 @@ type Props = { children: ReactNode };
 type State = { error: Error | null };
 
 /**
- * Keeps a render/runtime failure inside NOVA Studio from blanking the whole
+ * Keeps a render/runtime failure inside Prism Studio from blanking the whole
  * page. Offers a reload and a "reset workspace" escape hatch that clears the
  * persisted layout, which is the only client state that can wedge the shell.
  */
@@ -17,7 +17,7 @@ export class AppBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error) {
     // eslint-disable-next-line no-console
-    console.error("[NOVA Studio] render error:", error);
+    console.error("[Prism Studio] render error:", error);
   }
 
   private reset = () => {
@@ -35,7 +35,7 @@ export class AppBoundary extends Component<Props, State> {
 
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#0B0F19] px-6 text-center">
-        <h1 className="text-lg font-semibold text-zinc-100">NOVA Studio hit a snag</h1>
+        <h1 className="text-lg font-semibold text-zinc-100">Prism Studio hit a snag</h1>
         <p className="max-w-md text-sm text-zinc-400">
           The editor stopped rendering. Reloading usually fixes it; resetting the workspace
           restores the default panel layout.

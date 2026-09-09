@@ -78,15 +78,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "NOVA Studio — Browser Video Editor" },
+      { title: "Prism Studio — Browser Video Editor" },
       {
         name: "description",
         content:
-          "NOVA Studio is a browser-based pro video editor with a live effects library, LUT color grading, transitions and a multi-track timeline.",
+          "Prism Studio is a browser-based pro video editor with a live effects library, LUT color grading, transitions and a multi-track timeline.",
       },
-      { name: "author", content: "NOVA Studio" },
-      { property: "og:site_name", content: "NOVA Studio" },
-      { property: "og:title", content: "NOVA Studio — Browser Video Editor" },
+      { name: "author", content: "Prism Studio" },
+      { property: "og:site_name", content: "Prism Studio" },
+      { property: "og:title", content: "Prism Studio — Browser Video Editor" },
       {
         property: "og:description",
         content:

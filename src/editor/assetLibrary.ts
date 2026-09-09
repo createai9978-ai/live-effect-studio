@@ -1,5 +1,5 @@
 /**
- * NOVA Studio Asset Library.
+ * Prism Studio Asset Library.
  * Rebuilt as a massive, industry-grade catalog exceeding 220+ advanced video effects,
  * viral transitions, and high-end automotive presets.
  * Powered by a dynamic, high-performance preset generator to prevent asset clutter.
@@ -282,7 +282,7 @@ const item = (
 ): AssetItem => ({ id, name, glyph, gradient, ...extras });
 
 /* ==============================================================
-   NOVA 2026 preset generator — every preset is authored by name and
+   Prism 2026 preset generator — every preset is authored by name and
    compiled into a unique seeded render program.
    ============================================================== */
 const subTags = ["cinematic", "vlog", "gaming", "music", "travel", "wedding"] as ContentTag[];
@@ -397,7 +397,7 @@ function dedupe(items: AssetItem[]): AssetItem[] {
 /* ---------- Filmora-style production suite ---------- */
 
 /* ==========================================================================
-   NOVA 2026 Signature Library — fully rebuilt. Every legacy preset was retired
+   Prism 2026 Signature Library — fully rebuilt. Every legacy preset was retired
    and replaced with a modern, production-grade catalog: three suites, twelve
    sub-collections, all driven by unique seeded render programs.
    ========================================================================== */

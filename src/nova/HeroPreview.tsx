@@ -86,7 +86,7 @@ export default function HeroPreview() {
           ref={videoRef}
           src={HERO_CLIP}
           autoPlay
-          muted
+          muted={muted}
           loop
           playsInline
           preload="auto"

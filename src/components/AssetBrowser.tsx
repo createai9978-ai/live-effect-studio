@@ -833,6 +833,7 @@ function BrowserContent({
   onToggleFavorite,
   thumbSize,
   activeTags,
+  embedded = false,
 }: {
   tab: AssetTab;
   query: string;
@@ -846,6 +847,7 @@ function BrowserContent({
   onToggleFavorite: (id: string) => void;
   thumbSize: "s" | "m" | "l";
   activeTags: Set<ContentTag>;
+  embedded?: boolean;
 }) {
   const items = useMemo(() => itemsForTab(tab, activeCat), [tab, activeCat]);
   const filtered = useMemo(

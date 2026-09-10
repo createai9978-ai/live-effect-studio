@@ -6,6 +6,7 @@ import {
   Tool,
   TrackId,
   TrackState,
+  DEFAULT_TRACK_STATE,
   fmtDuration,
   niceStep,
   toTimecode,
@@ -606,7 +607,7 @@ function TrackLane(
   } = props;
   const [dragOver, setDragOver] = useState(false);
   const trackClips = clips.filter((c) => c.track === track);
-  const state = trackStates[track];
+  const state = trackStates[track] ?? DEFAULT_TRACK_STATE;
 
   const handleLaneMouseDown = (e: React.MouseEvent) => {
     if (state.locked) return;

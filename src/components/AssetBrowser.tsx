@@ -169,50 +169,83 @@ export default function AssetBrowser({
       className={cn(
         "flex flex-col",
         embedded
-          ? "h-full w-full min-h-0 bg-[#111621]"
+          ? "nova-asset-drawer h-full w-full min-h-0 overflow-hidden"
           : "fixed inset-0 z-[95] bg-[#111621]/95 backdrop-blur-md"
       )}
     >
-      {/* ============ Embedded drawer tabs (Project Media / Stock / Favorites) ============ */}
+      {/* ============ Embedded drawer header ============ */}
       {embedded && (
-        <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.05] px-3">
-          {([
-            { id: "project", label: "Project Media" },
-            { id: "stock", label: "Stock" },
-            { id: "fav", label: "Favorites" },
-          ] as const).map((t) => {
-            const on =
-              t.id === "stock" ? tab === "stock" : t.id === "fav" ? tab === "mine" : tab !== "stock" && tab !== "mine";
-            return (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id === "stock" ? "stock" : t.id === "fav" ? "mine" : initialTab)}
-                className={cn(
-                  "relative py-2.5 text-[11px] font-semibold transition-colors",
-                  on ? "text-[#00F0FF]" : "text-zinc-500 hover:text-zinc-300"
-                )}
-              >
-                {t.label}
-                {on && (
-                  <span className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-[#00F0FF] shadow-[0_0_8px_#00F0FF]" />
-                )}
-              </button>
-            );
-          })}
-          <button
-            onClick={onClose}
-            title="Close panel"
-            className="ml-auto flex h-6 w-6 items-center justify-center rounded text-zinc-500 transition hover:bg-white/[0.06] hover:text-zinc-200"
-          >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
-              <path d="M18 6L6 18M6 6l12 12" />
+        <div className="nova-asset-drawer-header shrink-0">
+          <div className="flex min-w-0 items-center justify-between gap-2">
+            <div className="min-w-0">
+              <h2 className="truncate text-[15px] font-semibold text-foreground">
+                {TAB_META.find((item) => item.id === tab)?.label ?? "Assets"}
+              </h2>
+              <p className="mt-0.5 truncate text-[9px] font-medium uppercase text-muted-foreground">
+                Professional presets
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              title="Close panel"
+              aria-label="Close asset panel"
+              className="nova-drawer-icon-button"
+            >
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="nova-drawer-search">
+            <svg className="h-3.5 w-3.5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.35-4.35" />
             </svg>
-          </button>
+            <input
+              value={globalQuery}
+              onChange={(event) => setGlobalQuery(event.target.value)}
+              placeholder={`Search ${(TAB_META.find((item) => item.id === tab)?.label ?? "assets").toLowerCase()}…`}
+              aria-label="Search presets"
+              className="min-w-0 flex-1 bg-transparent text-[11px] text-foreground outline-none placeholder:text-muted-foreground"
+            />
+            {globalQuery && (
+              <button
+                onClick={() => setGlobalQuery("")}
+                title="Clear search"
+                aria-label="Clear search"
+                className="nova-drawer-icon-button h-5 w-5"
+              >
+                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          <div className="nova-drawer-tabs nova-scroll-thin">
+            {([
+              { id: "project", label: "Trending" },
+              { id: "stock", label: "Stock" },
+              { id: "fav", label: "Favorites" },
+            ] as const).map((item) => {
+              const active = item.id === "stock" ? tab === "stock" : item.id === "fav" ? tab === "mine" : tab !== "stock" && tab !== "mine";
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setTab(item.id === "stock" ? "stock" : item.id === "fav" ? "mine" : initialTab)}
+                  className={cn("nova-drawer-tab", active && "nova-drawer-tab-active")}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
       {/* ============ Header row 1: brand + global search + close ============ */}
-      <div className={cn("flex shrink-0 items-center gap-3 border-b border-white/[0.05] bg-[#131824]/80 backdrop-blur-xl px-3", embedded ? "py-2" : "py-2")}>
+      <div className={cn("flex shrink-0 items-center gap-3 border-b border-white/[0.05] bg-[#131824]/80 backdrop-blur-xl px-3 py-2", embedded && "hidden")}>
 
         {!embedded && (
         <div className="flex shrink-0 items-center gap-2">
@@ -491,7 +524,7 @@ export default function AssetBrowser({
           )}
 
           <div className="flex min-h-0 flex-1">
-            <div className={cn("min-h-0 flex-1 overflow-y-auto", embedded ? "nova-emb-grid p-2.5" : "p-4")}>
+            <div className={cn("min-h-0 flex-1 overflow-y-auto", embedded ? "nova-emb-grid nova-scroll-thin p-3" : "p-4")}>
               {globalQuery ? (
                 <GlobalSearchResults
                   query={deferredGlobalQuery}

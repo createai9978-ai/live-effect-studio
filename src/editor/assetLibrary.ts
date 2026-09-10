@@ -1335,6 +1335,138 @@ const tplSubscribe = makeSet({
   ],
 });
 
+/* ---------- STOCK MEDIA ---------- */
+const stkMediaNature = makeSet({
+  prefix: "stk-nat", target: 28, glyph: "film", tag: "NATURE", kind: "media",
+  gradient: ["#052e16", "#4ade80"], tags: ["travel", "cinematic"],
+  names: [
+    "Forest Mist Morning", "Ocean Waves Slow-Mo", "Waterfall Close-Up", "Autumn Leaves Fall",
+    "Desert Dunes Sunset", "Snow Peaks Flyover", "Underwater Reef Dive", "Countryside Fields",
+  ],
+});
+const stkMediaUrban = makeSet({
+  prefix: "stk-urb", target: 28, glyph: "film", tag: "URBAN", kind: "media",
+  gradient: ["#0b1220", "#38bdf8"], tags: ["travel", "cinematic"],
+  names: [
+    "City Night Traffic 4K", "Neon Street Tokyo", "Traffic Light Trails", "Skyline Timelapse",
+    "Modern Architecture Pan", "Rainy Window Mood", "Subway Platform Rush", "Rooftop Sunset City",
+  ],
+});
+const stkMediaBusiness = makeSet({
+  prefix: "stk-biz", target: 24, glyph: "grid", tag: "BUSINESS", kind: "media",
+  gradient: ["#0f172a", "#60a5fa"], tags: ["corporate", "minimal"],
+  names: [
+    "Office Team Meeting", "Laptop Typing Close", "Handshake Deal Close", "Whiteboard Strategy",
+    "Startup Coworking Space", "Data Screen Dashboard",
+  ],
+});
+const stkMediaPeople = makeSet({
+  prefix: "stk-ppl", target: 24, glyph: "portrait", tag: "PEOPLE", kind: "media",
+  gradient: ["#3f1d38", "#fbcfe8"], tags: ["vlog", "wedding"],
+  names: [
+    "Studio Portrait Light", "Coffee Shop Ambience", "Friends Laughing Park", "Runner Sunrise Street",
+    "Chef Plating Dish", "Musician Studio Session",
+  ],
+});
+const stkMediaAerial = makeSet({
+  prefix: "stk-air", target: 24, glyph: "pan", tag: "AERIAL", kind: "media",
+  gradient: ["#083344", "#22d3ee"], tags: ["travel", "cinematic"],
+  names: [
+    "Aerial Coastline 4K", "Mountain Drone Sweep", "Highway Drive POV", "Island Lagoon Flyover",
+    "Canyon Drone Descent", "Harbour Boats Overhead",
+  ],
+});
+const stkMediaAbstract = makeSet({
+  prefix: "stk-abs", target: 24, glyph: "sparkle", tag: "ABSTRACT", kind: "media",
+  gradient: ["#1e1b4b", "#a855f7"], tags: ["music", "minimal"],
+  names: [
+    "Abstract Ink Flow", "Bokeh Night Lights", "Liquid Paint Swirl", "Particle Field Drift",
+    "Glass Prism Refraction", "Smoke Plume Slow-Mo",
+  ],
+});
+const stkMediaPhoto = makeSet({
+  prefix: "stk-photo", target: 20, glyph: "star", tag: "PHOTOS", kind: "media",
+  gradient: ["#1c1917", "#a8a29e"], tags: ["minimal", "corporate"],
+  names: [
+    "Marble Texture Still", "Gradient Backdrop Still", "Paper Grain Still", "Studio Backdrop Still",
+    "Night Sky Stars Still",
+  ],
+});
+
+/* ---------- AUDIO ---------- */
+const audioTrack = (
+  id: string,
+  name: string,
+  tag: string,
+  duration: string,
+  tags: ContentTag[],
+  gradient: [string, string] = ["#064e3b", "#34d399"]
+): AssetItem => ({
+  id, name, tag, duration, kind: "media", glyph: "note",
+  gradient: grad(gradient[0], gradient[1]), tags,
+});
+
+/** Build a music/SFX pack from `[name, duration]` pairs. */
+const audioPack = (
+  prefix: string,
+  tag: string,
+  tags: ContentTag[],
+  gradient: [string, string],
+  entries: [string, string][]
+): AssetItem[] =>
+  entries.map(([name, dur], i) => audioTrack(`${prefix}-${i}`, name, tag, dur, tags, gradient));
+
+const audCinematic = audioPack("aud-cin", "CINEMATIC", ["cinematic"], ["#0f172a", "#fbbf24"], [
+  ["Cinematic Rise Epic", "2:14"], ["Emotional Piano Score", "3:02"], ["Trailer Tension Build", "1:48"],
+  ["Orchestral Horizon", "2:36"], ["Heroic Brass Swell", "2:05"], ["Dark Strings Suspense", "2:41"],
+  ["Documentary Reflection", "3:18"], ["Epic Drum Finale", "1:52"],
+]);
+const audVlog = audioPack("aud-vlog", "VLOG", ["vlog"], ["#7c2d12", "#fbbf24"], [
+  ["Sunny Vlog Ukulele", "2:05"], ["Daily Routine Pop", "2:22"], ["Travel Diary Acoustic", "2:47"],
+  ["Morning Energy Indie", "1:58"], ["Weekend Roadtrip Folk", "2:33"], ["Happy Claps Summer", "2:11"],
+]);
+const audCorporate = audioPack("aud-corp", "CORPORATE", ["corporate"], ["#0f172a", "#38bdf8"], [
+  ["Corporate Uplift", "2:30"], ["Clean Tech Presentation", "2:12"], ["Product Reveal Minimal", "1:40"],
+  ["Innovation Pulse", "2:24"], ["Business Motivation", "2:58"],
+]);
+const audLofi = audioPack("aud-lofi", "LO-FI", ["minimal", "retro"], ["#312e81", "#a78bfa"], [
+  ["Lo-Fi Study Loop", "3:10"], ["Midnight Lo-Fi Tape", "2:52"], ["Rainy Day Lo-Fi", "3:24"],
+  ["Cassette Jazz Chill", "2:47"], ["Sleepy Keys Lo-Fi", "3:05"],
+]);
+const audElectronic = audioPack("aud-edm", "ELECTRONIC", ["music", "gaming"], ["#4c1d95", "#22d3ee"], [
+  ["Neon Synthwave Drive", "3:12"], ["Festival Drop Anthem", "2:44"], ["Deep House Groove", "3:36"],
+  ["Cyber Bass Pulse", "2:28"], ["Future Garage Night", "3:01"],
+]);
+const audAmbient = audioPack("aud-amb", "AMBIENT", ["minimal", "cinematic"], ["#0b1220", "#7dd3fc"], [
+  ["Weightless Pad Drift", "4:02"], ["Glacier Air Texture", "3:41"], ["Forest Field Recording", "3:22"],
+  ["Ocean Room Tone", "4:15"], ["City Rain Ambience", "3:58"],
+]);
+const audBeats = audioPack("aud-beat", "BEATS", ["music", "gaming"], ["#450a0a", "#fb7185"], [
+  ["Trap Hi-Hat Roll Beat", "2:18"], ["Hip-Hop Boom Bap", "2:46"], ["Sport Stomp Clap", "1:55"],
+  ["Drumline Percussion", "2:07"], ["Afrobeat Groove", "2:52"],
+]);
+const audSfx = audioPack("aud-sfx", "SFX", ["music", "gaming"], ["#052e16", "#34d399"], [
+  ["Whoosh Transition SFX", "0:02"], ["Impact Boom SFX", "0:03"], ["Riser Sweep SFX", "0:05"],
+  ["Camera Shutter SFX", "0:01"], ["Glitch Stutter SFX", "0:02"], ["Pop Click UI SFX", "0:01"],
+  ["Cinematic Braam Hit", "0:04"], ["Sword Swipe Swish", "0:02"], ["Crowd Cheer Burst", "0:06"],
+  ["Vinyl Scratch Stop", "0:02"], ["Notification Ding", "0:01"], ["Deep Sub Drop", "0:03"],
+]);
+const audFoley = audioPack("aud-fol", "FOLEY", ["cinematic", "minimal"], ["#1c1917", "#d6d3d1"], [
+  ["Footsteps Wood Floor", "0:08"], ["Door Creak Open", "0:04"], ["Paper Page Turn", "0:02"],
+  ["Keyboard Typing Loop", "0:12"], ["Coffee Pour Cup", "0:06"], ["Car Door Close", "0:03"],
+]);
+
+/** Audio processing presets — real, adjustable audio tools. */
+const audTools = makeSet({
+  prefix: "aud-tool", target: 24, glyph: "wave", tag: "AUDIO FX", kind: "effect",
+  gradient: ["#064e3b", "#22d3ee"], tags: ["corporate", "vlog"],
+  names: [
+    "Audio Denoise Clean", "Voice Clarity EQ", "Music Ducking Auto", "Reverb Room Space",
+    "Compressor Vocal Level", "De-Esser Sibilance", "Stereo Widener Mix", "Bass Boost Warmth",
+    "Pitch Shift Voice", "Telephone Radio EQ", "Podcast Master Chain", "Fade In Out Curve",
+  ],
+});
+
 const cat = (
   id: string,
   label: string,
@@ -1401,6 +1533,27 @@ export const LIB_TREES: Partial<Record<AssetTab, EffectCategory[]>> = {
     cat("tpl-cat-gal", "Gallery", "layers", tplGallery, "#a8a29e"),
     cat("tpl-cat-sub", "Subscribe", "layers", tplSubscribe, "#f472b6"),
   ],
+  stock: [
+    cat("stk-cat-nat", "Nature", "camera", stkMediaNature, "#4ade80"),
+    cat("stk-cat-urb", "Urban & City", "camera", stkMediaUrban, "#38bdf8", "HOT"),
+    cat("stk-cat-air", "Aerial & Drone", "camera", stkMediaAerial, "#22d3ee"),
+    cat("stk-cat-biz", "Business", "layers", stkMediaBusiness, "#60a5fa"),
+    cat("stk-cat-ppl", "People", "smiley", stkMediaPeople, "#fbcfe8"),
+    cat("stk-cat-abs", "Abstract", "sparkle", stkMediaAbstract, "#a855f7"),
+    cat("stk-cat-photo", "Photos", "film", stkMediaPhoto, "#a8a29e"),
+  ],
+  audio: [
+    cat("aud-cat-cin", "Cinematic Score", "audio", audCinematic, "#fbbf24", "HOT"),
+    cat("aud-cat-vlog", "Vlog & Lifestyle", "audio", audVlog, "#fb923c"),
+    cat("aud-cat-corp", "Corporate", "audio", audCorporate, "#38bdf8"),
+    cat("aud-cat-lofi", "Lo-Fi & Chill", "audio", audLofi, "#a78bfa"),
+    cat("aud-cat-edm", "Electronic", "audio", audElectronic, "#22d3ee"),
+    cat("aud-cat-amb", "Ambient", "audio", audAmbient, "#7dd3fc"),
+    cat("aud-cat-beat", "Beats & Percussion", "audio", audBeats, "#fb7185"),
+    cat("aud-cat-sfx", "Sound Effects", "shapes", audSfx, "#34d399"),
+    cat("aud-cat-fol", "Foley", "shapes", audFoley, "#d6d3d1"),
+    cat("aud-cat-tool", "Audio Tools", "wand", audTools, "#22d3ee", "FX"),
+  ],
 };
 
 const flat = (tab: AssetTab) => dedupe((LIB_TREES[tab] ?? []).flatMap((c) => c.items ?? []));
@@ -1415,56 +1568,10 @@ export const TITLES: AssetItem[] = flat("titles");
 export const STICKERS: AssetItem[] = flat("stickers");
 /** Ready-to-use project templates. */
 export const TEMPLATES: AssetItem[] = flat("templates");
-
 /** Royalty-free stock footage & photos (live preview clips resolve per id). */
-export const STOCK: AssetItem[] = makeSet({
-  prefix: "stock", target: 48, glyph: "film", tag: "STOCK", kind: "media",
-  gradient: ["#083344", "#22d3ee"],
-  tags: ["travel", "cinematic", "corporate", "minimal"],
-  names: [
-    "Aerial Coastline 4K", "City Night Traffic 4K", "Forest Mist Morning", "Desert Dunes Sunset",
-    "Ocean Waves Slow-Mo", "Mountain Drone Sweep", "Rainy Window Mood", "Neon Street Tokyo",
-    "Coffee Shop Ambience", "Office Team Meeting", "Snow Peaks Flyover", "Waterfall Close-Up",
-    "Traffic Light Trails", "Skyline Timelapse", "Beach Sunrise Walk", "Autumn Leaves Fall",
-    "Studio Portrait Light", "Abstract Ink Flow", "Bokeh Night Lights", "Highway Drive POV",
-    "Countryside Fields", "Underwater Reef Dive", "Campfire Night Close", "Modern Architecture Pan",
-  ],
-});
-
-const audioTrack = (
-  id: string,
-  name: string,
-  tag: string,
-  duration: string,
-  tags: ContentTag[]
-): AssetItem => ({
-  id, name, tag, duration, kind: "media", glyph: "note",
-  gradient: grad("#064e3b", "#34d399"), tags,
-});
-
-/** Background music beds + sound effects. */
-export const AUDIO_LIB: AssetItem[] = [
-  audioTrack("aud-cin-1", "Cinematic Rise Epic", "CINEMATIC", "2:14", ["cinematic"]),
-  audioTrack("aud-cin-2", "Emotional Piano Score", "CINEMATIC", "3:02", ["cinematic"]),
-  audioTrack("aud-cin-3", "Trailer Tension Build", "CINEMATIC", "1:48", ["cinematic"]),
-  audioTrack("aud-cin-4", "Orchestral Horizon", "CINEMATIC", "2:36", ["cinematic"]),
-  audioTrack("aud-vlog-1", "Sunny Vlog Ukulele", "VLOG", "2:05", ["vlog"]),
-  audioTrack("aud-vlog-2", "Daily Routine Pop", "VLOG", "2:22", ["vlog"]),
-  audioTrack("aud-vlog-3", "Travel Diary Acoustic", "VLOG", "2:47", ["travel"]),
-  audioTrack("aud-vlog-4", "Morning Energy Indie", "VLOG", "1:58", ["vlog"]),
-  audioTrack("aud-corp-1", "Corporate Uplift", "CORPORATE", "2:30", ["corporate"]),
-  audioTrack("aud-corp-2", "Clean Tech Presentation", "CORPORATE", "2:12", ["corporate"]),
-  audioTrack("aud-corp-3", "Product Reveal Minimal", "CORPORATE", "1:40", ["minimal"]),
-  audioTrack("aud-lofi-1", "Lo-Fi Study Loop", "LO-FI", "3:10", ["minimal"]),
-  audioTrack("aud-lofi-2", "Midnight Lo-Fi Tape", "LO-FI", "2:52", ["retro"]),
-  audioTrack("aud-lofi-3", "Rainy Day Lo-Fi", "LO-FI", "3:24", ["minimal"]),
-  audioTrack("aud-sfx-1", "Whoosh Transition SFX", "SFX", "0:02", ["music"]),
-  audioTrack("aud-sfx-2", "Impact Boom SFX", "SFX", "0:03", ["gaming"]),
-  audioTrack("aud-sfx-3", "Riser Sweep SFX", "SFX", "0:05", ["music"]),
-  audioTrack("aud-sfx-4", "Camera Shutter SFX", "SFX", "0:01", ["minimal"]),
-  audioTrack("aud-sfx-5", "Glitch Stutter SFX", "SFX", "0:02", ["gaming"]),
-  audioTrack("aud-sfx-6", "Pop Click UI SFX", "SFX", "0:01", ["minimal"]),
-];
+export const STOCK: AssetItem[] = flat("stock");
+/** Background music beds, sound effects and audio processing tools. */
+export const AUDIO_LIB: AssetItem[] = flat("audio");
 
 /** All tags an item carries — checks both its own tags and inferred glyph/family tags. */
 export function itemTags(i: AssetItem): ContentTag[] {

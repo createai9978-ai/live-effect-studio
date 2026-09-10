@@ -519,7 +519,14 @@ export default function AssetBrowser({
           )}
 
           <div className="flex min-h-0 flex-1">
-            <div className={cn("min-h-0 flex-1 overflow-y-auto", embedded ? "nova-emb-grid p-2.5" : "p-4")}>
+            <div
+              className={cn(
+                "min-h-0 flex-1 overflow-y-auto",
+                embedded ? "nova-emb-grid p-2.5" : "p-4",
+                // Audio rows need the full drawer width for track name + duration.
+                embedded && tab === "audio" && "nova-emb-list"
+              )}
+            >
               {globalQuery ? (
                 <GlobalSearchResults
                   query={deferredGlobalQuery}

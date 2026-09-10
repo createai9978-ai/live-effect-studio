@@ -566,6 +566,7 @@ export default function AssetBrowser({
                   onToggleFavorite={toggleFavorite}
                   thumbSize={thumbSize}
                   activeTags={activeTags}
+                  embedded={embedded}
                 />
               )}
             </div>
@@ -900,7 +901,7 @@ function BrowserContent({
   // Re-write the layout grid from scratch to prevent overlaps and strictly de-dupe card elements
   return (
     <>
-      {tab === "effects" && (
+      {tab === "effects" && !embedded && (
         <div className="mb-4 flex flex-wrap items-center gap-2 text-[11px] text-zinc-400">
           <span className="rounded-md bg-violet-500/10 px-2 py-0.5 font-medium text-violet-300 ring-1 ring-violet-500/20">
             {widened ? "All effects" : currentCatLabel(activeCat)}

@@ -419,6 +419,34 @@ export default function AssetBrowser({
         )}
 
         <main className="flex min-w-0 flex-1 flex-col">
+          {/* Compact category chips for the docked drawer — every library tab
+              exposes its full sub-category set without a second sidebar. */}
+          {embedded && !globalQuery && treeForTab(tab) && (
+            <div className="nova-scroll-thin flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-white/[0.05] px-2.5 py-1.5">
+              {treeForTab(tab)!.map((c) => {
+                const on = activeCat === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setActiveCat(c.id)}
+                    title={`${c.label} · ${c.count} presets`}
+                    className={cn(
+                      "flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[10.5px] font-medium transition",
+                      on
+                        ? "bg-[#00E5FF]/15 text-[#8BF3FF] ring-1 ring-[#00E5FF]/45 shadow-[0_0_14px_-6px_#00E5FF]"
+                        : "bg-white/[0.04] text-zinc-400 ring-1 ring-white/[0.06] hover:bg-white/[0.08] hover:text-zinc-100"
+                    )}
+                  >
+                    <span className="max-w-[120px] truncate">{c.label}</span>
+                    <span className="text-[9px] text-zinc-500">{c.count}</span>
+                    {c.badge && (
+                      <span className="rounded bg-[#00E5FF]/15 px-1 text-[8px] font-bold text-[#8BF3FF]">{c.badge}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           {/* Sub-header (in-tab search + context info) — hidden when global search is active */}
           {!globalQuery && !embedded && (
             <div className="flex items-center gap-3 border-b border-white/[0.05] bg-[#131824] px-4 py-2">
@@ -850,7 +878,7 @@ function BrowserContent({
         </div>
         <button
           onClick={onOpenImport}
-          className="mt-1 rounded-md bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-1.5 text-[11px] font-medium text-white shadow-md shadow-violet-600/25 transition hover:brightness-110"
+          className="mt-1 rounded-lg bg-gradient-to-r from-[#00E5FF]/25 to-[#3B82F6]/30 px-4 py-1.5 text-[11px] font-medium text-cyan-50 ring-1 ring-[#00E5FF]/40 shadow-[0_8px_24px_-12px_rgba(0,229,255,0.6)] transition hover:from-[#00E5FF]/40 hover:to-[#3B82F6]/45"
         >
           Import Media…
         </button>
@@ -1853,21 +1881,9 @@ function itemsForTab(tab: AssetTab, activeCat: string): AssetItem[] {
     case "titles":
     case "stickers":
     case "templates":
-      return findCategory(LIB_TREES[tab] ?? [], activeCat)?.items ?? itemsFallback(tab);
     case "stock":
-      return STOCK;
     case "audio":
-      return AUDIO_LIB;
-    case "titles":
-      return TITLES;
-    case "transitions":
-      return TRANSITIONS;
-    case "filters":
-      return FILTERS;
-    case "stickers":
-      return STICKERS;
-    case "templates":
-      return TEMPLATES;
+      return findCategory(LIB_TREES[tab] ?? [], activeCat)?.items ?? itemsFallback(tab);
     default:
       return [];
   }

@@ -46,6 +46,7 @@ export type EffectFamily =
   | "tracking"
   | "sharpen"
   | "flicker"
+  | "audio"
   | "generic";
 
 export type FamilySchema = {
@@ -296,6 +297,27 @@ const SCHEMAS: Record<EffectFamily, FamilySchema> = {
       { name: "Strobe Party", values: { rate: 45, depth: 95, randomness: 10, blend: "screen", warmth: -20 } },
     ],
   },
+  audio: {
+    family: "audio",
+    familyLabel: "Audio Processing",
+    params: [
+      num("level", "Output Level", -24, 12, 0, "dB", 0.5, "Clip gain applied after processing"),
+      num("denoise", "Noise Reduction", 0, 100, 35),
+      num("clarity", "Voice Clarity (EQ)", -100, 100, 25, "", 1),
+      num("bass", "Bass / Warmth", -100, 100, 10, "", 1),
+      num("ducking", "Music Ducking", 0, 100, 0, "%", 1, "Lowers music under dialogue"),
+      num("reverb", "Room Reverb", 0, 100, 0),
+      sel("space", "Reverb Space", ["Booth", "Room", "Hall", "Cathedral"], "Room"),
+      num("compress", "Compression", 0, 100, 30),
+      num("fade", "Fade In / Out", 0, 5000, 0, "ms", 50),
+    ],
+    presets: [
+      { name: "Clean Dialogue", values: { level: 1, denoise: 60, clarity: 40, bass: -10, ducking: 0, reverb: 0, space: "Booth", compress: 45, fade: 120 } },
+      { name: "Podcast Master", values: { level: 2, denoise: 45, clarity: 30, bass: 15, ducking: 0, reverb: 8, space: "Room", compress: 60, fade: 200 } },
+      { name: "Music Bed", values: { level: -6, denoise: 0, clarity: 0, bass: 20, ducking: 65, reverb: 0, space: "Room", compress: 20, fade: 800 } },
+      { name: "Cinematic Space", values: { level: 0, denoise: 20, clarity: 10, bass: 25, ducking: 30, reverb: 55, space: "Hall", compress: 35, fade: 400 } },
+    ],
+  },
   generic: {
     family: "generic",
     familyLabel: "Effect",
@@ -318,6 +340,8 @@ const SCHEMAS: Record<EffectFamily, FamilySchema> = {
 /** Resolve a family from an effect name / pack tag. */
 export function familyFor(name: string, tag?: string): EffectFamily {
   const n = `${name} ${tag ?? ""}`.toLowerCase();
+  if (/audio fx|audio denoise|voice clarity|ducking|reverb|compressor|de-esser|stereo widener|bass boost|pitch shift|podcast master|telephone radio eq|equali[sz]er|\beq\b|fade in out/.test(n))
+    return "audio";
   if (/chroma key|green screen|blue screen|spill|matte key/.test(n)) return "chroma";
   if (/picture in picture|\bpip\b|split screen|compare/.test(n)) return "pip";
   if (/tracking|track |auto reframe|follow/.test(n)) return "tracking";
@@ -454,6 +478,12 @@ export function paramsToVisual(family: EffectFamily, v: ParamValues): VisualResu
       if (mb > 0.02) f.push(`blur(${(mb * 2).toFixed(2)}px)`);
       f.push(`contrast(${(1 + (n(v.ramp) / 100) * 0.2).toFixed(3)})`, `saturate(${(1 + (fast > 1 ? 0.2 : -0.05)).toFixed(3)})`);
       transform = `scale(${(1 + Math.min(0.12, Math.abs(fast - 1) * 0.08)).toFixed(3)})`;
+      break;
+    }
+    case "audio": {
+      // Audio presets do not alter pixels — show a gentle level-linked readout tint.
+      const lvl = n(v.level, 0);
+      f.push(`brightness(${(1 + lvl * 0.004).toFixed(3)})`, `saturate(${(1 + n(v.clarity, 0) / 500).toFixed(3)})`);
       break;
     }
     case "chroma": {

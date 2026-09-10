@@ -1438,7 +1438,7 @@ function AppInner() {
                   elements: "stickers",
                   music: "audio",
                   audio: "audio",
-                  ai: "stock",
+                  ai: "effects",
                 };
                 openAssetBrowser(map[k] ?? "effects");
               }}

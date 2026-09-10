@@ -103,7 +103,7 @@ function ToolRail({
   onSelect: (key: RailKey) => void;
 }) {
   return (
-    <nav className="nova-tool-rail nova-scroll-thin nova-panel-card flex h-full min-h-0 w-full min-w-0 flex-col items-center overflow-y-auto overflow-x-hidden">
+    <nav className="nova-scroll-thin nova-panel-card flex h-full min-h-0 w-full min-w-0 flex-col items-center gap-1.5 overflow-y-auto overflow-x-hidden px-1.5 py-3">
       {ITEMS.map((it) => {
         const on = active === it.key;
         return (
@@ -111,9 +111,8 @@ function ToolRail({
             key={it.key}
             onClick={() => onSelect(it.key)}
             title={it.label}
-            aria-current={on ? "page" : undefined}
             className={cn(
-              "nova-tap nova-tool-button group relative flex w-full shrink-0 flex-col items-center rounded-xl",
+              "nova-tap group relative flex w-full shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 py-2.5",
               on
                 ? "nova-tool-active"
                 : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -123,11 +122,11 @@ function ToolRail({
             {on && (
               <span className="nova-tool-marker absolute left-0 top-1/2 h-6 w-[2px] -translate-y-1/2 rounded-r-full" />
             )}
-            <span className="nova-tool-icon transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-110 group-active:scale-95">
+            <span className="h-[22px] w-[22px] transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-110 group-active:scale-95">
               {it.icon}
             </span>
 
-            <span className="nova-tool-label max-w-full truncate font-medium leading-none">{it.label}</span>
+            <span className="max-w-full truncate text-[10px] font-medium leading-none tracking-tight">{it.label}</span>
             {it.badge && (
               <span className="nova-editor-badge absolute right-1 top-1 rounded-[3px] px-1 text-[7px] font-bold">
                 {it.badge}
@@ -136,7 +135,7 @@ function ToolRail({
           </button>
         );
       })}
-      <div className="nova-tool-more mt-auto shrink-0">More</div>
+      <div className="mt-auto shrink-0 pt-2 text-[10px] text-zinc-600">More</div>
     </nav>
   );
 }
